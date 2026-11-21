@@ -261,7 +261,9 @@
         </button>
 </div>
 <!-- FORM 1: MASUK AKUN -->
-<div class="space-y-4" id="form-login"><form class="space-y-4" onsubmit="event.preventDefault();">
+<div class="space-y-4" id="form-login">
+<div id="login-alert-msg" class="hidden p-2.5 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"></div>
+<form class="space-y-4" onsubmit="event.preventDefault();">
 <!-- Input Email / WhatsApp -->
 <div>
 <label class="block text-xs font-medium text-slate-700 mb-1.5" for="login-identifier">
@@ -312,7 +314,25 @@
 </div></div>
 <!-- FORM 2: DAFTAR AKUN BARU -->
 <div class="space-y-3.5 hidden" id="form-register">
-<form class="space-y-3" onsubmit="event.preventDefault();">
+<div id="register-alert-msg" class="hidden p-2.5 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"></div>
+<div id="register-success-box" class="hidden p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-slate-800 space-y-3">
+  <div class="flex items-start gap-3">
+    <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>
+    </div>
+    <div class="space-y-1">
+      <h4 class="text-xs font-bold text-slate-900">Tautan Verifikasi Telah Dikirim</h4>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Tautan verifikasi telah dikirim ke email Anda (<span id="reg-success-email" class="font-semibold text-slate-900"></span>). Silakan buka kotak masuk email Anda dan klik <strong>'Confirm email address'</strong>, lalu kembali ke halaman ini untuk Masuk Akun.
+      </p>
+    </div>
+  </div>
+  <button type="button" onclick="window.goToLoginWithEmail()" class="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+    <span>Ke Halaman Masuk Akun</span>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+  </button>
+</div>
+<form id="form-register-inner" class="space-y-3" onsubmit="event.preventDefault();">
 <!-- Nama Lengkap -->
 <div>
 <label class="block text-xs font-medium text-slate-700 mb-1" for="reg-name">
@@ -2079,9 +2099,9 @@ Mengerti &amp; Tutup
         </div>
         <span class="w-2 h-2 rounded-full bg-emerald-500" title="Online"></span>
       </div>
-      <button type="button" onclick="confirmExitToUser()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-        <span>Keluar ke Halaman Peserta</span>
+      <button type="button" onclick="adminLogout()" class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="log-out" class="lucide lucide-log-out w-3.5 h-3.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+        <span>Log Out</span>
       </button>
     </div>
   </aside>
@@ -2755,6 +2775,23 @@ Mengerti &amp; Tutup
             </div>
           </div>
 
+          <!-- Card 2.5: WhatsApp Admin Penerima Order Token -->
+          <div class="bg-white p-5 rounded-lg border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 class="text-sm font-bold text-slate-900">Nomor WhatsApp Admin (Penerima Order Token)</h3>
+              <span class="text-[11px] text-slate-400">Format: 62812xxxxxxxx</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <div class="flex-1 w-full space-y-1">
+                <input id="set-admin-wa" type="tel" placeholder="Contoh: 6281234567890" value="6281234567890" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 font-mono text-xs text-slate-800"/>
+                <span class="text-[10px] text-slate-400">Nomor ini menjadi tujuan pengiriman pesan WhatsApp ketika peserta menekan tombol 'Beli Paket' / 'Pesan Token' di Dashboard.</span>
+              </div>
+              <button type="button" onclick="saveAdminWhatsApp()" id="btn-save-admin-wa" class="shrink-0 px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors">
+                Simpan WhatsApp Admin
+              </button>
+            </div>
+          </div>
+
           <!-- Card 3: Template WhatsApp -->
           <div class="bg-white p-5 rounded-lg border border-slate-200 space-y-3">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -2794,32 +2831,9 @@ Mengerti &amp; Tutup
         </button>
       </div>
 
-      <div class="p-4 overflow-y-auto space-y-3 text-xs">
-        <div class="flex items-center gap-2">
-          <span id="ai-draft-badge" class="px-2 py-0.5 rounded bg-slate-100 font-bold text-slate-800">TIU - Silogisme</span>
-          <span id="ai-draft-key" class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-slate-900">Kunci: B (+5 Poin)</span>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-500 uppercase text-[10px]">Teks Pertanyaan HOTS:</label>
-          <div id="ai-draft-text" class="mt-1 p-2.5 rounded bg-slate-50 border border-slate-200 text-slate-800 leading-relaxed">
-            Semua peserta pelatihan dasar CPNS memiliki akun modul mandiri. Sebagian peserta yang memiliki akun modul mandiri telah menyelesaikan penugasan aktualisasi sebelum tenggat waktu. Tidak ada peserta yang belum mengunggah rancangan aktualisasi yang diperkenankan mengikuti evaluasi akhir. Kesimpulan yang sah secara kaidah logika silogisme adalah...
-          </div>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pilihan Jawaban:</label>
-          <div id="ai-draft-options" class="mt-1 space-y-1 text-slate-700">
-            <div class="p-1.5 rounded bg-slate-50 border border-slate-100">A. Semua peserta yang menyelesaikan aktualisasi diperkenankan evaluasi akhir.</div>
-            <div class="p-1.5 rounded bg-slate-100 border border-slate-300 font-semibold text-slate-900">B. Sebagian peserta yang memiliki modul mandiri menyelesaikan penugasan aktualisasi tepat waktu.</div>
-            <div class="p-1.5 rounded bg-slate-50 border border-slate-100">C. Semua peserta yang belum mengunggah rancangan memiliki akun modul mandiri.</div>
-            <div class="p-1.5 rounded bg-slate-50 border border-slate-100">D. Sebagian peserta tidak memiliki akun modul mandiri.</div>
-            <div class="p-1.5 rounded bg-slate-50 border border-slate-100">E. Seluruh rancangan aktualisasi diunggah sebelum modul mandiri selesai.</div>
-          </div>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pembahasan &amp; Kaidah Logika:</label>
-          <div id="ai-draft-exp" class="mt-1 p-2.5 rounded bg-slate-50 border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
-            Premis 1: Semua P adalah Q (Universal Afirmatif). Premis 2: Sebagian Q adalah R (Partikular Afirmatif). Aturan silogisme: kesimpulan yang sah wajib bersifat partikular. Jawaban B paling tepat.
-          </div>
+      <div id="ai-draft-questions-list" class="p-4 overflow-y-auto space-y-4 text-xs flex-1">
+        <div class="text-center py-6 text-slate-400">
+          Belum ada draf soal AI. Silakan gunakan form generator di atas.
         </div>
       </div>
 
@@ -2827,8 +2841,8 @@ Mengerti &amp; Tutup
         <button type="button" onclick="closeModal('modal-ai-draft')" class="px-3 py-1.5 rounded text-xs font-semibold text-slate-600 hover:bg-slate-200">
           Buang Draf
         </button>
-        <button type="button" onclick="confirmSaveAIDraft()" class="px-4 py-1.5 rounded bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800">
-          Simpan ke Paket Ini
+        <button id="btn-save-ai-draft" type="button" onclick="confirmSaveAIDraft()" class="px-4 py-1.5 rounded bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 disabled:opacity-50 inline-flex items-center gap-1.5">
+          <span>Simpan ke Paket Ini</span>
         </button>
       </div>
     </div>
@@ -3446,6 +3460,9 @@ Mengerti &amp; Tutup
     // --- SETTINGS ---
     function handleSaveSettings(e) {
       e.preventDefault();
+      if (typeof window.saveAdminWhatsApp === 'function') {
+        window.saveAdminWhatsApp();
+      }
       showToast('Seluruh konfigurasi sistem dan harga berhasil disimpan.', 'success');
     }
 
@@ -3484,8 +3501,8 @@ Mengerti &amp; Tutup
     }
 
     function confirmExitToUser() {
-      if (confirm('Kembali ke Halaman Peserta (Dashboard CAT CPNS Pro)?')) {
-        showToast('Beralih ke Dashboard Peserta...', 'info');
+      if (typeof window.adminLogout === 'function') {
+        window.adminLogout();
       }
     }
 
@@ -3505,6 +3522,7 @@ Mengerti &amp; Tutup
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
+    window.showToast = showToast;
 
     // Initialize
     window.addEventListener('DOMContentLoaded', () => {
@@ -3654,6 +3672,14 @@ Mengerti &amp; Tutup
 
   async function syncInitialData() {
     loadSession();
+    try {
+      const localWa = localStorage.getItem('cat_admin_whatsapp');
+      if (localWa) {
+        state.settings.admin_whatsapp = localWa;
+        state.settings.WA_ADMIN = localWa;
+      }
+    } catch (e) {}
+
     if (supabase) {
       try {
         const { data: setts } = await supabase.from('settings').select('*');
@@ -3661,6 +3687,12 @@ Mengerti &amp; Tutup
           setts.forEach(s => {
             if (s.key && s.value) state.settings[s.key] = s.value;
           });
+        }
+
+        const { data: appSetts } = await supabase.from('app_settings').select('*').eq('id', 1).maybeSingle();
+        if (appSetts && appSetts.admin_whatsapp) {
+          state.settings.admin_whatsapp = appSetts.admin_whatsapp;
+          state.settings.WA_ADMIN = appSetts.admin_whatsapp;
         }
 
         const { data: pkgs } = await supabase.from('packages').select('*').order('id_paket');
@@ -3740,10 +3772,61 @@ Mengerti &amp; Tutup
     }
   };
 
-  // 6. AUTHENTICATION MODULE (DIRECT TO public.users)
+  // 6. AUTHENTICATION MODULE (DIRECT TO public.users & Supabase Auth)
+  function showLoginError(msg) {
+    const el = document.getElementById('login-alert-msg');
+    if (el) {
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+  }
+
+  function hideLoginError() {
+    const el = document.getElementById('login-alert-msg');
+    if (el) el.classList.add('hidden');
+  }
+
+  function showRegisterError(msg) {
+    const el = document.getElementById('register-alert-msg');
+    if (el) {
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+  }
+
+  function hideRegisterError() {
+    const el = document.getElementById('register-alert-msg');
+    if (el) el.classList.add('hidden');
+  }
+
+  function updateParticipantWhatsAppLinks(adminWaNumber) {
+    const phone = (adminWaNumber || state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890').replace(/\D/g, '');
+    const user = state.currentUser || {};
+    const userIdentifier = user.nama ? `${user.nama} (${user.email || user.no_wa || ''})` : 'Peserta';
+
+    const waLinks = document.querySelectorAll('a[href*="wa.me"]');
+    waLinks.forEach(link => {
+      const currentHref = link.getAttribute('href') || '';
+      let text = 'Halo Admin CAT CPNS Pro, saya butuh bantuan informasi paket ujian.';
+      if (currentHref.includes('Bundle') || link.textContent.includes('Bundle')) {
+        text = `Halo Admin, saya ${userIdentifier} ingin memesan Paket Bundle 3x Try Out CPNS Pro (Rp 30.000). Mohon instruksi pembayaran & token akses.`;
+      } else if (currentHref.includes('Satuan') || link.textContent.includes('Satuan')) {
+        text = `Halo Admin, saya ${userIdentifier} ingin memesan Paket Satuan Try Out CPNS Pro (Rp 12.000). Mohon instruksi pembayaran & token akses.`;
+      } else if (currentHref.includes('pembahasan') || currentHref.includes('Buka') || link.textContent.includes('Pembahasan')) {
+        text = `Halo Admin, saya ${userIdentifier} ingin mengaktifkan Paket Try Out CPNS Pro untuk membuka seluruh pembahasan ujian.`;
+      } else if (currentHref.includes('Bantuan') || link.textContent.includes('Bantuan')) {
+        text = `Halo Admin Bantuan CAT CPNS Pro, saya ${userIdentifier} ingin bertanya mengenai simulasi ujian CPNS.`;
+      }
+      link.setAttribute('href', `https://wa.me/${phone}?text=${encodeURIComponent(text)}`);
+    });
+  }
+
+  window.updateParticipantWhatsAppLinks = updateParticipantWhatsAppLinks;
+
   async function handleLoginSubmit(identifier, password) {
+    hideLoginError();
     if (!identifier || !password) {
-      alert('Harap masukkan Email / No WhatsApp dan kata sandi.');
+      showLoginError('Harap masukkan Email / No WhatsApp dan kata sandi.');
       return;
     }
 
@@ -3761,7 +3844,6 @@ Mengerti &amp; Tutup
         role: 'admin'
       };
       localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
-      alert('Login Berhasil! Mengalihkan ke Panel Admin CPNS Pro...');
       window.showView('admin');
       return;
     }
@@ -3783,7 +3865,7 @@ Mengerti &amp; Tutup
           if (String(u.password) === String(password)) {
             user = u;
           } else {
-            alert('Kata sandi yang Anda masukkan salah.');
+            showLoginError('Kata sandi yang Anda masukkan salah.');
             return;
           }
         }
@@ -3802,7 +3884,7 @@ Mengerti &amp; Tutup
         if (String(found.password) === String(password)) {
           user = found;
         } else {
-          alert('Kata sandi salah.');
+          showLoginError('Kata sandi yang Anda masukkan salah.');
           return;
         }
       }
@@ -3824,28 +3906,68 @@ Mengerti &amp; Tutup
     if (user) {
       state.currentUser = user;
       localStorage.setItem('cat_user_session', JSON.stringify(user));
-      alert(`Selamat datang kembali, ${user.nama}!`);
       await syncInitialData();
+      updateParticipantWhatsAppLinks();
       window.showView('dashboard');
     } else {
-      alert('Akun belum terdaftar. Silakan lakukan pendaftaran akun baru.');
+      showLoginError('Akun belum terdaftar atau kata sandi tidak cocok. Silakan daftar akun baru.');
     }
   }
 
   async function handleRegisterSubmit(userData) {
+    hideRegisterError();
     const { nama, no_wa, email, password, jurusan, provinsi } = userData;
-    if (!nama || !no_wa || !email || !password) {
-      alert('Lengkapi seluruh data pendaftaran.');
+    if (!nama || !no_wa || !email || !password || !jurusan) {
+      showRegisterError('Harap lengkapi semua kolom yang bertanda bintang (*).');
       return;
     }
 
+    if (String(password).length < 6) {
+      showRegisterError('Kata sandi minimal 6 karakter.');
+      return;
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanWa = String(no_wa).trim();
+
+    // Supabase Auth Email Verification SignUp
+    const authClient = window.supabaseClient || supabase;
+    if (authClient && authClient.auth) {
+      try {
+        const { data: authData, error: authError } = await authClient.auth.signUp({
+          email: cleanEmail,
+          password: password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: {
+              full_name: String(nama).trim(),
+              whatsapp: cleanWa,
+              education: String(jurusan || '').trim(),
+              target_formation: String(provinsi || '').trim()
+            }
+          }
+        });
+
+        if (authError) {
+          const msg = authError.message || '';
+          if (msg.toLowerCase().includes('already registered')) {
+            showRegisterError('Alamat email sudah terdaftar. Silakan buka tab Masuk Akun.');
+            return;
+          }
+          console.warn('Supabase Auth signUp note:', authError);
+        }
+      } catch (authErr) {
+        console.warn('Supabase Auth signUp exception:', authErr);
+      }
+    }
+
     let newUser = {
-      nama,
-      no_wa,
-      email: email.toLowerCase(),
-      password,
-      jurusan: jurusan || 'Umum',
-      provinsi: provinsi || 'Indonesia',
+      nama: String(nama).trim(),
+      no_wa: cleanWa,
+      email: cleanEmail,
+      password: password,
+      jurusan: String(jurusan || 'Umum').trim(),
+      provinsi: String(provinsi || 'Indonesia').trim(),
       role: 'peserta',
       created_at: new Date().toISOString()
     };
@@ -3858,8 +3980,7 @@ Mengerti &amp; Tutup
           .limit(1);
 
         if (exist && exist.length > 0) {
-          alert('Email atau Nomor WhatsApp sudah terdaftar. Silakan masuk.');
-          window.showView('login');
+          showRegisterError('Email atau Nomor WhatsApp sudah terdaftar. Silakan buka tab Masuk Akun.');
           return;
         }
 
@@ -3872,17 +3993,38 @@ Mengerti &amp; Tutup
       }
     }
 
-    // Save to local list & active session
+    // Save to local list
     let localUsers = JSON.parse(localStorage.getItem('cat_registered_users') || '[]');
+    localUsers = localUsers.filter(u => u.email !== newUser.email);
     localUsers.push(newUser);
     localStorage.setItem('cat_registered_users', JSON.stringify(localUsers));
 
-    state.currentUser = newUser;
-    localStorage.setItem('cat_user_session', JSON.stringify(newUser));
-    alert('Pendaftaran berhasil! Akun Anda aktif.');
-    await syncInitialData();
-    window.showView('dashboard');
+    // Show clean Stitch verification notice box
+    const formInner = document.getElementById('form-register-inner');
+    if (formInner) formInner.classList.add('hidden');
+    hideRegisterError();
+    const successBox = document.getElementById('register-success-box');
+    if (successBox) successBox.classList.remove('hidden');
+    const targetEmailEl = document.getElementById('reg-success-email');
+    if (targetEmailEl) targetEmailEl.textContent = newUser.email;
   }
+
+  window.goToLoginWithEmail = function() {
+    const regEmail = document.getElementById('reg-email')?.value || '';
+    if (typeof window.switchTab === 'function') window.switchTab('login');
+    const loginId = document.getElementById('login-identifier');
+    if (loginId) loginId.value = regEmail;
+    const loginPass = document.getElementById('login-password');
+    if (loginPass) loginPass.focus();
+  };
+
+  window.adminLogout = function() {
+    sessionStorage.removeItem('cat_admin_authed');
+    localStorage.removeItem('cat_user_session');
+    state.currentUser = null;
+    window.showView('login');
+    if (typeof window.switchTab === 'function') window.switchTab('login');
+  };
 
   // 7. DASHBOARD MODULE
   function renderDashboardView() {
@@ -4568,26 +4710,123 @@ Mengerti &amp; Tutup
     if (typeof window.updatePackageView === 'function') window.updatePackageView();
     if (typeof window.switchAdminTab === 'function') window.switchAdminTab(window.APP.activeTab || 'dashboard');
 
+    // Sync admin whatsapp field
+    const adminWaInput = document.getElementById('set-admin-wa');
+    if (adminWaInput) {
+      adminWaInput.value = state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890';
+    }
+
     // Attach AI Generator to /api/generate-soal
+    window.currentAiDraftQuestions = [];
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderAiDraftQuestions(questions) {
+      const listContainer = document.getElementById('ai-draft-questions-list');
+      if (!listContainer) return;
+
+      if (!Array.isArray(questions) || questions.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-6 text-slate-400">
+            Belum ada draf soal AI. Silakan gunakan formulir generator di atas.
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = questions.map((q, idx) => {
+        const sub = q.subtest || q.subtes || 'TIU';
+        const top = q.topic || q.topik || 'HOTS Standar BKN';
+        const diff = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
+        const key = q.correct_answer || q.kunci_atau_bobot || 'A';
+        const text = q.question_text || q.pertanyaan || '';
+        const exp = q.explanation || q.pembahasan || '-';
+        const optA = q.option_a || q.opsi_a || '';
+        const optB = q.option_b || q.opsi_b || '';
+        const optC = q.option_c || q.opsi_c || '';
+        const optD = q.option_d || q.opsi_d || '';
+        const optE = q.option_e || q.opsi_e || '';
+
+        const isKey = (letter) => String(key).trim().toUpperCase().startsWith(letter);
+
+        return `
+          <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">${escapeHtml(sub)}</span>
+                <span class="text-[11px] font-semibold text-slate-700">${escapeHtml(top)}</span>
+                <span class="text-[10px] text-slate-400">&bull; ${escapeHtml(diff)}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Kunci: ${escapeHtml(key)}</span>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Butir Soal #${idx + 1}:</label>
+              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-800 leading-relaxed text-xs">
+                ${escapeHtml(text)}
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pilihan Jawaban:</label>
+              <div class="mt-1 space-y-1 text-slate-700 text-xs">
+                <div class="p-1.5 rounded ${isKey('A') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>A.</strong> ${escapeHtml(optA)}</div>
+                <div class="p-1.5 rounded ${isKey('B') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>B.</strong> ${escapeHtml(optB)}</div>
+                <div class="p-1.5 rounded ${isKey('C') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>C.</strong> ${escapeHtml(optC)}</div>
+                <div class="p-1.5 rounded ${isKey('D') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>D.</strong> ${escapeHtml(optD)}</div>
+                <div class="p-1.5 rounded ${isKey('E') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>E.</strong> ${escapeHtml(optE)}</div>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pembahasan &amp; Kaidah Logika:</label>
+              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
+                ${escapeHtml(exp)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     const aiForm = document.getElementById('ai-generate-form');
     if (aiForm && !aiForm._boundAI) {
       aiForm._boundAI = true;
       aiForm.onsubmit = async function(e) {
         e.preventDefault();
-        const subtes = document.getElementById('ai-subtest').value;
-        const count = parseInt(document.getElementById('ai-count').value) || 1;
-        const topic = document.getElementById('ai-topic').value || 'Penalaran HOTS BKN 2026';
+        const subtesEl = document.getElementById('ai-subtest');
+        const countEl = document.getElementById('ai-count');
+        const topicEl = document.getElementById('ai-topic');
+        const diffEl = document.getElementById('ai-diff');
+
+        const subtes = subtesEl ? subtesEl.value : 'TIU';
+        const count = countEl ? (parseInt(countEl.value) || 1) : 1;
+        const topic = topicEl ? (topicEl.value.trim() || 'Penalaran HOTS BKN 2026') : 'Penalaran HOTS BKN 2026';
+        const diff = diffEl ? diffEl.value : 'HOTS Standar BKN 2026';
+
         const btn = document.getElementById('btn-submit-ai');
         const btnText = document.getElementById('btn-ai-text');
 
-        if (btnText) btnText.textContent = 'Memproses Gemini AI...';
+        if (btnText) btnText.textContent = `Menghasilkan ${count} Soal Gemini...`;
         if (btn) btn.disabled = true;
 
         try {
           const res = await fetch('/api/generate-soal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subtes, jumlah: count, topik: topic })
+            body: JSON.stringify({
+              subtes: subtes,
+              jumlah: count,
+              topik: topic,
+              topic: topic,
+              kesulitan: diff,
+              difficulty: diff
+            })
           });
 
           if (!res.ok) {
@@ -4597,41 +4836,20 @@ Mengerti &amp; Tutup
 
           const generated = await res.json();
           if (Array.isArray(generated) && generated.length > 0) {
-            const first = generated[0];
-            document.getElementById('ai-draft-badge').textContent = `${first.subtes} - HOTS AI`;
-            document.getElementById('ai-draft-key').textContent = first.kunci_atau_bobot;
-            document.getElementById('ai-draft-text').textContent = first.pertanyaan;
-            document.getElementById('ai-draft-exp').textContent = first.pembahasan;
-
-            const optBox = document.getElementById('ai-draft-options');
-            if (optBox) {
-              optBox.innerHTML = `
-                <div><strong>A.</strong> ${first.opsi_a}</div>
-                <div><strong>B.</strong> ${first.opsi_b}</div>
-                <div><strong>C.</strong> ${first.opsi_c}</div>
-                <div><strong>D.</strong> ${first.opsi_d}</div>
-                <div><strong>E.</strong> ${first.opsi_e}</div>
-              `;
-            }
-
-            window._pendingAIDraft = {
-              id_paket: window.APP.selectedPackage || 'to1',
-              subtes: first.subtes,
-              pertanyaan: first.pertanyaan,
-              opsi_a: first.opsi_a,
-              opsi_b: first.opsi_b,
-              opsi_c: first.opsi_c,
-              opsi_d: first.opsi_d,
-              opsi_e: first.opsi_e,
-              kunci_atau_bobot: first.kunci_atau_bobot,
-              pembahasan: first.pembahasan
-            };
+            window.currentAiDraftQuestions = generated;
+            renderAiDraftQuestions(generated);
 
             const modalDraft = document.getElementById('modal-ai-draft');
             if (modalDraft) modalDraft.classList.remove('hidden');
+          } else {
+            throw new Error('Format respon AI tidak valid atau kosong.');
           }
         } catch (err) {
-          alert('Gagal menghasilkan soal AI: ' + err.message);
+          if (typeof showToast === 'function') {
+            showToast('Gagal menghasilkan soal AI: ' + err.message, 'info');
+          } else {
+            console.error('AI generate error:', err);
+          }
         } finally {
           if (btnText) btnText.textContent = 'Generate Soal AI ke Paket Ini';
           if (btn) btn.disabled = false;
@@ -4640,15 +4858,108 @@ Mengerti &amp; Tutup
     }
 
     window.confirmSaveAIDraft = async function() {
-      if (window._pendingAIDraft && supabase) {
-        try {
-          await supabase.from('questions').insert([window._pendingAIDraft]);
-        } catch (e) {}
+      if (!window.currentAiDraftQuestions || window.currentAiDraftQuestions.length === 0) {
+        if (typeof showToast === 'function') showToast('Tidak ada draf soal untuk disimpan.', 'info');
+        return;
       }
+
+      const saveBtn = document.getElementById('btn-save-ai-draft');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span>Menyimpan ke Paket...</span>
+        `;
+      }
+
+      const curPkgKey = (window.APP && window.APP.selectedPackage) ? window.APP.selectedPackage : 'to1';
+      let dbPkgId = curPkgKey;
+      if (curPkgKey === 'mini') dbPkgId = 'mini-to';
+      else if (curPkgKey === 'to1') dbPkgId = 'to-1';
+      else if (curPkgKey === 'to2') dbPkgId = 'to-2';
+      else if (curPkgKey === 'to3') dbPkgId = 'to-3';
+
+      const rows = window.currentAiDraftQuestions.map(q => {
+        const sub = q.subtest || q.subtes || 'TIU';
+        const top = q.topic || q.topik || 'HOTS BKN 2026';
+        const txt = q.question_text || q.pertanyaan || '';
+        const oA = q.option_a || q.opsi_a || '';
+        const oB = q.option_b || q.opsi_b || '';
+        const oC = q.option_c || q.opsi_c || '';
+        const oD = q.option_d || q.opsi_d || '';
+        const oE = q.option_e || q.opsi_e || '';
+        const ans = q.correct_answer || q.kunci_atau_bobot || 'A';
+        const exp = q.explanation || q.pembahasan || '';
+        const pts = q.points || (sub === 'TKP' ? 5 : 5);
+        const dif = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
+
+        return {
+          package_id: dbPkgId,
+          id_paket: dbPkgId,
+          subtest: sub,
+          subtes: sub,
+          topic: top,
+          topik: top,
+          question_text: txt,
+          pertanyaan: txt,
+          option_a: oA,
+          opsi_a: oA,
+          option_b: oB,
+          opsi_b: oB,
+          option_c: oC,
+          opsi_c: oC,
+          option_d: oD,
+          opsi_d: oD,
+          option_e: oE,
+          opsi_e: oE,
+          correct_answer: ans,
+          kunci_atau_bobot: ans,
+          explanation: exp,
+          pembahasan: exp,
+          points: pts,
+          difficulty: dif
+        };
+      });
+
+      if (supabase) {
+        try {
+          await supabase.from('questions').insert(rows);
+        } catch (e) {
+          console.warn('Supabase question insert warning:', e);
+        }
+      }
+
+      // Add to local state & APP.packages
+      if (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) {
+        const pkg = window.APP.packages[curPkgKey];
+        rows.forEach((r, i) => {
+          pkg.questions.unshift({
+            id: `SOAL-${r.subtest}-AI-${Date.now()}-${i}`,
+            subtest: r.subtest,
+            topic: r.topic,
+            key: r.correct_answer,
+            text: r.question_text,
+            difficulty: r.difficulty
+          });
+        });
+        pkg.current = Math.min(pkg.total, pkg.current + rows.length);
+      }
+
+      if (typeof window.updatePackageView === 'function') window.updatePackageView();
+      if (typeof window.renderQuestions === 'function') window.renderQuestions();
+
       const modal = document.getElementById('modal-ai-draft');
       if (modal) modal.classList.add('hidden');
-      alert('Soal AI berhasil disimpan ke Bank Soal Paket!');
-      if (typeof window.renderQuestions === 'function') window.renderQuestions();
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+      }
+
+      const pkgName = (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) ? window.APP.packages[curPkgKey].name : 'Paket Aktif';
+      if (typeof showToast === 'function') {
+        showToast(`${rows.length} butir soal AI berhasil disimpan ke ${pkgName}.`, 'success');
+      }
     };
 
     window.executeSendWA = function() {
@@ -4695,22 +5006,28 @@ Mengerti &amp; Tutup
       });
     }
 
-    const vReg = document.getElementById('view-register');
-    if (vReg) {
-      const formReg = vReg.querySelector('form');
-      if (formReg) {
-        formReg.onsubmit = function(e) {
+    const bindRegisterForm = (container) => {
+      if (!container) return;
+      const form = container.tagName === 'FORM' ? container : container.querySelector('form');
+      if (form && !form._boundReg) {
+        form._boundReg = true;
+        form.onsubmit = function(e) {
           e.preventDefault();
-          const nama = vReg.querySelector('#reg-name')?.value;
-          const no_wa = vReg.querySelector('#reg-wa')?.value;
-          const email = vReg.querySelector('#reg-email')?.value;
-          const password = vReg.querySelector('#reg-password')?.value;
-          const jurusan = vReg.querySelector('#reg-major')?.value;
-          const provinsi = vReg.querySelector('#reg-target')?.value;
+          const nama = (container.querySelector('#reg-name') || document.getElementById('reg-name'))?.value;
+          const no_wa = (container.querySelector('#reg-wa') || document.getElementById('reg-wa'))?.value;
+          const email = (container.querySelector('#reg-email') || document.getElementById('reg-email'))?.value;
+          const password = (container.querySelector('#reg-password') || document.getElementById('reg-password'))?.value;
+          const jurusan = (container.querySelector('#reg-major') || document.getElementById('reg-major'))?.value;
+          const provinsi = (container.querySelector('#reg-target') || document.getElementById('reg-target'))?.value;
           handleRegisterSubmit({ nama, no_wa, email, password, jurusan, provinsi });
         };
       }
-    }
+    };
+
+    bindRegisterForm(document.getElementById('form-register-inner'));
+    bindRegisterForm(document.getElementById('form-register'));
+    bindRegisterForm(document.getElementById('view-register'));
+    updateParticipantWhatsAppLinks();
 
     // Attach navigation to Dashboard Sidebar
     const vDash = document.getElementById('view-dashboard');

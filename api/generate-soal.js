@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const { subtes, jumlah = 1, topik, apiKey } = body || {};
+    const { subtes, jumlah = 1, topik, topic, kesulitan, difficulty, apiKey } = body || {};
 
     if (!subtes) {
       return res.status(400).json({
@@ -50,7 +50,8 @@ module.exports = async function handler(req, res) {
     }
 
     const count = Math.min(Math.max(parseInt(jumlah, 10) || 1, 1), 10);
-    const topikSoal = topik ? String(topik).trim() : `Kisi-kisi Standar HOTS ${validSubtes} BKN 2026`;
+    const topikSoal = (topik || topic || '').trim() || `Kisi-kisi Standar HOTS ${validSubtes} BKN 2026`;
+    const tingkatKesulitan = (kesulitan || difficulty || '').trim() || 'HOTS Standar BKN 2026';
 
     // Ambil Gemini API Key dari environment variable atau request body fallback
     const geminiApiKey = process.env.GEMINI_API_KEY || apiKey;
@@ -79,17 +80,22 @@ module.exports = async function handler(req, res) {
 Tugas Anda adalah memproduksi soal-soal berkualitas tinggi bertipe HOTS (Higher Order Thinking Skills).
 Setiap soal harus memiliki 5 pilihan jawaban (A, B, C, D, E) dan pembahasan tuntas, logis, serta berlandaskan kaidah/regulasi resmi.`;
 
-    const promptUser = `Buatkan ${count} butir soal pilihan ganda HOTS SKD CPNS dengan rincian:
+    const promptUser = `TUGAS UTAMA: Buatkan ${count} butir soal pilihan ganda HOTS SKD CPNS yang WAJIB SECARA KETAT SESUAI DENGAN SPESIFIKASI BERIKUT:
 - Subtes: ${validSubtes}
-- Topik / Fokus Materi: ${topikSoal}
-- Aturan Subtes: ${panduanSubtes}
+- TOPIK / KISI-KISI WAJIB: ${topikSoal} (DILARANG MEMBUAT TOPIK LAIN DI LUAR INI!)
+- TINGKAT KESULITAN: ${tingkatKesulitan}
+- Panduan Khusus Subtes: ${panduanSubtes}
 - Format Kunci Jawaban: ${formatKunci}
+
+PENTING: Seluruh soal yang dihasilkan HARUS BENAR-BENAR berfokus pada materi "${topikSoal}" dan tidak boleh menyimpang atau kembali ke topik umum/default lainnya.
 
 Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis seperti berikut:
 [
   {
     "subtes": "${validSubtes}",
-    "pertanyaan": "Teks soal HOTS lengkap...",
+    "topik": "${topikSoal}",
+    "tingkat_kesulitan": "${tingkatKesulitan}",
+    "pertanyaan": "Teks soal HOTS lengkap sesuai topik...",
     "opsi_a": "Teks pilihan A",
     "opsi_b": "Teks pilihan B",
     "opsi_c": "Teks pilihan C",
@@ -123,6 +129,8 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
             type: 'OBJECT',
             properties: {
               subtes: { type: 'STRING' },
+              topik: { type: 'STRING' },
+              tingkat_kesulitan: { type: 'STRING' },
               pertanyaan: { type: 'STRING' },
               opsi_a: { type: 'STRING' },
               opsi_b: { type: 'STRING' },
@@ -134,6 +142,7 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
             },
             required: [
               'subtes',
+              'topik',
               'pertanyaan',
               'opsi_a',
               'opsi_b',
@@ -210,14 +219,27 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
     // Normalisasi struktur output untuk memastikan setiap field sesuai kontrak
     const formattedResult = questionList.map(item => ({
       subtes: validSubtes,
-      pertanyaan: item.pertanyaan || item.soal || '',
-      opsi_a: item.opsi_a || item.a || '',
-      opsi_b: item.opsi_b || item.b || '',
-      opsi_c: item.opsi_c || item.c || '',
-      opsi_d: item.opsi_d || item.d || '',
-      opsi_e: item.opsi_e || item.e || '',
-      kunci_atau_bobot: item.kunci_atau_bobot || item.kunci || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
-      pembahasan: item.pembahasan || ''
+      subtest: validSubtes,
+      topik: item.topik || topikSoal,
+      topic: item.topik || topikSoal,
+      tingkat_kesulitan: item.tingkat_kesulitan || tingkatKesulitan,
+      difficulty: item.tingkat_kesulitan || tingkatKesulitan,
+      pertanyaan: item.pertanyaan || item.soal || item.question_text || '',
+      question_text: item.pertanyaan || item.soal || item.question_text || '',
+      opsi_a: item.opsi_a || item.a || item.option_a || '',
+      option_a: item.opsi_a || item.a || item.option_a || '',
+      opsi_b: item.opsi_b || item.b || item.option_b || '',
+      option_b: item.opsi_b || item.b || item.option_b || '',
+      opsi_c: item.opsi_c || item.c || item.option_c || '',
+      option_c: item.opsi_c || item.c || item.option_c || '',
+      opsi_d: item.opsi_d || item.d || item.option_d || '',
+      option_d: item.opsi_d || item.d || item.option_d || '',
+      opsi_e: item.opsi_e || item.e || item.option_e || '',
+      option_e: item.opsi_e || item.e || item.option_e || '',
+      kunci_atau_bobot: item.kunci_atau_bobot || item.kunci || item.correct_answer || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
+      correct_answer: item.kunci_atau_bobot || item.kunci || item.correct_answer || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
+      pembahasan: item.pembahasan || item.explanation || '',
+      explanation: item.pembahasan || item.explanation || ''
     }));
 
     // Kembalikan respons JSON berupa array soal HOTS SKD CPNS
