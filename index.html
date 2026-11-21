@@ -835,7 +835,7 @@
 <span class="material-symbols-outlined text-[20px]">support_agent</span>
 <span class="font-label-md text-label-md">Bantuan WhatsApp</span>
 </a>
-<a class="flex items-center gap-3 px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-colors mt-space-xs" href="javascript:void(0)" onclick="alert('Anda telah keluar dari sesi CAT CPNS Pro.')">
+<a class="flex items-center gap-3 px-space-sm py-2 rounded-lg text-error hover:bg-error-container hover:text-on-error-container transition-colors mt-space-xs" href="javascript:void(0)" onclick="handleUserLogout()">
 <span class="material-symbols-outlined text-[20px]">logout</span>
 <span class="font-label-md text-label-md">Keluar</span>
 </a>
@@ -3258,48 +3258,276 @@ Mengerti &amp; Tutup
       `).join('');
     }
 
+    // --- HELPER ESCAPE HTML ---
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // --- AI GENERATION MODAL & ACTIONS ---
-    function handleGenerateAI(e) {
-      e.preventDefault();
-      const subtest = document.getElementById('ai-subtest').value;
-      const topic = document.getElementById('ai-topic').value || 'Penalaran HOTS';
+    window.currentAiDraftQuestions = [];
+
+    function renderAiDraftQuestions(questions) {
+      const listContainer = document.getElementById('ai-draft-questions-list');
+      if (!listContainer) return;
+
+      if (!Array.isArray(questions) || questions.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-6 text-slate-400">
+            Belum ada draf soal AI. Silakan gunakan formulir generator di atas.
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = questions.map((q, idx) => {
+        const sub = q.subtest || q.subtes || 'TIU';
+        const top = q.topic || q.topik || 'HOTS Standar BKN';
+        const diff = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
+        const key = q.correct_answer || q.kunci_atau_bobot || 'A';
+        const text = q.question_text || q.pertanyaan || '';
+        const exp = q.explanation || q.pembahasan || '-';
+        const optA = q.option_a || q.opsi_a || '';
+        const optB = q.option_b || q.opsi_b || '';
+        const optC = q.option_c || q.opsi_c || '';
+        const optD = q.option_d || q.opsi_d || '';
+        const optE = q.option_e || q.opsi_e || '';
+
+        const isKey = (letter) => {
+          const k = String(key).trim().toUpperCase();
+          if (k.length === 1) return k === letter;
+          if (k.startsWith(letter + ' ') || k === letter) return true;
+          if (k.includes(letter + ':5')) return true;
+          return false;
+        };
+
+        return `
+          <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">${escapeHtml(sub)}</span>
+                <span class="text-[11px] font-semibold text-slate-700">${escapeHtml(top)}</span>
+                <span class="text-[10px] text-slate-400">&bull; ${escapeHtml(diff)}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Kunci: ${escapeHtml(key)}</span>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Butir Soal #${idx + 1}:</label>
+              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-800 leading-relaxed text-xs">
+                ${escapeHtml(text)}
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pilihan Jawaban:</label>
+              <div class="mt-1 space-y-1 text-slate-700 text-xs">
+                <div class="p-1.5 rounded ${isKey('A') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>A.</strong> ${escapeHtml(optA)}</div>
+                <div class="p-1.5 rounded ${isKey('B') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>B.</strong> ${escapeHtml(optB)}</div>
+                <div class="p-1.5 rounded ${isKey('C') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>C.</strong> ${escapeHtml(optC)}</div>
+                <div class="p-1.5 rounded ${isKey('D') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>D.</strong> ${escapeHtml(optD)}</div>
+                <div class="p-1.5 rounded ${isKey('E') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>E.</strong> ${escapeHtml(optE)}</div>
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pembahasan &amp; Kaidah Logika:</label>
+              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
+                ${escapeHtml(exp)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleGenerateAI(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+      const subtest = document.getElementById('ai-subtest')?.value || 'TIU';
+      const count = parseInt(document.getElementById('ai-count')?.value || '1') || 1;
+      const topic = (document.getElementById('ai-topic')?.value || 'Penalaran HOTS BKN 2026').trim() || 'Penalaran HOTS BKN 2026';
+      const difficulty = document.getElementById('ai-diff')?.value || 'HOTS Standar BKN 2026';
+
       const btn = document.getElementById('btn-submit-ai');
       const btnText = document.getElementById('btn-ai-text');
+      const saveBtn = document.getElementById('btn-save-ai-draft');
 
-      btnText.textContent = 'Memproses Gemini AI...';
-      btn.disabled = true;
+      if (btnText) btnText.textContent = `Menghasilkan ${count} Soal Gemini...`;
+      if (btn) btn.disabled = true;
 
-      setTimeout(() => {
-        btnText.textContent = 'Generate Soal AI ke Paket Ini';
-        btn.disabled = false;
+      // Buka modal pratinjau langsung dengan status loading
+      const modalDraft = document.getElementById('modal-ai-draft');
+      const listContainer = document.getElementById('ai-draft-questions-list');
+      if (listContainer) {
+        listContainer.innerHTML = `
+          <div class="text-center py-12 space-y-3">
+            <div class="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-xs font-semibold text-slate-800">Sedang menyusun soal HOTS dengan Gemini AI...</p>
+            <p class="text-[11px] text-slate-400">Menghubungkan ke Gemini 2.5 Flash sesuai parameter: ${escapeHtml(subtest)} &bull; ${escapeHtml(topic)}</p>
+          </div>
+        `;
+      }
+      if (saveBtn) saveBtn.disabled = true;
+      if (modalDraft) {
+        modalDraft.classList.remove('hidden');
+        modalDraft.classList.add('flex');
+      }
 
-        document.getElementById('ai-draft-badge').textContent = `${subtest} - ${topic}`;
-        openModal('modal-ai-draft');
-      }, 700);
+      try {
+        const res = await fetch('/api/generate-soal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subtest: subtest,
+            count: count,
+            topic: topic,
+            difficulty: difficulty
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const resData = await res.json();
+        const generated = resData.questions || (Array.isArray(resData) ? resData : []);
+        if (Array.isArray(generated) && generated.length > 0) {
+          window.currentAiDraftQuestions = generated;
+          renderAiDraftQuestions(generated);
+          if (saveBtn) saveBtn.disabled = false;
+        } else {
+          throw new Error('Format respon AI tidak valid atau daftar soal kosong.');
+        }
+      } catch (err) {
+        if (listContainer) {
+          listContainer.innerHTML = `
+            <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center space-y-1">
+              <p class="font-bold">Gagal Menghasilkan Soal AI</p>
+              <p>${escapeHtml(err.message || 'Terjadi kesalahan saat memproses soal AI.')}</p>
+            </div>
+          `;
+        }
+        if (saveBtn) saveBtn.disabled = true;
+      } finally {
+        if (btnText) btnText.textContent = 'Generate Soal AI ke Paket Ini';
+        if (btn) btn.disabled = false;
+      }
     }
+    window.handleGenerateAI = handleGenerateAI;
 
-    function confirmSaveAIDraft() {
-      const pkg = APP.packages[APP.selectedPackage];
-      const subtest = document.getElementById('ai-subtest').value;
-      const topic = document.getElementById('ai-topic').value;
+    async function confirmSaveAIDraft() {
+      if (!window.currentAiDraftQuestions || window.currentAiDraftQuestions.length === 0) {
+        if (typeof showToast === 'function') showToast('Tidak ada draf soal untuk disimpan.', 'info');
+        return;
+      }
 
-      const newQ = {
-        id: `SOAL-${subtest}-AI-${Math.floor(100 + Math.random() * 900)}`,
-        subtest: subtest,
-        topic: topic,
-        key: 'B (+5 Poin)',
-        text: document.getElementById('ai-draft-text').textContent.trim(),
-        difficulty: 'HOTS Standar BKN'
-      };
+      const saveBtn = document.getElementById('btn-save-ai-draft');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5 animate-spin inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span>Menyimpan ke Paket...</span>
+        `;
+      }
 
-      pkg.questions.unshift(newQ);
-      pkg.current = Math.min(pkg.total, pkg.current + 1);
+      const curPkgKey = (window.APP && window.APP.selectedPackage) ? window.APP.selectedPackage : 'to1';
+      let dbPkgId = curPkgKey;
+      if (curPkgKey === 'mini') dbPkgId = 'mini-to';
+      else if (curPkgKey === 'to1') dbPkgId = 'to-1';
+      else if (curPkgKey === 'to2') dbPkgId = 'to-2';
+      else if (curPkgKey === 'to3') dbPkgId = 'to-3';
 
-      closeModal('modal-ai-draft');
-      updatePackageView();
-      renderQuestions();
-      showToast('Soal AI berhasil disimpan ke paket ini.', 'success');
+      const rows = window.currentAiDraftQuestions.map(q => {
+        const sub = q.subtest || q.subtes || 'TIU';
+        const top = q.topic || q.topik || 'HOTS BKN 2026';
+        const txt = q.question_text || q.pertanyaan || '';
+        const oA = q.option_a || q.opsi_a || '';
+        const oB = q.option_b || q.opsi_b || '';
+        const oC = q.option_c || q.opsi_c || '';
+        const oD = q.option_d || q.opsi_d || '';
+        const oE = q.option_e || q.opsi_e || '';
+        const ans = q.correct_answer || q.kunci_atau_bobot || 'A';
+        const exp = q.explanation || q.pembahasan || '';
+        const pts = q.points || (sub === 'TKP' ? 5 : 5);
+        const dif = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
+
+        return {
+          package_id: dbPkgId,
+          id_paket: dbPkgId,
+          subtest: sub,
+          subtes: sub,
+          topic: top,
+          topik: top,
+          question_text: txt,
+          pertanyaan: txt,
+          option_a: oA,
+          opsi_a: oA,
+          option_b: oB,
+          opsi_b: oB,
+          option_c: oC,
+          opsi_c: oC,
+          option_d: oD,
+          opsi_d: oD,
+          option_e: oE,
+          opsi_e: oE,
+          correct_answer: ans,
+          kunci_atau_bobot: ans,
+          explanation: exp,
+          pembahasan: exp,
+          points: pts,
+          difficulty: dif
+        };
+      });
+
+      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      if (dbClient) {
+        try {
+          await dbClient.from('questions').insert(rows);
+        } catch (e) {
+          console.warn('Supabase question insert warning:', e);
+        }
+      }
+
+      // Add to local state & APP.packages
+      if (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) {
+        const pkg = window.APP.packages[curPkgKey];
+        rows.forEach((r, i) => {
+          pkg.questions.unshift({
+            id: `SOAL-${r.subtest}-AI-${Date.now()}-${i}`,
+            subtest: r.subtest,
+            topic: r.topic,
+            key: r.correct_answer,
+            text: r.question_text,
+            difficulty: r.difficulty
+          });
+        });
+        pkg.current = Math.min(pkg.total, pkg.current + rows.length);
+      }
+
+      if (typeof window.updatePackageView === 'function') window.updatePackageView();
+      if (typeof window.renderQuestions === 'function') window.renderQuestions();
+
+      const modal = document.getElementById('modal-ai-draft');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+      }
+
+      const pkgName = (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) ? window.APP.packages[curPkgKey].name : 'Paket Aktif';
+      if (typeof showToast === 'function') {
+        showToast(`${rows.length} butir soal AI berhasil disimpan ke ${pkgName}.`, 'success');
+      }
     }
+    window.confirmSaveAIDraft = confirmSaveAIDraft;
 
     // --- MANUAL QUESTION CRUD ---
     function openQuestionModal(mode, qId = null) {
@@ -4126,13 +4354,27 @@ Mengerti &amp; Tutup
     if (loginPass) loginPass.focus();
   };
 
-  window.adminLogout = function() {
-    sessionStorage.removeItem('cat_admin_authed');
+  window.handleUserLogout = async function() {
+    try {
+      const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
+      if (authClient) {
+        await authClient.auth.signOut().catch(() => {});
+      }
+    } catch (e) {}
+
     localStorage.removeItem('cat_user_session');
+    localStorage.removeItem('cat_admin_authed');
+    localStorage.removeItem('cat_attempts');
+    sessionStorage.removeItem('cat_admin_authed');
+    sessionStorage.removeItem('cat_user_session');
+
     state.currentUser = null;
     window.showView('login');
-    if (typeof window.switchTab === 'function') window.switchTab('login');
+    if (typeof window.switchTab === 'function') {
+      window.switchTab('login');
+    }
   };
+  window.adminLogout = window.handleUserLogout;
 
   // 7. DASHBOARD MODULE
   function renderDashboardView() {
@@ -4853,280 +5095,16 @@ Mengerti &amp; Tutup
       adminWaInput.value = state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890';
     }
 
-    // Attach AI Generator to /api/generate-soal
-    window.currentAiDraftQuestions = [];
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function renderAiDraftQuestions(questions) {
-      const listContainer = document.getElementById('ai-draft-questions-list');
-      if (!listContainer) return;
-
-      if (!Array.isArray(questions) || questions.length === 0) {
-        listContainer.innerHTML = `
-          <div class="text-center py-6 text-slate-400">
-            Belum ada draf soal AI. Silakan gunakan formulir generator di atas.
-          </div>
-        `;
-        return;
-      }
-
-      listContainer.innerHTML = questions.map((q, idx) => {
-        const sub = q.subtest || q.subtes || 'TIU';
-        const top = q.topic || q.topik || 'HOTS Standar BKN';
-        const diff = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
-        const key = q.correct_answer || q.kunci_atau_bobot || 'A';
-        const text = q.question_text || q.pertanyaan || '';
-        const exp = q.explanation || q.pembahasan || '-';
-        const optA = q.option_a || q.opsi_a || '';
-        const optB = q.option_b || q.opsi_b || '';
-        const optC = q.option_c || q.opsi_c || '';
-        const optD = q.option_d || q.opsi_d || '';
-        const optE = q.option_e || q.opsi_e || '';
-
-        const isKey = (letter) => {
-          const k = String(key).trim().toUpperCase();
-          if (k.length === 1) return k === letter;
-          if (k.startsWith(letter + ' ') || k === letter) return true;
-          if (k.includes(letter + ':5')) return true;
-          return false;
-        };
-
-        return `
-          <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">${escapeHtml(sub)}</span>
-                <span class="text-[11px] font-semibold text-slate-700">${escapeHtml(top)}</span>
-                <span class="text-[10px] text-slate-400">&bull; ${escapeHtml(diff)}</span>
-              </div>
-              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Kunci: ${escapeHtml(key)}</span>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Butir Soal #${idx + 1}:</label>
-              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-800 leading-relaxed text-xs">
-                ${escapeHtml(text)}
-              </div>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pilihan Jawaban:</label>
-              <div class="mt-1 space-y-1 text-slate-700 text-xs">
-                <div class="p-1.5 rounded ${isKey('A') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>A.</strong> ${escapeHtml(optA)}</div>
-                <div class="p-1.5 rounded ${isKey('B') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>B.</strong> ${escapeHtml(optB)}</div>
-                <div class="p-1.5 rounded ${isKey('C') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>C.</strong> ${escapeHtml(optC)}</div>
-                <div class="p-1.5 rounded ${isKey('D') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>D.</strong> ${escapeHtml(optD)}</div>
-                <div class="p-1.5 rounded ${isKey('E') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>E.</strong> ${escapeHtml(optE)}</div>
-              </div>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pembahasan &amp; Kaidah Logika:</label>
-              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
-                ${escapeHtml(exp)}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
+    // Hook AI Generator form
     const aiForm = document.getElementById('ai-generate-form');
     if (aiForm && !aiForm._boundAI) {
       aiForm._boundAI = true;
-      aiForm.onsubmit = async function(e) {
-        e.preventDefault();
-        const subtesEl = document.getElementById('ai-subtest');
-        const countEl = document.getElementById('ai-count');
-        const topicEl = document.getElementById('ai-topic');
-        const diffEl = document.getElementById('ai-diff');
-
-        const subtes = subtesEl ? subtesEl.value : 'TIU';
-        const count = countEl ? (parseInt(countEl.value) || 1) : 1;
-        const topic = topicEl ? (topicEl.value.trim() || 'Penalaran HOTS BKN 2026') : 'Penalaran HOTS BKN 2026';
-        const diff = diffEl ? diffEl.value : 'HOTS Standar BKN 2026';
-
-        const btn = document.getElementById('btn-submit-ai');
-        const btnText = document.getElementById('btn-ai-text');
-        const saveBtn = document.getElementById('btn-save-ai-draft');
-
-        if (btnText) btnText.textContent = `Menghasilkan ${count} Soal Gemini...`;
-        if (btn) btn.disabled = true;
-
-        // Buka modal pratinjau langsung dengan status loading
-        const modalDraft = document.getElementById('modal-ai-draft');
-        const listContainer = document.getElementById('ai-draft-questions-list');
-        if (listContainer) {
-          listContainer.innerHTML = `
-            <div class="text-center py-12 space-y-3">
-              <div class="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p class="text-xs font-semibold text-slate-800">Sedang menyusun soal HOTS dengan Gemini AI...</p>
-              <p class="text-[11px] text-slate-400">Menghubungkan ke Gemini 2.5 Flash sesuai parameter: ${escapeHtml(subtes)} &bull; ${escapeHtml(topic)}</p>
-            </div>
-          `;
-        }
-        if (saveBtn) saveBtn.disabled = true;
-        if (modalDraft) {
-          modalDraft.classList.remove('hidden');
-          modalDraft.classList.add('flex');
-        }
-
-        try {
-          const res = await fetch('/api/generate-soal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              subtest: subtes,
-              count: count,
-              topic: topic,
-              difficulty: diff
-            })
-          });
-
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || `HTTP ${res.status}`);
-          }
-
-          const resData = await res.json();
-          const generated = resData.questions || (Array.isArray(resData) ? resData : []);
-          if (Array.isArray(generated) && generated.length > 0) {
-            window.currentAiDraftQuestions = generated;
-            renderAiDraftQuestions(generated);
-            if (saveBtn) saveBtn.disabled = false;
-          } else {
-            throw new Error('Format respon AI tidak valid atau daftar soal kosong.');
-          }
-        } catch (err) {
-          if (listContainer) {
-            listContainer.innerHTML = `
-              <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center space-y-1">
-                <p class="font-bold">Gagal Menghasilkan Soal AI</p>
-                <p>${escapeHtml(err.message || 'Terjadi kesalahan saat memproses soal AI.')}</p>
-              </div>
-            `;
-          }
-          if (saveBtn) saveBtn.disabled = true;
-        } finally {
-          if (btnText) btnText.textContent = 'Generate Soal AI ke Paket Ini';
-          if (btn) btn.disabled = false;
+      aiForm.onsubmit = function(e) {
+        if (typeof window.handleGenerateAI === 'function') {
+          return window.handleGenerateAI(e);
         }
       };
     }
-
-    window.confirmSaveAIDraft = async function() {
-      if (!window.currentAiDraftQuestions || window.currentAiDraftQuestions.length === 0) {
-        if (typeof showToast === 'function') showToast('Tidak ada draf soal untuk disimpan.', 'info');
-        return;
-      }
-
-      const saveBtn = document.getElementById('btn-save-ai-draft');
-      if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = `
-          <svg class="w-3.5 h-3.5 animate-spin inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span>Menyimpan ke Paket...</span>
-        `;
-      }
-
-      const curPkgKey = (window.APP && window.APP.selectedPackage) ? window.APP.selectedPackage : 'to1';
-      let dbPkgId = curPkgKey;
-      if (curPkgKey === 'mini') dbPkgId = 'mini-to';
-      else if (curPkgKey === 'to1') dbPkgId = 'to-1';
-      else if (curPkgKey === 'to2') dbPkgId = 'to-2';
-      else if (curPkgKey === 'to3') dbPkgId = 'to-3';
-
-      const rows = window.currentAiDraftQuestions.map(q => {
-        const sub = q.subtest || q.subtes || 'TIU';
-        const top = q.topic || q.topik || 'HOTS BKN 2026';
-        const txt = q.question_text || q.pertanyaan || '';
-        const oA = q.option_a || q.opsi_a || '';
-        const oB = q.option_b || q.opsi_b || '';
-        const oC = q.option_c || q.opsi_c || '';
-        const oD = q.option_d || q.opsi_d || '';
-        const oE = q.option_e || q.opsi_e || '';
-        const ans = q.correct_answer || q.kunci_atau_bobot || 'A';
-        const exp = q.explanation || q.pembahasan || '';
-        const pts = q.points || (sub === 'TKP' ? 5 : 5);
-        const dif = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
-
-        return {
-          package_id: dbPkgId,
-          id_paket: dbPkgId,
-          subtest: sub,
-          subtes: sub,
-          topic: top,
-          topik: top,
-          question_text: txt,
-          pertanyaan: txt,
-          option_a: oA,
-          opsi_a: oA,
-          option_b: oB,
-          opsi_b: oB,
-          option_c: oC,
-          opsi_c: oC,
-          option_d: oD,
-          opsi_d: oD,
-          option_e: oE,
-          opsi_e: oE,
-          correct_answer: ans,
-          kunci_atau_bobot: ans,
-          explanation: exp,
-          pembahasan: exp,
-          points: pts,
-          difficulty: dif
-        };
-      });
-
-      if (supabase) {
-        try {
-          await supabase.from('questions').insert(rows);
-        } catch (e) {
-          console.warn('Supabase question insert warning:', e);
-        }
-      }
-
-      // Add to local state & APP.packages
-      if (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) {
-        const pkg = window.APP.packages[curPkgKey];
-        rows.forEach((r, i) => {
-          pkg.questions.unshift({
-            id: `SOAL-${r.subtest}-AI-${Date.now()}-${i}`,
-            subtest: r.subtest,
-            topic: r.topic,
-            key: r.correct_answer,
-            text: r.question_text,
-            difficulty: r.difficulty
-          });
-        });
-        pkg.current = Math.min(pkg.total, pkg.current + rows.length);
-      }
-
-      if (typeof window.updatePackageView === 'function') window.updatePackageView();
-      if (typeof window.renderQuestions === 'function') window.renderQuestions();
-
-      const modal = document.getElementById('modal-ai-draft');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-
-      if (saveBtn) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
-      }
-
-      const pkgName = (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) ? window.APP.packages[curPkgKey].name : 'Paket Aktif';
-      if (typeof showToast === 'function') {
-        showToast(`${rows.length} butir soal AI berhasil disimpan ke ${pkgName}.`, 'success');
-      }
-    };
 
     window.executeSendWA = function() {
       const phone = document.getElementById('wa-preview-phone').textContent.replace(/\D/g, '');
@@ -5218,23 +5196,59 @@ Mengerti &amp; Tutup
         } else if (txt.includes('keluar')) {
           l.onclick = function(e) {
             e.preventDefault();
-            if (confirm('Apakah Anda yakin ingin keluar dari akun?')) {
-              localStorage.removeItem('cat_user_session');
-              state.currentUser = null;
-              window.showView('login');
+            if (typeof window.handleUserLogout === 'function') {
+              window.handleUserLogout();
             }
           };
         }
       });
     }
 
-    // Direct to view
-    if (state.currentUser) {
-      if (state.currentUser.role === 'admin' && sessionStorage.getItem('cat_admin_authed') === 'true') {
-        window.showView('admin');
-      } else {
-        window.showView('dashboard');
+    // URL parameter check for direct admin access (?admin=1 or #admin)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminParam = urlParams.get('admin') === '1' || window.location.hash === '#admin';
+
+    // Verify Supabase Auth Session
+    const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
+
+    let hasConfirmedSession = false;
+    if (authClient) {
+      try {
+        const { data: sessionData } = await authClient.auth.getSession();
+        const activeAuthUser = sessionData?.session?.user;
+        if (activeAuthUser) {
+          if (!activeAuthUser.email_confirmed_at) {
+            // Email belum dikonfirmasi: paksa signOut() otomatis dan bersihkan sesi
+            await authClient.auth.signOut().catch(() => {});
+            localStorage.removeItem('cat_user_session');
+            state.currentUser = null;
+            hasConfirmedSession = false;
+          } else {
+            hasConfirmedSession = true;
+          }
+        } else {
+          // Tidak ada sesi aktif di Supabase auth
+          if (!sessionStorage.getItem('cat_admin_authed')) {
+            localStorage.removeItem('cat_user_session');
+            state.currentUser = null;
+          }
+        }
+      } catch (sessErr) {
+        console.warn('Session verification notice:', sessErr);
       }
+    }
+
+    // Direct to view with safe checking
+    if (isAdminParam) {
+      window.showView('login');
+      if (typeof window.switchTab === 'function') window.switchTab('login');
+      if (typeof window.openAdminLoginModal === 'function') {
+        window.openAdminLoginModal();
+      }
+    } else if (state.currentUser && hasConfirmedSession) {
+      window.showView('dashboard');
+    } else if (state.currentUser && state.currentUser.role === 'admin' && sessionStorage.getItem('cat_admin_authed') === 'true') {
+      window.showView('admin');
     } else {
       window.showView('login');
       if (typeof window.switchTab === 'function') {
@@ -5242,15 +5256,9 @@ Mengerti &amp; Tutup
       }
     }
 
-    // Check URL Hash (Aman tanpa auto-prompt admin)
+    // Check URL Hash
     const hash = window.location.hash.replace('#', '');
-    if (hash === 'admin') {
-      if (sessionStorage.getItem('cat_admin_authed') === 'true') {
-        window.showView('admin');
-      } else {
-        window.showView('login');
-      }
-    } else if (['login', 'register', 'dashboard', 'exam', 'history'].includes(hash)) {
+    if (hash && ['login', 'register'].includes(hash)) {
       window.showView(hash);
     }
   });
