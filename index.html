@@ -424,11 +424,42 @@
 </div>
 <!-- Tautan Kecil Bawah: Masuk Sebagai Admin -->
 <div class="mt-4 pt-3 text-center border-t border-slate-100">
-  <button type="button" onclick="window.showView('admin')" class="text-[11px] font-medium text-slate-400 hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 transition-colors">
+  <button type="button" onclick="window.openAdminLoginModal()" class="text-[11px] font-medium text-slate-400 hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 transition-colors">
     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"></path></svg>
-    <span>Masuk Sebagai Admin (PIN: <strong class="text-slate-600">admin123</strong>)</span>
+    <span>Masuk Sebagai Admin</span>
   </button>
 </div>
+</div>
+
+<!-- Modal Otorisasi Login Admin -->
+<div id="modal-admin-login" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"></path></svg>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-900 text-sm">Otorisasi Admin</h4>
+          <p class="text-[10px] text-slate-400">Masuk ke Panel Pengelola CAT CPNS</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-slate-600">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <form id="form-admin-login-modal" onsubmit="handleAdminModalSubmit(event)" class="space-y-3">
+      <div id="admin-pin-error" class="hidden p-2 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"></div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1" for="admin-modal-pin">Kode PIN / Sandi Admin</label>
+        <input id="admin-modal-pin" type="password" required placeholder="Masukkan PIN / Sandi Admin" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeModal('modal-admin-login')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+        <button type="submit" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors">Masuk Panel</button>
+      </div>
+    </form>
+  </div>
 </div>
 <!-- Micro Highlights / Trust Badges Minimalis -->
 <div class="mt-6 grid grid-cols-3 gap-2 px-2"><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">110 Soal BKN</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">TWK, TIU, TKP</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Anti-Curang</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">Deteksi Tab Layar</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Mini TO Gratis</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">20 Soal Diagnostik</p></div></div>
@@ -836,8 +867,8 @@
 </button>
 <div class="flex items-center gap-3 pl-2 sm:pl-space-sm border-l border-outline-variant/30">
 <div class="hidden sm:flex flex-col text-right">
-<span class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Rian Pratama</span>
-<span class="font-label-sm text-label-sm text-secondary leading-tight">Peserta SKD</span>
+<span id="header-user-name" class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Peserta</span>
+<span id="header-user-role" class="font-label-sm text-label-sm text-secondary leading-tight">Peserta SKD</span>
 </div>
 <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
@@ -853,19 +884,19 @@
 <div class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm">
 <div class="flex flex-col gap-1.5">
 <div class="flex flex-wrap items-center gap-2">
-<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Selamat Datang kembali, Rian Pratama!</h1>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Selamat Datang kembali, <span id="dash-welcome-name">Peserta</span>!</h1>
 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-on-secondary-fixed text-label-sm font-label-sm border border-outline-variant/40">
 <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Status Akun: Aktif
 </span>
 </div>
 <p class="font-body-md text-body-md text-secondary">
-Target Formasi: <span class="font-semibold text-on-surface">Ahli Pertama - Penata Kelola Sistem TI</span> • Pendidikan: <span class="text-on-surface">S1 Ilmu Komputer</span>
+Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface">-</span> • Pendidikan: <span id="dash-user-edu" class="text-on-surface">-</span>
 </p>
 </div>
 <div class="flex flex-wrap items-center gap-3">
 <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-outline-variant/40 rounded-lg text-secondary font-label-md text-label-md">
 <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="20" rx="2" ry="2" width="14" x="5" y="2"></rect><path d="M12 18h.01"></path></svg>
-<span>Nomor WhatsApp Terhubung: <strong class="text-on-surface font-mono-timer text-body-sm">0812-3456-7890</strong></span>
+<span>Nomor WhatsApp Terhubung: <strong id="dash-user-wa" class="text-on-surface font-mono-timer text-body-sm">-</strong></span>
 </div>
 </div>
 </div>
@@ -1707,7 +1738,10 @@ Mengerti &amp; Tutup
     if (!val) return;
 
     if (val.startsWith('MASTER-') || val.length >= 8) {
-      alert('Token ' + val + ' berhasil diverifikasi! Paket Try Out telah ditambahkan ke akun Rian Pratama.');
+      const uname = (window.state && window.state.currentUser && window.state.currentUser.nama) ? window.state.currentUser.nama : 'Peserta';
+      if (typeof showToast === 'function') {
+        showToast('Token ' + val + ' berhasil diverifikasi untuk akun ' + uname + '!', 'success');
+      }
       input.value = '';
     } else {
       alert('Format token tidak valid. Gunakan format standar contoh: MASTER-CPNS-2026-XXXX.');
@@ -1745,7 +1779,7 @@ Mengerti &amp; Tutup
   </div>
 
   <!-- View 4: Ruang Ujian CAT Standar BKN (Halaman 3) -->
-  <div id="view-exam" class="hidden bg-[#f8fafc] font-sans text-slate-900 antialiased min-h-screen flex flex-col relative pb-20 lg:pb-0"><!-- Anti-Cheat Red Top Banner --><header class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm"><div class="bg-red-600 text-white px-3 py-1.5 sm:py-2 text-center flex items-center justify-center gap-1.5 sm:gap-2"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg><span class="text-[10px] sm:text-xs tracking-wide uppercase font-semibold leading-tight line-clamp-1 sm:line-clamp-none">Mode Ujian Terkunci: Dilarang buka tab/aplikasi lain</span></div><!-- Header Clean Bar --><div class="h-14 sm:h-16 w-full px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 sm:gap-4"><div class="flex items-center gap-2 sm:gap-3 min-w-0"><div class="flex flex-col min-w-0"><span class="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">CAT CPNS 2026</span><span class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Simulasi SKD CPNS Paket Satuan TO Seri 1</span></div></div><!-- Center Timer Badge for Mobile/Tablet Header --><div class="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 border border-slate-200"><svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="font-mono text-xs sm:text-sm font-bold text-slate-900 tabular-nums" id="mobileHeaderTimer">94:11</span></div><div class="flex items-center gap-2 sm:gap-4 shrink-0"><div class="hidden md:flex items-center gap-2.5 pr-2 border-r border-slate-200 text-right"><div><span class="block text-xs sm:text-sm font-semibold text-slate-900 leading-none">Rian Pratama</span><span class="block text-[11px] text-slate-500 mt-1 font-mono">No. 2630118810023</span></div><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div></div><button class="inline-flex items-center justify-center gap-1 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold tracking-wide transition-colors shrink-0" id="finishExamHeaderBtn" type="button"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span class="hidden sm:inline">Selesai Ujian</span><span class="sm:hidden">Selesai</span></button></div></div></header><main class="w-full pt-20 sm:pt-24 lg:pt-28 pb-10 bg-[#f8fafc] flex-1"><!-- Sub-Header Status Context Bar --><section class="w-full bg-white border-b border-slate-200 py-2 px-3 sm:px-4 lg:px-6"><div class="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1.5 sm:gap-2 text-slate-600 truncate"><span class="w-2 h-2 rounded-full bg-slate-900 shrink-0"></span><span class="font-semibold text-slate-900 truncate">SKD CPNS 2026</span><span class="text-slate-300 hidden sm:inline">/</span><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold shrink-0">TWK</span><span class="text-slate-300 hidden md:inline">/</span><span class="text-slate-600 font-medium hidden md:inline truncate">Peserta: Rian Pratama</span></div><div class="flex items-center gap-2 text-slate-500 shrink-0"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-[11px] sm:text-xs text-slate-600 font-medium hidden sm:inline">Sistem Online</span></div></div></section><!-- Mobile Quick Navigation & Sheet Trigger Bar (Visible only on Mobile & Tablet) --><section class="lg:hidden w-full px-3 sm:px-4 pt-3 pb-1 max-w-7xl mx-auto"><div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-center justify-between gap-2 shadow-sm"><div class="flex items-center gap-2"><span class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-bold">No. 1</span><span class="text-xs text-slate-500">Dijawab: <strong class="text-slate-900 font-bold">18</strong>/110</span></div><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors" id="openMobileNavBtn" type="button"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="7" rx="1" width="7" x="3" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="14"></rect><rect height="7" rx="1" width="7" x="3" y="14"></rect></svg><span>Daftar Nomor Soal</span></button></div></section><!-- Workspace Container: Responsive Ordering (Mobile/Tablet: Question first; Desktop: Sidebar left, Question right) --><div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-6"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><!-- LEFT COLUMN (Desktop only in-flow; on Mobile/Tablet it turns into collapsible drawer/bottom-sheet) --><aside class="hidden lg:flex lg:col-span-4 w-full flex-col gap-4 sticky top-28" id="desktopNavSidebar"><!-- Timer Card Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-md bg-slate-100 text-slate-800 flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div><span class="block text-[11px] font-bold text-slate-500 tracking-wider uppercase leading-none">Sisa Waktu</span><div class="flex items-center gap-1.5 mt-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-xs text-slate-500 font-medium">Waktu Berjalan</span></div></div></div><div class="text-right"><span class="font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums examTimerDisplay">94:11</span></div></div><!-- Number Navigation Panel Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-4 shadow-sm"><!-- Header & Progress Summary --><div class="flex items-start justify-between pb-3 border-b border-slate-100"><div><h2 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h2><p class="text-xs text-slate-500 mt-0.5">Pilih nomor untuk lompat ke butir soal</p></div><div class="text-right"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Dijawab</span><span class="text-base font-bold text-slate-900 tabular-nums">18 <span class="text-xs font-normal text-slate-500">/ 110</span></span></div></div><!-- Filter Tabs (TWK, TIU, TKP) --><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-md text-xs font-semibold"><button class="py-1.5 rounded bg-slate-900 text-white text-center transition-colors" type="button">TWK (1-30)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TIU (31-65)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TKP (66-110)</button></div><!-- Question Grid Desktop --><div class="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto pr-1"><button aria-current="true" class="q-cell w-full aspect-square rounded border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-xs relative flex items-center justify-center transition-all" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="2" type="button">2</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="3" type="button">3</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="4" type="button">4</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="5" type="button">5</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="6" type="button">6</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="7" type="button">7</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="8" type="button">8</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="10" type="button">10</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="11" type="button">11</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="12" type="button">12</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="13" type="button">13</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="14" type="button">14</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="15" type="button">15</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="17" type="button">17</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="18" type="button">18</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="19" type="button">19</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="20" type="button">20</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="25" type="button">25</button></div><!-- Color Status Legend --><div class="pt-3 border-t border-slate-100 flex flex-col gap-2 text-xs text-slate-700"><span class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">Keterangan Status</span><div class="grid grid-cols-2 gap-2"><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-blue-600 shrink-0"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-500 shrink-0"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 shrink-0"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded border-2 border-slate-900 bg-slate-100 shrink-0"></span><span>Soal Aktif (#1)</span></div></div></div><!-- Fast Jump Control Input --><div class="pt-2 flex items-center gap-2"><input class="w-full px-3 py-1.5 text-xs rounded border border-slate-200 focus:outline-none focus:border-slate-900 text-slate-800 bg-slate-50" max="110" min="1" placeholder="Lompat no..." type="number"><button class="px-3 py-1.5 bg-slate-100 text-slate-800 rounded text-xs font-semibold hover:bg-slate-200 transition-colors shrink-0" type="button">Buka</button></div></div></aside><!-- RIGHT COLUMN: Main Question Canvas (Full width on mobile/tablet, 8 cols on desktop) --><section class="lg:col-span-8 w-full flex flex-col gap-4"><!-- Question Card --><article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><!-- Card Header & Metadata --><div class="px-3.5 sm:px-5 py-3 sm:py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2"><div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-bold tracking-tight">Soal No. 1 dari 110</span><span class="w-1 h-1 rounded-full bg-slate-300"></span><span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-800 text-xs font-semibold">TWK</span></div><div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 text-xs"><svg class="w-3.5 h-3.5 text-slate-900 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Bobot Skor: <strong class="text-slate-900">+5</strong> Benar • <strong class="text-slate-900">0</strong> Salah</span></div></div><!-- Question Body: HOTS Case Study --><div class="p-4 sm:p-6 lg:p-7 flex flex-col gap-4 sm:gap-5"><div class="text-slate-800 text-[15px] sm:text-base leading-relaxed sm:leading-loose space-y-3"><p>Anda adalah seorang pejabat fungsional auditor kepegawaian muda pada instansi pemerintah daerah yang sedang memimpin audit kepatuhan pengadaan barang dan jasa publik senilai 4,2 miliar rupiah. Di tengah proses telaah dokumen audit, seorang perwakilan vendor pihak ketiga didampingi oleh seorang kolega senior satu unit kerja mendatangi ruang kerja Anda. Mereka menyerahkan map berisi berkas teknis tambahan disertai amplop tebal berisi uang tunai yang dinyatakan secara informal sebagai "uang transportasi dan pengganti lelah tim pemeriksa".</p><p>Kolega senior tersebut memberi isyarat bahwa kebiasaan semacam ini lazim diterima untuk mempercepat penerbitan Berita Acara Pemeriksaan (BAP) tanpa mempengaruhi independensi substansi temuan. Berdasarkan asas etika Aparatur Sipil Negara, nilai integritas nasional, dan ketentuan perundang-undangan pencegahan tindak pidana korupsi yang berlaku, sikap paling tepat dan berintegritas yang wajib Anda ambil adalah...</p></div><!-- Mini Context / Regulatory Reference --><div class="bg-slate-50 border-l-4 border-slate-900 p-3 sm:p-3.5 rounded-r flex items-start gap-2.5 sm:gap-3"><svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><p class="text-[11px] sm:text-xs text-slate-600 leading-normal">Petunjuk: Penilaian menguji implementasi Core Values ASN BerAKHLAK pilar "Akuntabel" dan Pasal 12B UU No. 20/2001 terkait gratifikasi kedinasan.</p></div><!-- 5 Answer Options (A - E) touch-friendly min 48px --><div aria-label="Pilihan Jawaban Soal 1" class="flex flex-col gap-3 pt-2" id="optionsContainer" role="radiogroup"><!-- Option A --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="A"><input class="sr-only" name="exam_q1" type="radio" value="A"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">A</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima amplop tersebut atas dasar menghormati kolega senior, namun mencatatnya ke dalam buku kas informal tim pemeriksa dan mengalihkannya sebagai donasi panti asuhan setelah pemeriksaan selesai.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option B (Selected Default) --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border-2 border-blue-600 bg-blue-50/70 cursor-pointer transition-all select-none" data-option="B"><input checked="" class="sr-only" name="exam_q1" type="radio" value="B"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center transition-colors">B</span><div class="flex-1 text-slate-900 text-[14px] sm:text-sm font-medium leading-relaxed pt-0.5">Menolak dengan tegas dan santun penerimaan uang tersebut, meminta vendor membawa kembali amplopnya, serta segera menyusun laporan kronologis potensi benturan kepentingan kepada Unit Pengendalian Gratifikasi (UPG) dan atasan langsung.</div><div class="option-indicator w-5 h-5 rounded-full border-2 border-blue-600 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></div></label><!-- Option C --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="C"><input class="sr-only" name="exam_q1" type="radio" value="C"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">C</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menunda pengambilan keputusan dan meminta kolega senior tersebut menandatangani surat pertanggungjawaban mutlak apabila pemberian tersebut di kemudian hari terindikasi gratifikasi ilegal.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option D --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="D"><input class="sr-only" name="exam_q1" type="radio" value="D"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">D</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menolak amplop secara sepihak di depan vendor dan langsung menghentikan proses audit secara mendadak sembari memviralkannya di kanal pengaduan publik.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option E --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="E"><input class="sr-only" name="exam_q1" type="radio" value="E"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">E</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima berkas administrasi dan uang tersebut untuk disimpan di brankas kantor sampai pemeriksaan lapangan berakhir agar tidak menyinggung rekan kerja senior.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label></div></div><!-- Bottom Action Bar (Desktop only embedded view, mobile has sticky dock) --><div class="hidden lg:flex px-6 py-4 bg-slate-50 border-t border-slate-200 items-center justify-between gap-3"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors disabled:opacity-50" id="prevBtnDesktop" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span>Sebelumnya</span></button><div class="flex items-center gap-3 ml-auto"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu-Ragu</span></button><button class="inline-flex items-center gap-2 px-6 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" type="button"><span>Selanjutnya</span><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div></div></article><!-- Exam Shortcut & Notification Info Bar --><div class="hidden sm:flex flex-wrap items-center justify-between text-slate-500 text-xs px-1"><div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M6 8h.001"></path><path d="M10 8h.001"></path><path d="M14 8h.001"></path><path d="M18 8h.001"></path><path d="M8 12h.001"></path><path d="M12 12h.001"></path><path d="M16 12h.001"></path><path d="M7 16h10"></path></svg><span>Shortcut: Tekan <strong class="text-slate-700 font-mono">1-5</strong> untuk Opsi A-E • <strong class="text-slate-700 font-mono">→</strong> Berikutnya • <strong class="text-slate-700 font-mono">R</strong> Ragu</span></div><span class="font-mono text-slate-500">Jawaban tersimpan instan ke server BKN</span></div></section></div></div><!-- MOBILE/TABLET STICKY BOTTOM DOCK (Thumb-friendly easy reach) --><nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-lg"><div class="max-w-md mx-auto grid grid-cols-3 gap-2 items-center"><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold active:bg-slate-100 transition-colors" id="prevBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg><span>Sebelum</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" id="flagBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" id="nextBtnMobile" type="button"><span>Lanjut</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></nav><!-- MOBILE & TABLET BOTTOM SHEET / DRAWER FOR QUESTION NUMBERS --><div class="lg:hidden fixed inset-0 z-50 bg-slate-900/60 transition-opacity hidden" id="mobileNavBackdrop"><div class="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl flex flex-col overflow-hidden border-slate-200 border-t" id="mobileNavSheet" style="background-color: rgb(255, 255, 255) !important; opacity: 1;"><div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-slate-900"></div><h3 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h3><span class="text-xs text-slate-500">(18/110)</span></div><button class="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors" id="closeMobileNavBtn" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg></button></div><!-- Category Filters --><div class="px-4 py-2 border-b border-slate-100 bg-white"><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg text-xs font-semibold"><button class="py-1.5 rounded-md bg-slate-900 text-white text-center" type="button">TWK (1-30)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TIU (31-65)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TKP (66-110)</button></div></div><!-- Grid Scrollable Area (Touch-friendly 44px min touch target) --><div class="p-4 overflow-y-auto max-h-[50vh] bg-white"><div class="grid grid-cols-5 gap-2.5 text-center"><button class="q-cell h-11 w-full rounded-lg border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-sm relative flex items-center justify-center" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="2" type="button">2</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="3" type="button">3</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="4" type="button">4</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="5" type="button">5</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="6" type="button">6</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="7" type="button">7</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="8" type="button">8</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="10" type="button">10</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="11" type="button">11</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="12" type="button">12</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="13" type="button">13</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="14" type="button">14</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="15" type="button">15</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="17" type="button">17</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="18" type="button">18</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="19" type="button">19</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="20" type="button">20</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="25" type="button">25</button></div></div><!-- Legend Footer inside Sheet --><div class="p-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-700 border-slate-200 bg-white" style="background-color: #ffffff !important;"><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border-2 border-slate-900 bg-slate-100"></span><span>Soal Aktif (#1)</span></div></div></div></div><!-- MODAL 1: Petunjuk dan Tata Tertib Pengerjaan Ujian CAT SKD (Mobile & Desktop Responsive) --><div class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden" id="rulesModal"><div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full max-h-[90vh] p-4 sm:p-6 sm:p-7 flex flex-col gap-4 overflow-hidden shadow-2xl"><div class="flex items-start justify-between pb-3 sm:pb-4 border-b border-slate-100 shrink-0"><div><span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Standar BKN RI</span><h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Petunjuk &amp; Tata Tertib Ujian Try Out SKD</h2></div><div class="px-2.5 py-1 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] sm:text-xs font-semibold shrink-0">SKD CPNS 2026</div></div><!-- Scrollable Content on Mobile --><div class="overflow-y-auto pr-1 space-y-4 flex-1"><!-- Duration and breakdown tags --><div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Durasi Ujian</span><span class="text-xs sm:text-sm font-bold text-slate-900">100 Menit</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Jumlah Soal</span><span class="text-xs sm:text-sm font-bold text-slate-900">110 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TWK &amp; TIU</span><span class="text-xs sm:text-sm font-bold text-slate-900">30 &amp; 35 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TKP</span><span class="text-xs sm:text-sm font-bold text-slate-900">45 Butir</span></div></div><!-- Rules list --><div class="space-y-2.5 py-1"><h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ketentuan &amp; Tata Tertib:</h3><ol class="space-y-2 text-xs text-slate-700 leading-relaxed list-decimal list-outside pl-4"><li><strong>Sistem Penilaian :</strong> TWK dan TIU menerapkan bobot <strong>+5 untuk benar</strong> dan <strong>0 untuk salah</strong>. TKP menggunakan <strong>skala nilai 1 sampai 5</strong> tanpa minus.</li><li><strong>Larangan Pelanggaran Integritas:</strong> Dilarang berpindah tab browser atau meminimalkan jendela. Sistem akan <strong>langsung mengakhiri sesi (auto-submit)</strong> jika terdeteksi curang.</li><li><strong>Status Warna:</strong> Biru solid = Dijawab, Kuning/Amber solid = Ragu-ragu, Abu-abu netral = Belum Dijawab.</li><li><strong>Pengakhiran Sesi:</strong> Klik tombol merah <strong>'Selesai Ujian'</strong> jika telah selesai.</li></ol></div><!-- Checkbox confirmation --><div class="pt-1"><label class="flex items-start gap-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 cursor-pointer"><input class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer" id="agreeCheckbox" type="checkbox"><span class="text-xs text-slate-800 font-medium leading-relaxed">Saya telah membaca, memahami, dan menyetujui seluruh tata tertib ujian Try Out SKD CPNS ini.</span></label></div></div><!-- Action button --><div class="pt-2 border-t border-slate-100 flex items-center justify-end shrink-0"><button class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-semibold tracking-wide hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all" id="startExamBtn" type="button">Mulai Kerjakan Soal</button></div></div></div><!-- MODAL 2: Anti-Cheat Warning --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="antiCheatModal"><div class="bg-white border-2 border-red-600 rounded-xl max-w-lg w-full p-5 sm:p-6 text-center flex flex-col items-center gap-4"><div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><div class="space-y-1"><h3 class="text-base font-bold text-slate-900">Peringatan Integritas Ujian!</h3><p class="text-xs text-slate-600 leading-relaxed">Sistem mendeteksi bahwa jendela atau tab ujian Anda kehilangan fokus. Seluruh aktivitas terekam di log pengawas CAT.</p></div><div class="w-full bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-md text-xs font-semibold">Pelanggaran: 1 kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!</div><button class="w-full py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all" id="resumeExamBtn" type="button">Kembali ke Lembar Ujian Sekarang</button></div></div><!-- MODAL 3: Finish Exam Confirmation --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="finishExamModal"><div class="bg-white border border-slate-200 rounded-xl max-w-md w-full p-5 sm:p-6 flex flex-col gap-4 shadow-xl"><div class="flex items-center gap-3 pb-2 border-b border-slate-100"><div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><h3 class="text-sm font-bold text-slate-900">Konfirmasi Selesai Ujian</h3></div><p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin mengakhiri sesi ujian ini? Dari total <strong>110 butir</strong>, Anda telah menjawab <strong>18 butir</strong> dan masih terdapat <strong>2 butir</strong> dengan status ragu-ragu.</p><div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-800 text-xs space-y-1.5"><div class="flex justify-between"><span>Sisa Waktu Ujian:</span><span class="font-mono font-bold text-slate-900" id="modalTimeRemaining">094 Menit 11 Detik</span></div><div class="flex justify-between"><span>Status Nilai:</span><span class="text-slate-600 font-medium">Akan langsung dikalkulasi CAT BKN</span></div></div><div class="flex items-center justify-end gap-2.5 pt-2"><button class="px-3.5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-medium hover:bg-slate-100 transition-colors" id="cancelFinishBtn" type="button">Batal</button><button class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors" id="confirmFinishBtn" type="button">Ya, Akhiri Ujian</button></div></div></div></main><footer class="hidden lg:block w-full bg-white border-t border-slate-200 py-3 mt-auto"><div class="w-full px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2"><div class="flex items-center gap-3 text-slate-500 text-xs"><span>Badan Kepegawaian Negara (BKN) RI © 2026</span><span class="hidden sm:inline">•</span><span class="hidden sm:inline font-mono">Sesi II • Ruang Lab-04 • PIN Sesi: 8904</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span>Status Jaringan: Terhubung Stabil (Latency 14ms)</span></div></div></footer><!-- Client-side Interactive Logic --><script>
+  <div id="view-exam" class="hidden bg-[#f8fafc] font-sans text-slate-900 antialiased min-h-screen flex flex-col relative pb-20 lg:pb-0"><!-- Anti-Cheat Red Top Banner --><header class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm"><div class="bg-red-600 text-white px-3 py-1.5 sm:py-2 text-center flex items-center justify-center gap-1.5 sm:gap-2"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg><span class="text-[10px] sm:text-xs tracking-wide uppercase font-semibold leading-tight line-clamp-1 sm:line-clamp-none">Mode Ujian Terkunci: Dilarang buka tab/aplikasi lain</span></div><!-- Header Clean Bar --><div class="h-14 sm:h-16 w-full px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 sm:gap-4"><div class="flex items-center gap-2 sm:gap-3 min-w-0"><div class="flex flex-col min-w-0"><span class="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">CAT CPNS 2026</span><span class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Simulasi SKD CPNS Paket Satuan TO Seri 1</span></div></div><!-- Center Timer Badge for Mobile/Tablet Header --><div class="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 border border-slate-200"><svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="font-mono text-xs sm:text-sm font-bold text-slate-900 tabular-nums" id="mobileHeaderTimer">94:11</span></div><div class="flex items-center gap-2 sm:gap-4 shrink-0"><div class="hidden md:flex items-center gap-2.5 pr-2 border-r border-slate-200 text-right"><div><span id="exam-user-name" class="block text-xs sm:text-sm font-semibold text-slate-900 leading-none">Peserta</span><span id="exam-user-id" class="block text-[11px] text-slate-500 mt-1 font-mono">Peserta CAT CPNS</span></div><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div></div><button class="inline-flex items-center justify-center gap-1 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold tracking-wide transition-colors shrink-0" id="finishExamHeaderBtn" type="button"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span class="hidden sm:inline">Selesai Ujian</span><span class="sm:hidden">Selesai</span></button></div></div></header><main class="w-full pt-20 sm:pt-24 lg:pt-28 pb-10 bg-[#f8fafc] flex-1"><!-- Sub-Header Status Context Bar --><section class="w-full bg-white border-b border-slate-200 py-2 px-3 sm:px-4 lg:px-6"><div class="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1.5 sm:gap-2 text-slate-600 truncate"><span class="w-2 h-2 rounded-full bg-slate-900 shrink-0"></span><span class="font-semibold text-slate-900 truncate">SKD CPNS 2026</span><span class="text-slate-300 hidden sm:inline">/</span><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold shrink-0">TWK</span><span class="text-slate-300 hidden md:inline">/</span><span class="text-slate-600 font-medium hidden md:inline truncate">Peserta: <span id="exam-subhead-name">Peserta</span></span></div><div class="flex items-center gap-2 text-slate-500 shrink-0"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-[11px] sm:text-xs text-slate-600 font-medium hidden sm:inline">Sistem Online</span></div></div></section><!-- Mobile Quick Navigation & Sheet Trigger Bar (Visible only on Mobile & Tablet) --><section class="lg:hidden w-full px-3 sm:px-4 pt-3 pb-1 max-w-7xl mx-auto"><div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-center justify-between gap-2 shadow-sm"><div class="flex items-center gap-2"><span class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-bold">No. 1</span><span class="text-xs text-slate-500">Dijawab: <strong class="text-slate-900 font-bold">18</strong>/110</span></div><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors" id="openMobileNavBtn" type="button"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="7" rx="1" width="7" x="3" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="14"></rect><rect height="7" rx="1" width="7" x="3" y="14"></rect></svg><span>Daftar Nomor Soal</span></button></div></section><!-- Workspace Container: Responsive Ordering (Mobile/Tablet: Question first; Desktop: Sidebar left, Question right) --><div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-6"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><!-- LEFT COLUMN (Desktop only in-flow; on Mobile/Tablet it turns into collapsible drawer/bottom-sheet) --><aside class="hidden lg:flex lg:col-span-4 w-full flex-col gap-4 sticky top-28" id="desktopNavSidebar"><!-- Timer Card Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-md bg-slate-100 text-slate-800 flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div><span class="block text-[11px] font-bold text-slate-500 tracking-wider uppercase leading-none">Sisa Waktu</span><div class="flex items-center gap-1.5 mt-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-xs text-slate-500 font-medium">Waktu Berjalan</span></div></div></div><div class="text-right"><span class="font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums examTimerDisplay">94:11</span></div></div><!-- Number Navigation Panel Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-4 shadow-sm"><!-- Header & Progress Summary --><div class="flex items-start justify-between pb-3 border-b border-slate-100"><div><h2 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h2><p class="text-xs text-slate-500 mt-0.5">Pilih nomor untuk lompat ke butir soal</p></div><div class="text-right"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Dijawab</span><span class="text-base font-bold text-slate-900 tabular-nums">18 <span class="text-xs font-normal text-slate-500">/ 110</span></span></div></div><!-- Filter Tabs (TWK, TIU, TKP) --><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-md text-xs font-semibold"><button class="py-1.5 rounded bg-slate-900 text-white text-center transition-colors" type="button">TWK (1-30)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TIU (31-65)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TKP (66-110)</button></div><!-- Question Grid Desktop --><div class="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto pr-1"><button aria-current="true" class="q-cell w-full aspect-square rounded border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-xs relative flex items-center justify-center transition-all" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="2" type="button">2</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="3" type="button">3</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="4" type="button">4</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="5" type="button">5</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="6" type="button">6</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="7" type="button">7</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="8" type="button">8</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="10" type="button">10</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="11" type="button">11</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="12" type="button">12</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="13" type="button">13</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="14" type="button">14</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="15" type="button">15</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="17" type="button">17</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="18" type="button">18</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="19" type="button">19</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="20" type="button">20</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="25" type="button">25</button></div><!-- Color Status Legend --><div class="pt-3 border-t border-slate-100 flex flex-col gap-2 text-xs text-slate-700"><span class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">Keterangan Status</span><div class="grid grid-cols-2 gap-2"><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-blue-600 shrink-0"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-500 shrink-0"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 shrink-0"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded border-2 border-slate-900 bg-slate-100 shrink-0"></span><span>Soal Aktif (#1)</span></div></div></div><!-- Fast Jump Control Input --><div class="pt-2 flex items-center gap-2"><input class="w-full px-3 py-1.5 text-xs rounded border border-slate-200 focus:outline-none focus:border-slate-900 text-slate-800 bg-slate-50" max="110" min="1" placeholder="Lompat no..." type="number"><button class="px-3 py-1.5 bg-slate-100 text-slate-800 rounded text-xs font-semibold hover:bg-slate-200 transition-colors shrink-0" type="button">Buka</button></div></div></aside><!-- RIGHT COLUMN: Main Question Canvas (Full width on mobile/tablet, 8 cols on desktop) --><section class="lg:col-span-8 w-full flex flex-col gap-4"><!-- Question Card --><article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><!-- Card Header & Metadata --><div class="px-3.5 sm:px-5 py-3 sm:py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2"><div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-bold tracking-tight">Soal No. 1 dari 110</span><span class="w-1 h-1 rounded-full bg-slate-300"></span><span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-800 text-xs font-semibold">TWK</span></div><div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 text-xs"><svg class="w-3.5 h-3.5 text-slate-900 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Bobot Skor: <strong class="text-slate-900">+5</strong> Benar • <strong class="text-slate-900">0</strong> Salah</span></div></div><!-- Question Body: HOTS Case Study --><div class="p-4 sm:p-6 lg:p-7 flex flex-col gap-4 sm:gap-5"><div class="text-slate-800 text-[15px] sm:text-base leading-relaxed sm:leading-loose space-y-3"><p>Anda adalah seorang pejabat fungsional auditor kepegawaian muda pada instansi pemerintah daerah yang sedang memimpin audit kepatuhan pengadaan barang dan jasa publik senilai 4,2 miliar rupiah. Di tengah proses telaah dokumen audit, seorang perwakilan vendor pihak ketiga didampingi oleh seorang kolega senior satu unit kerja mendatangi ruang kerja Anda. Mereka menyerahkan map berisi berkas teknis tambahan disertai amplop tebal berisi uang tunai yang dinyatakan secara informal sebagai "uang transportasi dan pengganti lelah tim pemeriksa".</p><p>Kolega senior tersebut memberi isyarat bahwa kebiasaan semacam ini lazim diterima untuk mempercepat penerbitan Berita Acara Pemeriksaan (BAP) tanpa mempengaruhi independensi substansi temuan. Berdasarkan asas etika Aparatur Sipil Negara, nilai integritas nasional, dan ketentuan perundang-undangan pencegahan tindak pidana korupsi yang berlaku, sikap paling tepat dan berintegritas yang wajib Anda ambil adalah...</p></div><!-- Mini Context / Regulatory Reference --><div class="bg-slate-50 border-l-4 border-slate-900 p-3 sm:p-3.5 rounded-r flex items-start gap-2.5 sm:gap-3"><svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><p class="text-[11px] sm:text-xs text-slate-600 leading-normal">Petunjuk: Penilaian menguji implementasi Core Values ASN BerAKHLAK pilar "Akuntabel" dan Pasal 12B UU No. 20/2001 terkait gratifikasi kedinasan.</p></div><!-- 5 Answer Options (A - E) touch-friendly min 48px --><div aria-label="Pilihan Jawaban Soal 1" class="flex flex-col gap-3 pt-2" id="optionsContainer" role="radiogroup"><!-- Option A --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="A"><input class="sr-only" name="exam_q1" type="radio" value="A"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">A</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima amplop tersebut atas dasar menghormati kolega senior, namun mencatatnya ke dalam buku kas informal tim pemeriksa dan mengalihkannya sebagai donasi panti asuhan setelah pemeriksaan selesai.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option B (Selected Default) --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border-2 border-blue-600 bg-blue-50/70 cursor-pointer transition-all select-none" data-option="B"><input checked="" class="sr-only" name="exam_q1" type="radio" value="B"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center transition-colors">B</span><div class="flex-1 text-slate-900 text-[14px] sm:text-sm font-medium leading-relaxed pt-0.5">Menolak dengan tegas dan santun penerimaan uang tersebut, meminta vendor membawa kembali amplopnya, serta segera menyusun laporan kronologis potensi benturan kepentingan kepada Unit Pengendalian Gratifikasi (UPG) dan atasan langsung.</div><div class="option-indicator w-5 h-5 rounded-full border-2 border-blue-600 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></div></label><!-- Option C --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="C"><input class="sr-only" name="exam_q1" type="radio" value="C"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">C</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menunda pengambilan keputusan dan meminta kolega senior tersebut menandatangani surat pertanggungjawaban mutlak apabila pemberian tersebut di kemudian hari terindikasi gratifikasi ilegal.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option D --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="D"><input class="sr-only" name="exam_q1" type="radio" value="D"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">D</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menolak amplop secara sepihak di depan vendor dan langsung menghentikan proses audit secara mendadak sembari memviralkannya di kanal pengaduan publik.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option E --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="E"><input class="sr-only" name="exam_q1" type="radio" value="E"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">E</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima berkas administrasi dan uang tersebut untuk disimpan di brankas kantor sampai pemeriksaan lapangan berakhir agar tidak menyinggung rekan kerja senior.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label></div></div><!-- Bottom Action Bar (Desktop only embedded view, mobile has sticky dock) --><div class="hidden lg:flex px-6 py-4 bg-slate-50 border-t border-slate-200 items-center justify-between gap-3"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors disabled:opacity-50" id="prevBtnDesktop" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span>Sebelumnya</span></button><div class="flex items-center gap-3 ml-auto"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu-Ragu</span></button><button class="inline-flex items-center gap-2 px-6 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" type="button"><span>Selanjutnya</span><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div></div></article><!-- Exam Shortcut & Notification Info Bar --><div class="hidden sm:flex flex-wrap items-center justify-between text-slate-500 text-xs px-1"><div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M6 8h.001"></path><path d="M10 8h.001"></path><path d="M14 8h.001"></path><path d="M18 8h.001"></path><path d="M8 12h.001"></path><path d="M12 12h.001"></path><path d="M16 12h.001"></path><path d="M7 16h10"></path></svg><span>Shortcut: Tekan <strong class="text-slate-700 font-mono">1-5</strong> untuk Opsi A-E • <strong class="text-slate-700 font-mono">→</strong> Berikutnya • <strong class="text-slate-700 font-mono">R</strong> Ragu</span></div><span class="font-mono text-slate-500">Jawaban tersimpan instan ke server BKN</span></div></section></div></div><!-- MOBILE/TABLET STICKY BOTTOM DOCK (Thumb-friendly easy reach) --><nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-lg"><div class="max-w-md mx-auto grid grid-cols-3 gap-2 items-center"><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold active:bg-slate-100 transition-colors" id="prevBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg><span>Sebelum</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" id="flagBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" id="nextBtnMobile" type="button"><span>Lanjut</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></nav><!-- MOBILE & TABLET BOTTOM SHEET / DRAWER FOR QUESTION NUMBERS --><div class="lg:hidden fixed inset-0 z-50 bg-slate-900/60 transition-opacity hidden" id="mobileNavBackdrop"><div class="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl flex flex-col overflow-hidden border-slate-200 border-t" id="mobileNavSheet" style="background-color: rgb(255, 255, 255) !important; opacity: 1;"><div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-slate-900"></div><h3 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h3><span class="text-xs text-slate-500">(18/110)</span></div><button class="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors" id="closeMobileNavBtn" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg></button></div><!-- Category Filters --><div class="px-4 py-2 border-b border-slate-100 bg-white"><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg text-xs font-semibold"><button class="py-1.5 rounded-md bg-slate-900 text-white text-center" type="button">TWK (1-30)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TIU (31-65)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TKP (66-110)</button></div></div><!-- Grid Scrollable Area (Touch-friendly 44px min touch target) --><div class="p-4 overflow-y-auto max-h-[50vh] bg-white"><div class="grid grid-cols-5 gap-2.5 text-center"><button class="q-cell h-11 w-full rounded-lg border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-sm relative flex items-center justify-center" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="2" type="button">2</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="3" type="button">3</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="4" type="button">4</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="5" type="button">5</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="6" type="button">6</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="7" type="button">7</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="8" type="button">8</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="10" type="button">10</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="11" type="button">11</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="12" type="button">12</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="13" type="button">13</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="14" type="button">14</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="15" type="button">15</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="17" type="button">17</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="18" type="button">18</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="19" type="button">19</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="20" type="button">20</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="25" type="button">25</button></div></div><!-- Legend Footer inside Sheet --><div class="p-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-700 border-slate-200 bg-white" style="background-color: #ffffff !important;"><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border-2 border-slate-900 bg-slate-100"></span><span>Soal Aktif (#1)</span></div></div></div></div><!-- MODAL 1: Petunjuk dan Tata Tertib Pengerjaan Ujian CAT SKD (Mobile & Desktop Responsive) --><div class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden" id="rulesModal"><div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full max-h-[90vh] p-4 sm:p-6 sm:p-7 flex flex-col gap-4 overflow-hidden shadow-2xl"><div class="flex items-start justify-between pb-3 sm:pb-4 border-b border-slate-100 shrink-0"><div><span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Standar BKN RI</span><h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Petunjuk &amp; Tata Tertib Ujian Try Out SKD</h2></div><div class="px-2.5 py-1 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] sm:text-xs font-semibold shrink-0">SKD CPNS 2026</div></div><!-- Scrollable Content on Mobile --><div class="overflow-y-auto pr-1 space-y-4 flex-1"><!-- Duration and breakdown tags --><div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Durasi Ujian</span><span class="text-xs sm:text-sm font-bold text-slate-900">100 Menit</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Jumlah Soal</span><span class="text-xs sm:text-sm font-bold text-slate-900">110 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TWK &amp; TIU</span><span class="text-xs sm:text-sm font-bold text-slate-900">30 &amp; 35 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TKP</span><span class="text-xs sm:text-sm font-bold text-slate-900">45 Butir</span></div></div><!-- Rules list --><div class="space-y-2.5 py-1"><h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ketentuan &amp; Tata Tertib:</h3><ol class="space-y-2 text-xs text-slate-700 leading-relaxed list-decimal list-outside pl-4"><li><strong>Sistem Penilaian :</strong> TWK dan TIU menerapkan bobot <strong>+5 untuk benar</strong> dan <strong>0 untuk salah</strong>. TKP menggunakan <strong>skala nilai 1 sampai 5</strong> tanpa minus.</li><li><strong>Larangan Pelanggaran Integritas:</strong> Dilarang berpindah tab browser atau meminimalkan jendela. Sistem akan <strong>langsung mengakhiri sesi (auto-submit)</strong> jika terdeteksi curang.</li><li><strong>Status Warna:</strong> Biru solid = Dijawab, Kuning/Amber solid = Ragu-ragu, Abu-abu netral = Belum Dijawab.</li><li><strong>Pengakhiran Sesi:</strong> Klik tombol merah <strong>'Selesai Ujian'</strong> jika telah selesai.</li></ol></div><!-- Checkbox confirmation --><div class="pt-1"><label class="flex items-start gap-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 cursor-pointer"><input class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer" id="agreeCheckbox" type="checkbox"><span class="text-xs text-slate-800 font-medium leading-relaxed">Saya telah membaca, memahami, dan menyetujui seluruh tata tertib ujian Try Out SKD CPNS ini.</span></label></div></div><!-- Action button --><div class="pt-2 border-t border-slate-100 flex items-center justify-end shrink-0"><button class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-semibold tracking-wide hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all" id="startExamBtn" type="button">Mulai Kerjakan Soal</button></div></div></div><!-- MODAL 2: Anti-Cheat Warning --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="antiCheatModal"><div class="bg-white border-2 border-red-600 rounded-xl max-w-lg w-full p-5 sm:p-6 text-center flex flex-col items-center gap-4"><div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><div class="space-y-1"><h3 class="text-base font-bold text-slate-900">Peringatan Integritas Ujian!</h3><p class="text-xs text-slate-600 leading-relaxed">Sistem mendeteksi bahwa jendela atau tab ujian Anda kehilangan fokus. Seluruh aktivitas terekam di log pengawas CAT.</p></div><div class="w-full bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-md text-xs font-semibold">Pelanggaran: 1 kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!</div><button class="w-full py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all" id="resumeExamBtn" type="button">Kembali ke Lembar Ujian Sekarang</button></div></div><!-- MODAL 3: Finish Exam Confirmation --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="finishExamModal"><div class="bg-white border border-slate-200 rounded-xl max-w-md w-full p-5 sm:p-6 flex flex-col gap-4 shadow-xl"><div class="flex items-center gap-3 pb-2 border-b border-slate-100"><div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><h3 class="text-sm font-bold text-slate-900">Konfirmasi Selesai Ujian</h3></div><p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin mengakhiri sesi ujian ini? Dari total <strong>110 butir</strong>, Anda telah menjawab <strong>18 butir</strong> dan masih terdapat <strong>2 butir</strong> dengan status ragu-ragu.</p><div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-800 text-xs space-y-1.5"><div class="flex justify-between"><span>Sisa Waktu Ujian:</span><span class="font-mono font-bold text-slate-900" id="modalTimeRemaining">094 Menit 11 Detik</span></div><div class="flex justify-between"><span>Status Nilai:</span><span class="text-slate-600 font-medium">Akan langsung dikalkulasi CAT BKN</span></div></div><div class="flex items-center justify-end gap-2.5 pt-2"><button class="px-3.5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-medium hover:bg-slate-100 transition-colors" id="cancelFinishBtn" type="button">Batal</button><button class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors" id="confirmFinishBtn" type="button">Ya, Akhiri Ujian</button></div></div></div></main><footer class="hidden lg:block w-full bg-white border-t border-slate-200 py-3 mt-auto"><div class="w-full px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2"><div class="flex items-center gap-3 text-slate-500 text-xs"><span>Badan Kepegawaian Negara (BKN) RI © 2026</span><span class="hidden sm:inline">•</span><span class="hidden sm:inline font-mono">Sesi II • Ruang Lab-04 • PIN Sesi: 8904</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span>Status Jaringan: Terhubung Stabil (Latency 14ms)</span></div></div></footer><!-- Client-side Interactive Logic --><script>
     (function initExamRoom() {
       // 1. Rules Modal & Checkbox Validation
       const rulesModal = document.getElementById('rulesModal');
@@ -3730,13 +3764,9 @@ Mengerti &amp; Tutup
     if (viewId === 'admin') {
       const authed = sessionStorage.getItem('cat_admin_authed');
       if (authed !== 'true') {
-        const inputPin = prompt('Masukkan PIN Otorisasi Admin Master:');
-        const correctPin = state.settings.PIN_ADMIN || 'admin123';
-        if (inputPin === correctPin || inputPin === '202601' || inputPin === 'admin123') {
-          sessionStorage.setItem('cat_admin_authed', 'true');
-        } else {
-          alert('PIN Admin salah! Akses ditolak.');
-          return;
+        viewId = 'login';
+        if (typeof window.openAdminLoginModal === 'function') {
+          window.openAdminLoginModal();
         }
       }
     }
@@ -3823,6 +3853,49 @@ Mengerti &amp; Tutup
 
   window.updateParticipantWhatsAppLinks = updateParticipantWhatsAppLinks;
 
+  window.openAdminLoginModal = function() {
+    const pinInput = document.getElementById('admin-modal-pin');
+    if (pinInput) pinInput.value = '';
+    const errBox = document.getElementById('admin-pin-error');
+    if (errBox) errBox.classList.add('hidden');
+    const modal = document.getElementById('modal-admin-login');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+
+  window.handleAdminModalSubmit = function(e) {
+    if (e) e.preventDefault();
+    const pinInput = document.getElementById('admin-modal-pin');
+    const errBox = document.getElementById('admin-pin-error');
+    const val = pinInput ? pinInput.value.trim() : '';
+    const currentPin = state.settings.PIN_ADMIN || 'admin123';
+
+    if (val === currentPin || val === '202601' || val === 'admin123') {
+      sessionStorage.setItem('cat_admin_authed', 'true');
+      state.currentUser = {
+        id: 'admin-1',
+        nama: 'Administrator Workspace',
+        email: 'admin@catcpns.pro',
+        no_wa: '081111111111',
+        role: 'admin'
+      };
+      localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+      const modal = document.getElementById('modal-admin-login');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      window.showView('admin');
+    } else {
+      if (errBox) {
+        errBox.textContent = 'Kode PIN Admin salah. Akses ditolak.';
+        errBox.classList.remove('hidden');
+      }
+    }
+  };
+
   async function handleLoginSubmit(identifier, password) {
     hideLoginError();
     if (!identifier || !password) {
@@ -3830,7 +3903,7 @@ Mengerti &amp; Tutup
       return;
     }
 
-    // Otorisasi Khusus Akun Admin Uji Coba
+    // Otorisasi Khusus Akun Admin
     const cleanId = String(identifier).trim().toLowerCase();
     const currentPin = state.settings.PIN_ADMIN || 'admin123';
     if ((cleanId === 'admin' || cleanId === 'admin@catcpns.pro' || cleanId === 'admin@test.com' || cleanId === '081111111111') &&
@@ -3848,69 +3921,102 @@ Mengerti &amp; Tutup
       return;
     }
 
-    let user = null;
-    if (supabase) {
-      try {
-        const isEmail = identifier.includes('@');
-        let query = supabase.from('users').select('*');
-        if (isEmail) {
-          query = query.ilike('email', identifier.trim());
-        } else {
-          query = query.eq('no_wa', identifier.trim());
-        }
+    const authClient = window.supabaseClient || supabase;
+    const isEmail = identifier.includes('@');
+    let loginEmail = String(identifier).trim();
 
-        const { data, error } = await query.limit(1);
-        if (!error && data && data.length > 0) {
-          const u = data[0];
-          if (String(u.password) === String(password)) {
-            user = u;
-          } else {
-            showLoginError('Kata sandi yang Anda masukkan salah.');
-            return;
-          }
+    // Jika input nomor WhatsApp, cari email terdaftar di tabel users
+    if (!isEmail && supabase) {
+      try {
+        const { data: uMatch } = await supabase.from('users').select('email').eq('no_wa', loginEmail).limit(1);
+        if (uMatch && uMatch.length > 0 && uMatch[0].email) {
+          loginEmail = uMatch[0].email;
         }
-      } catch (err) {
-        console.warn('Supabase login query error:', err);
-      }
+      } catch (e) {}
     }
 
-    // Local fallback
-    if (!user) {
-      const localUsers = JSON.parse(localStorage.getItem('cat_registered_users') || '[]');
-      const found = localUsers.find(u => 
-        (u.email?.toLowerCase() === identifier.toLowerCase() || u.no_wa === identifier)
-      );
-      if (found) {
-        if (String(found.password) === String(password)) {
-          user = found;
-        } else {
-          showLoginError('Kata sandi yang Anda masukkan salah.');
+    let authUser = null;
+
+    // Login via Supabase Auth signInWithPassword
+    if (authClient && authClient.auth) {
+      try {
+        const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
+          email: loginEmail,
+          password: password
+        });
+
+        if (authError) {
+          // Jika error password/user
+          showLoginError(authError.message || 'Email atau kata sandi yang Anda masukkan salah.');
           return;
         }
+
+        if (authData && authData.user) {
+          // Periksa apakah data.user.email_confirmed_at sudah terisi
+          if (!authData.user.email_confirmed_at) {
+            await authClient.auth.signOut();
+            showLoginError('Email Anda belum dikonfirmasi. Silakan buka kotak masuk email dan klik tautan konfirmasi sebelum masuk akun.');
+            return;
+          }
+          authUser = authData.user;
+        }
+      } catch (authErr) {
+        console.warn('Supabase Auth signIn note:', authErr);
       }
     }
 
-    // Default test account fallback
-    if (!user && (identifier === 'peserta@test.com' || identifier === '081234567890') && password === '123456') {
-      user = {
-        id: 'user-demo-1',
-        nama: 'Peserta Uji Coba',
-        email: 'peserta@test.com',
-        no_wa: '081234567890',
-        jurusan: 'S1 Administrasi Publik',
-        provinsi: 'DKI Jakarta',
-        role: 'peserta'
+    let activeUser = null;
+
+    if (authUser) {
+      // Ambil data profil asli pengguna dari tabel users
+      let profile = null;
+      if (supabase) {
+        try {
+          const { data: profs } = await supabase.from('users').select('*').eq('email', authUser.email).limit(1);
+          if (profs && profs.length > 0) profile = profs[0];
+        } catch(e) {}
+      }
+
+      const meta = authUser.user_metadata || {};
+      activeUser = {
+        id: authUser.id,
+        nama: profile?.nama || meta.full_name || authUser.email.split('@')[0],
+        email: authUser.email,
+        no_wa: profile?.no_wa || meta.whatsapp || '',
+        jurusan: profile?.jurusan || meta.education || 'Umum',
+        provinsi: profile?.provinsi || meta.target_formation || 'Indonesia',
+        role: profile?.role || 'peserta'
       };
+    } else {
+      // Direct query fallback ke tabel users
+      if (supabase) {
+        try {
+          let query = supabase.from('users').select('*');
+          if (isEmail) query = query.ilike('email', loginEmail);
+          else query = query.eq('no_wa', loginEmail);
+          const { data: dbUsers } = await query.limit(1);
+          if (dbUsers && dbUsers.length > 0) {
+            const u = dbUsers[0];
+            if (String(u.password) === String(password)) {
+              activeUser = u;
+            } else {
+              showLoginError('Kata sandi yang Anda masukkan salah.');
+              return;
+            }
+          }
+        } catch(e) {}
+      }
     }
 
-    if (user) {
-      state.currentUser = user;
-      localStorage.setItem('cat_user_session', JSON.stringify(user));
+    if (activeUser) {
+      state.currentUser = activeUser;
+      localStorage.setItem('cat_user_session', JSON.stringify(activeUser));
       await syncInitialData();
+      renderDashboardView();
       updateParticipantWhatsAppLinks();
       window.showView('dashboard');
     } else {
-      showLoginError('Akun belum terdaftar atau kata sandi tidak cocok. Silakan daftar akun baru.');
+      showLoginError('Akun belum terdaftar atau email/kata sandi salah.');
     }
   }
 
@@ -3930,7 +4036,7 @@ Mengerti &amp; Tutup
     const cleanEmail = String(email).trim().toLowerCase();
     const cleanWa = String(no_wa).trim();
 
-    // Supabase Auth Email Verification SignUp
+    // 1. Supabase Auth Email Verification SignUp
     const authClient = window.supabaseClient || supabase;
     if (authClient && authClient.auth) {
       try {
@@ -3938,7 +4044,7 @@ Mengerti &amp; Tutup
           email: cleanEmail,
           password: password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: 'https://cat-cpns-pro.vercel.app',
             data: {
               full_name: String(nama).trim(),
               whatsapp: cleanWa,
@@ -3954,13 +4060,20 @@ Mengerti &amp; Tutup
             showRegisterError('Alamat email sudah terdaftar. Silakan buka tab Masuk Akun.');
             return;
           }
-          console.warn('Supabase Auth signUp note:', authError);
+          showRegisterError(authError.message || 'Pendaftaran gagal melalui sistem otentikasi.');
+          return;
         }
+
+        // Panggil signOut() agar sesi belum aktif sebelum email dikonfirmasi
+        try {
+          await authClient.auth.signOut();
+        } catch(e) {}
       } catch (authErr) {
         console.warn('Supabase Auth signUp exception:', authErr);
       }
     }
 
+    // 2. Simpan profil peserta ke tabel users
     let newUser = {
       nama: String(nama).trim(),
       no_wa: cleanWa,
@@ -3984,22 +4097,17 @@ Mengerti &amp; Tutup
           return;
         }
 
-        const { data, error } = await supabase.from('users').insert([newUser]).select();
-        if (!error && data && data.length > 0) {
-          newUser = data[0];
-        }
+        await supabase.from('users').insert([newUser]);
       } catch (err) {
         console.warn('Supabase register error:', err);
       }
     }
 
-    // Save to local list
-    let localUsers = JSON.parse(localStorage.getItem('cat_registered_users') || '[]');
-    localUsers = localUsers.filter(u => u.email !== newUser.email);
-    localUsers.push(newUser);
-    localStorage.setItem('cat_registered_users', JSON.stringify(localUsers));
+    // JANGAN langsung memindahkan pengguna ke Halaman 2 (Dashboard Peserta).
+    localStorage.removeItem('cat_user_session');
+    state.currentUser = null;
 
-    // Show clean Stitch verification notice box
+    // Tampilkan kotak instruksi verifikasi email di dalam form
     const formInner = document.getElementById('form-register-inner');
     if (formInner) formInner.classList.add('hidden');
     hideRegisterError();
@@ -4031,9 +4139,38 @@ Mengerti &amp; Tutup
     const u = state.currentUser;
     if (!u) return;
 
-    // Update Profile Header & Info
-    const nameEls = document.querySelectorAll('#header-user-name, #dash-welcome-text, [data-user-name]');
-    nameEls.forEach(el => el.textContent = u.nama);
+    // Update Profile Header & Info Real Data (Hapus Dummy Rian Pratama)
+    const displayName = u.nama || u.full_name || 'Peserta';
+    const displayWa = u.no_wa || u.whatsapp || '-';
+    const displayEdu = u.jurusan || u.education || '-';
+    const displayTarget = u.provinsi || u.target_formation || '-';
+
+    const headerName = document.getElementById('header-user-name');
+    if (headerName) headerName.textContent = displayName;
+
+    const welcomeName = document.getElementById('dash-welcome-name');
+    if (welcomeName) welcomeName.textContent = displayName;
+
+    const welcomeText = document.getElementById('dash-welcome-text');
+    if (welcomeText) welcomeText.textContent = `Selamat Datang kembali, ${displayName}!`;
+
+    const userTarget = document.getElementById('dash-user-target');
+    if (userTarget) userTarget.textContent = displayTarget;
+
+    const userEdu = document.getElementById('dash-user-edu');
+    if (userEdu) userEdu.textContent = displayEdu;
+
+    const userWa = document.getElementById('dash-user-wa');
+    if (userWa) userWa.textContent = displayWa;
+
+    const examUser = document.getElementById('exam-user-name');
+    if (examUser) examUser.textContent = displayName;
+
+    const examSubhead = document.getElementById('exam-subhead-name');
+    if (examSubhead) examSubhead.textContent = displayName;
+
+    const nameEls = document.querySelectorAll('[data-user-name]');
+    nameEls.forEach(el => el.textContent = displayName);
 
     // Setup Chart.js dynamic rendering
     renderDashboardCharts();
@@ -4755,7 +4892,13 @@ Mengerti &amp; Tutup
         const optD = q.option_d || q.opsi_d || '';
         const optE = q.option_e || q.opsi_e || '';
 
-        const isKey = (letter) => String(key).trim().toUpperCase().startsWith(letter);
+        const isKey = (letter) => {
+          const k = String(key).trim().toUpperCase();
+          if (k.length === 1) return k === letter;
+          if (k.startsWith(letter + ' ') || k === letter) return true;
+          if (k.includes(letter + ':5')) return true;
+          return false;
+        };
 
         return `
           <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-2.5">
@@ -4811,20 +4954,37 @@ Mengerti &amp; Tutup
 
         const btn = document.getElementById('btn-submit-ai');
         const btnText = document.getElementById('btn-ai-text');
+        const saveBtn = document.getElementById('btn-save-ai-draft');
 
         if (btnText) btnText.textContent = `Menghasilkan ${count} Soal Gemini...`;
         if (btn) btn.disabled = true;
+
+        // Buka modal pratinjau langsung dengan status loading
+        const modalDraft = document.getElementById('modal-ai-draft');
+        const listContainer = document.getElementById('ai-draft-questions-list');
+        if (listContainer) {
+          listContainer.innerHTML = `
+            <div class="text-center py-12 space-y-3">
+              <div class="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p class="text-xs font-semibold text-slate-800">Sedang menyusun soal HOTS dengan Gemini AI...</p>
+              <p class="text-[11px] text-slate-400">Menghubungkan ke Gemini 2.5 Flash sesuai parameter: ${escapeHtml(subtes)} &bull; ${escapeHtml(topic)}</p>
+            </div>
+          `;
+        }
+        if (saveBtn) saveBtn.disabled = true;
+        if (modalDraft) {
+          modalDraft.classList.remove('hidden');
+          modalDraft.classList.add('flex');
+        }
 
         try {
           const res = await fetch('/api/generate-soal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              subtes: subtes,
-              jumlah: count,
-              topik: topic,
+              subtest: subtes,
+              count: count,
               topic: topic,
-              kesulitan: diff,
               difficulty: diff
             })
           });
@@ -4834,22 +4994,25 @@ Mengerti &amp; Tutup
             throw new Error(err.error || `HTTP ${res.status}`);
           }
 
-          const generated = await res.json();
+          const resData = await res.json();
+          const generated = resData.questions || (Array.isArray(resData) ? resData : []);
           if (Array.isArray(generated) && generated.length > 0) {
             window.currentAiDraftQuestions = generated;
             renderAiDraftQuestions(generated);
-
-            const modalDraft = document.getElementById('modal-ai-draft');
-            if (modalDraft) modalDraft.classList.remove('hidden');
+            if (saveBtn) saveBtn.disabled = false;
           } else {
-            throw new Error('Format respon AI tidak valid atau kosong.');
+            throw new Error('Format respon AI tidak valid atau daftar soal kosong.');
           }
         } catch (err) {
-          if (typeof showToast === 'function') {
-            showToast('Gagal menghasilkan soal AI: ' + err.message, 'info');
-          } else {
-            console.error('AI generate error:', err);
+          if (listContainer) {
+            listContainer.innerHTML = `
+              <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center space-y-1">
+                <p class="font-bold">Gagal Menghasilkan Soal AI</p>
+                <p>${escapeHtml(err.message || 'Terjadi kesalahan saat memproses soal AI.')}</p>
+              </div>
+            `;
           }
+          if (saveBtn) saveBtn.disabled = true;
         } finally {
           if (btnText) btnText.textContent = 'Generate Soal AI ke Paket Ini';
           if (btn) btn.disabled = false;
@@ -4949,7 +5112,10 @@ Mengerti &amp; Tutup
       if (typeof window.renderQuestions === 'function') window.renderQuestions();
 
       const modal = document.getElementById('modal-ai-draft');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
 
       if (saveBtn) {
         saveBtn.disabled = false;
@@ -4997,10 +5163,12 @@ Mengerti &amp; Tutup
       // Link to admin
       const adminLinks = vLogin.querySelectorAll('a, button');
       adminLinks.forEach(l => {
-        if ((l.textContent || '').toLowerCase().includes('admin')) {
+        if ((l.textContent || '').toLowerCase().includes('masuk sebagai admin')) {
           l.onclick = function(e) {
             e.preventDefault();
-            window.showView('admin');
+            if (typeof window.openAdminLoginModal === 'function') {
+              window.openAdminLoginModal();
+            }
           };
         }
       });
@@ -5062,7 +5230,7 @@ Mengerti &amp; Tutup
 
     // Direct to view
     if (state.currentUser) {
-      if (state.currentUser.role === 'admin') {
+      if (state.currentUser.role === 'admin' && sessionStorage.getItem('cat_admin_authed') === 'true') {
         window.showView('admin');
       } else {
         window.showView('dashboard');
@@ -5074,9 +5242,15 @@ Mengerti &amp; Tutup
       }
     }
 
-    // Check URL Hash
+    // Check URL Hash (Aman tanpa auto-prompt admin)
     const hash = window.location.hash.replace('#', '');
-    if (['login', 'register', 'dashboard', 'exam', 'history', 'admin'].includes(hash)) {
+    if (hash === 'admin') {
+      if (sessionStorage.getItem('cat_admin_authed') === 'true') {
+        window.showView('admin');
+      } else {
+        window.showView('login');
+      }
+    } else if (['login', 'register', 'dashboard', 'exam', 'history'].includes(hash)) {
       window.showView(hash);
     }
   });

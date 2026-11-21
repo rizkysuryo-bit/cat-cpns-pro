@@ -34,26 +34,37 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const { subtes, jumlah = 1, topik, topic, kesulitan, difficulty, apiKey } = body || {};
+    const {
+      subtest,
+      subtes,
+      count,
+      jumlah = 1,
+      topic,
+      topik,
+      difficulty,
+      kesulitan,
+      apiKey
+    } = body || {};
 
-    if (!subtes) {
+    const rawSubtest = subtest || subtes;
+    if (!rawSubtest) {
       return res.status(400).json({
-        error: 'Field "subtes" wajib diisi (TWK, TIU, atau TKP).'
+        error: 'Field "subtest" (atau "subtes") wajib diisi (TWK, TIU, atau TKP).'
       });
     }
 
-    const validSubtes = String(subtes).trim().toUpperCase();
+    const validSubtes = String(rawSubtest).trim().toUpperCase();
     if (!['TWK', 'TIU', 'TKP'].includes(validSubtes)) {
       return res.status(400).json({
-        error: 'Nilai "subtes" harus salah satu dari: TWK, TIU, atau TKP.'
+        error: 'Nilai subtest harus salah satu dari: TWK, TIU, atau TKP.'
       });
     }
 
-    const count = Math.min(Math.max(parseInt(jumlah, 10) || 1, 1), 10);
-    const topikSoal = (topik || topic || '').trim() || `Kisi-kisi Standar HOTS ${validSubtes} BKN 2026`;
-    const tingkatKesulitan = (kesulitan || difficulty || '').trim() || 'HOTS Standar BKN 2026';
+    const finalCount = Math.min(Math.max(parseInt(count || jumlah, 10) || 1, 1), 10);
+    const topikSoal = (topic || topik || '').trim() || `Kisi-kisi Standar HOTS ${validSubtes} BKN 2026`;
+    const tingkatKesulitan = (difficulty || kesulitan || '').trim() || 'HOTS Standar BKN 2026';
 
-    // Ambil Gemini API Key dari environment variable atau request body fallback
+    // Ambil Gemini API Key dari environment variable process.env.GEMINI_API_KEY
     const geminiApiKey = process.env.GEMINI_API_KEY || apiKey;
     if (!geminiApiKey) {
       return res.status(500).json({
@@ -80,7 +91,7 @@ module.exports = async function handler(req, res) {
 Tugas Anda adalah memproduksi soal-soal berkualitas tinggi bertipe HOTS (Higher Order Thinking Skills).
 Setiap soal harus memiliki 5 pilihan jawaban (A, B, C, D, E) dan pembahasan tuntas, logis, serta berlandaskan kaidah/regulasi resmi.`;
 
-    const promptUser = `TUGAS UTAMA: Buatkan ${count} butir soal pilihan ganda HOTS SKD CPNS yang WAJIB SECARA KETAT SESUAI DENGAN SPESIFIKASI BERIKUT:
+    const promptUser = `TUGAS UTAMA: Buatkan ${finalCount} butir soal pilihan ganda HOTS SKD CPNS yang WAJIB SECARA KETAT SESUAI DENGAN SPESIFIKASI BERIKUT:
 - Subtes: ${validSubtes}
 - TOPIK / KISI-KISI WAJIB: ${topikSoal} (DILARANG MEMBUAT TOPIK LAIN DI LUAR INI!)
 - TINGKAT KESULITAN: ${tingkatKesulitan}
@@ -89,22 +100,22 @@ Setiap soal harus memiliki 5 pilihan jawaban (A, B, C, D, E) dan pembahasan tunt
 
 PENTING: Seluruh soal yang dihasilkan HARUS BENAR-BENAR berfokus pada materi "${topikSoal}" dan tidak boleh menyimpang atau kembali ke topik umum/default lainnya.
 
-Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis seperti berikut:
-[
-  {
-    "subtes": "${validSubtes}",
-    "topik": "${topikSoal}",
-    "tingkat_kesulitan": "${tingkatKesulitan}",
-    "pertanyaan": "Teks soal HOTS lengkap sesuai topik...",
-    "opsi_a": "Teks pilihan A",
-    "opsi_b": "Teks pilihan B",
-    "opsi_c": "Teks pilihan C",
-    "opsi_d": "Teks pilihan D",
-    "opsi_e": "Teks pilihan E",
-    "kunci_atau_bobot": "${validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'}",
-    "pembahasan": "Pembahasan rinci dan alasan penetapan kunci/bobot skor tertinggi."
-  }
-]`;
+Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti berikut:
+{
+  "questions": [
+    {
+      "question_text": "Teks soal HOTS lengkap sesuai materi topik...",
+      "option_a": "Teks pilihan A",
+      "option_b": "Teks pilihan B",
+      "option_c": "Teks pilihan C",
+      "option_d": "Teks pilihan D",
+      "option_e": "Teks pilihan E",
+      "correct_answer": "${validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'}",
+      "explanation": "Pembahasan rinci dan kaidah logika/aturan penentuan jawaban.",
+      "points": 5
+    }
+  ]
+}`;
 
     // Panggil Gemini 2.5 Flash API menggunakan fetch bawaan
     const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
@@ -124,35 +135,38 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
         topP: 0.95,
         responseMimeType: 'application/json',
         responseSchema: {
-          type: 'ARRAY',
-          items: {
-            type: 'OBJECT',
-            properties: {
-              subtes: { type: 'STRING' },
-              topik: { type: 'STRING' },
-              tingkat_kesulitan: { type: 'STRING' },
-              pertanyaan: { type: 'STRING' },
-              opsi_a: { type: 'STRING' },
-              opsi_b: { type: 'STRING' },
-              opsi_c: { type: 'STRING' },
-              opsi_d: { type: 'STRING' },
-              opsi_e: { type: 'STRING' },
-              kunci_atau_bobot: { type: 'STRING' },
-              pembahasan: { type: 'STRING' }
-            },
-            required: [
-              'subtes',
-              'topik',
-              'pertanyaan',
-              'opsi_a',
-              'opsi_b',
-              'opsi_c',
-              'opsi_d',
-              'opsi_e',
-              'kunci_atau_bobot',
-              'pembahasan'
-            ]
-          }
+          type: 'OBJECT',
+          properties: {
+            questions: {
+              type: 'ARRAY',
+              items: {
+                type: 'OBJECT',
+                properties: {
+                  question_text: { type: 'STRING' },
+                  option_a: { type: 'STRING' },
+                  option_b: { type: 'STRING' },
+                  option_c: { type: 'STRING' },
+                  option_d: { type: 'STRING' },
+                  option_e: { type: 'STRING' },
+                  correct_answer: { type: 'STRING' },
+                  explanation: { type: 'STRING' },
+                  points: { type: 'NUMBER' }
+                },
+                required: [
+                  'question_text',
+                  'option_a',
+                  'option_b',
+                  'option_c',
+                  'option_d',
+                  'option_e',
+                  'correct_answer',
+                  'explanation',
+                  'points'
+                ]
+              }
+            }
+          },
+          required: ['questions']
         }
       }
     };
@@ -183,17 +197,13 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
       });
     }
 
-    // Bersihkan teks jika ada markdown code block
+    // Bersihkan karakter markdown ```json atau ``` sebelum JSON.parse() agar tidak pernah gagal parsing
     let cleaned = rawContent.trim();
-    if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.replace(/^```json/, '').replace(/```$/, '').trim();
-    } else if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/^```/, '').replace(/```$/, '').trim();
-    }
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 
-    let parsedQuestions;
+    let parsedResult;
     try {
-      parsedQuestions = JSON.parse(cleaned);
+      parsedResult = JSON.parse(cleaned);
     } catch (parseError) {
       return res.status(500).json({
         error: 'Gagal mengurai teks respon JSON dari Gemini.',
@@ -202,48 +212,49 @@ Keluarkan data HANYA dalam bentuk JSON array objek soal dengan struktur persis s
       });
     }
 
-    // Pastikan hasil selalu berupa array
+    // Ekstrak array soal
     let questionList = [];
-    if (Array.isArray(parsedQuestions)) {
-      questionList = parsedQuestions;
-    } else if (parsedQuestions && typeof parsedQuestions === 'object') {
-      if (Array.isArray(parsedQuestions.questions)) {
-        questionList = parsedQuestions.questions;
-      } else if (Array.isArray(parsedQuestions.soal)) {
-        questionList = parsedQuestions.soal;
+    if (parsedResult && Array.isArray(parsedResult.questions)) {
+      questionList = parsedResult.questions;
+    } else if (Array.isArray(parsedResult)) {
+      questionList = parsedResult;
+    } else if (parsedResult && typeof parsedResult === 'object') {
+      if (Array.isArray(parsedResult.soal)) {
+        questionList = parsedResult.soal;
       } else {
-        questionList = [parsedQuestions];
+        questionList = [parsedResult];
       }
     }
 
-    // Normalisasi struktur output untuk memastikan setiap field sesuai kontrak
-    const formattedResult = questionList.map(item => ({
-      subtes: validSubtes,
+    // Normalisasi struktur output untuk memastikan setiap field sesuai kontrak baku
+    const formattedQuestions = questionList.map(item => ({
       subtest: validSubtes,
-      topik: item.topik || topikSoal,
-      topic: item.topik || topikSoal,
-      tingkat_kesulitan: item.tingkat_kesulitan || tingkatKesulitan,
-      difficulty: item.tingkat_kesulitan || tingkatKesulitan,
-      pertanyaan: item.pertanyaan || item.soal || item.question_text || '',
-      question_text: item.pertanyaan || item.soal || item.question_text || '',
-      opsi_a: item.opsi_a || item.a || item.option_a || '',
-      option_a: item.opsi_a || item.a || item.option_a || '',
-      opsi_b: item.opsi_b || item.b || item.option_b || '',
-      option_b: item.opsi_b || item.b || item.option_b || '',
-      opsi_c: item.opsi_c || item.c || item.option_c || '',
-      option_c: item.opsi_c || item.c || item.option_c || '',
-      opsi_d: item.opsi_d || item.d || item.option_d || '',
-      option_d: item.opsi_d || item.d || item.option_d || '',
-      opsi_e: item.opsi_e || item.e || item.option_e || '',
-      option_e: item.opsi_e || item.e || item.option_e || '',
-      kunci_atau_bobot: item.kunci_atau_bobot || item.kunci || item.correct_answer || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
-      correct_answer: item.kunci_atau_bobot || item.kunci || item.correct_answer || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
-      pembahasan: item.pembahasan || item.explanation || '',
-      explanation: item.pembahasan || item.explanation || ''
+      subtes: validSubtes,
+      topic: topikSoal,
+      topik: topikSoal,
+      difficulty: tingkatKesulitan,
+      tingkat_kesulitan: tingkatKesulitan,
+      question_text: item.question_text || item.pertanyaan || '',
+      pertanyaan: item.question_text || item.pertanyaan || '',
+      option_a: item.option_a || item.opsi_a || '',
+      opsi_a: item.option_a || item.opsi_a || '',
+      option_b: item.option_b || item.opsi_b || '',
+      opsi_b: item.option_b || item.opsi_b || '',
+      option_c: item.option_c || item.opsi_c || '',
+      opsi_c: item.option_c || item.opsi_c || '',
+      option_d: item.option_d || item.opsi_d || '',
+      opsi_d: item.option_d || item.opsi_d || '',
+      option_e: item.option_e || item.opsi_e || '',
+      opsi_e: item.option_e || item.opsi_e || '',
+      correct_answer: item.correct_answer || item.kunci_atau_bobot || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
+      kunci_atau_bobot: item.correct_answer || item.kunci_atau_bobot || (validSubtes === 'TKP' ? 'A:1,B:5,C:3,D:2,E:4' : 'A'),
+      explanation: item.explanation || item.pembahasan || '',
+      pembahasan: item.explanation || item.pembahasan || '',
+      points: Number(item.points) || (validSubtes === 'TKP' ? 5 : 5)
     }));
 
-    // Kembalikan respons JSON berupa array soal HOTS SKD CPNS
-    return res.status(200).json(formattedResult);
+    // Kembalikan respons JSON dengan key baku questions
+    return res.status(200).json({ questions: formattedQuestions });
   } catch (error) {
     console.error('Error pada api/generate-soal:', error);
     return res.status(500).json({
