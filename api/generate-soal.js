@@ -34,12 +34,30 @@ Aturan wajib:
   }
 ]`;
 
-    // HANYA menggunakan 2 model resmi yang didukung penuh oleh API Key Anda
-    const models = ['gemini-3.8-flash', 'gemini-3.1-pro-preview'];
+    // 1. Daftar seri Flash GRATIS (tanpa seri Pro yang limit-nya 0 di Free Tier)
+    let candidateModels = [
+      'gemini-3.8-flash',
+      'gemini-3.8-flash-lite',
+      'gemini-3.0-flash',
+      'gemini-flash-latest'
+    ];
+
+    // 2. Cek daftar model resmi yang aktif pada API Key Anda dan tambahkan seri Flash yang tersedia
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (listRes.ok) {
+        const listData = await listRes.json();
+        const availableFlash = (listData.models || [])
+          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+          .map(m => m.name.replace('models/', ''))
+          .filter(name => name.includes('flash') && !name.includes('image') && !name.includes('audio'));
+        candidateModels = [...new Set([...candidateModels, ...availableFlash])];
+      }
+    } catch (_) {}
+
     let lastError = '';
 
-    for (const model of models) {
-      // Coba maksimal 2 kali per model jika terjadi lonjakan trafik sementara (503/429)
+    for (const model of candidateModels) {
       for (let attempt = 1; attempt <= 2; attempt++) {
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -67,8 +85,8 @@ Aturan wajib:
 
         lastError = data.error?.message || `HTTP ${response.status} pada ${model}`;
 
-        // Jika sibuk (503 atau 429), tunggu 1.5 detik lalu coba lagi
-        if ((response.status === 503 || response.status === 429) && attempt === 1) {
+        // Jika sibuk sementara (503/429), tunggu 1.5 detik lalu coba ulang; jika kuota 0 / tidak ada, langsung pindah model Flash berikutnya
+        if ((response.status === 503 || response.status === 429) && !lastError.includes('limit: 0') && attempt === 1) {
           await new Promise((r) => setTimeout(r, 1500));
         } else {
           break;
