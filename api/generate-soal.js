@@ -47,6 +47,8 @@ function verifyAdminToken(token, secretPin) {
   return true;
 }
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -195,6 +197,7 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
   ]
 }`;
 
+    // Payload dengan generationConfig respons JSON murni dan temperature 0.7 sesuai ketentuan
     const geminiPayload = {
       systemInstruction: {
         parts: [{ text: systemInstruction }]
@@ -206,43 +209,8 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
         }
       ],
       generationConfig: {
-        temperature: 0.6,
-        topP: 0.95,
         responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'OBJECT',
-          properties: {
-            questions: {
-              type: 'ARRAY',
-              items: {
-                type: 'OBJECT',
-                properties: {
-                  question_text: { type: 'STRING' },
-                  option_a: { type: 'STRING' },
-                  option_b: { type: 'STRING' },
-                  option_c: { type: 'STRING' },
-                  option_d: { type: 'STRING' },
-                  option_e: { type: 'STRING' },
-                  correct_answer: { type: 'STRING' },
-                  explanation: { type: 'STRING' },
-                  points: { type: 'NUMBER' }
-                },
-                required: [
-                  'question_text',
-                  'option_a',
-                  'option_b',
-                  'option_c',
-                  'option_d',
-                  'option_e',
-                  'correct_answer',
-                  'explanation',
-                  'points'
-                ]
-              }
-            }
-          },
-          required: ['questions']
-        }
+        temperature: 0.7
       }
     };
 
@@ -258,35 +226,75 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
       });
     }
 
-    // Panggil model utama: gemini-3.8-flash (sesuai arahan pengguna)
-    let response = await requestGemini('gemini-3.8-flash');
+    // Daftar model berurutan dengan auto-retry & multi-model fallback
+    const modelsToTry = [
+      'gemini-3.8-flash',
+      'gemini-3.8-flash-lite',
+      'gemini-3.0-flash',
+      'gemini-2.5-pro'
+    ];
 
-    // Jika terjadi error selain 401/403 (misal status 404 jika model belum tersedia di region akun atau 503), coba fallback otomatis ke gemini-2.5-flash
-    if (!response.ok && response.status !== 401 && response.status !== 403) {
-      console.warn(`Panggilan ke gemini-3.8-flash menghasilkan status ${response.status}. Mencoba fallback ke gemini-2.5-flash...`);
-      const fallbackResponse = await requestGemini('gemini-2.5-flash');
-      if (fallbackResponse.ok) {
-        response = fallbackResponse;
+    let response = null;
+    let lastErrorData = null;
+    let lastStatus = 500;
+    let successModel = null;
+
+    for (let i = 0; i < modelsToTry.length; i++) {
+      const currentModel = modelsToTry[i];
+      try {
+        response = await requestGemini(currentModel);
+
+        if (response.ok) {
+          successModel = currentModel;
+          break;
+        }
+
+        lastStatus = response.status;
+
+        // Jika 401 atau 403 (autentikasi/API Key salah), jangan lanjut looping
+        if (response.status === 401 || response.status === 403) {
+          try {
+            lastErrorData = await response.json();
+          } catch (e) {
+            lastErrorData = { error: { message: response.statusText } };
+          }
+          break;
+        }
+
+        // Jika error sementara (503 high demand atau 429 rate limit): lakukan retry 1 kali setelah jeda 1500ms
+        if (response.status === 503 || response.status === 429) {
+          console.warn(`Model ${currentModel} mengembalikan status ${response.status}. Menunggu jeda 1500ms untuk 1x percobaan ulang...`);
+          await sleep(1500);
+          response = await requestGemini(currentModel);
+          if (response.ok) {
+            successModel = currentModel;
+            break;
+          }
+          lastStatus = response.status;
+        }
+
+        // Catat error dan lanjut otomatis ke model berikutnya dalam daftar cadangan
+        try {
+          lastErrorData = await response.json();
+        } catch (e) {
+          lastErrorData = { error: { message: response.statusText } };
+        }
+        console.warn(`Model ${currentModel} gagal (${lastStatus}). Otomatis mencoba model berikutnya dalam daftar cadangan...`);
+      } catch (netErr) {
+        console.warn(`Koneksi ke model ${currentModel} gagal: ${netErr.message}. Mencoba model berikutnya...`);
+        lastErrorData = { error: { message: netErr.message } };
       }
     }
 
-    if (!response.ok) {
-      let errMessage = `Gagal memanggil Gemini API: ${response.status} ${response.statusText}`;
-      let errDetails = null;
-
-      try {
-        const errData = await response.json();
-        errDetails = errData;
-        if (errData?.error?.message) {
-          errMessage = errData.error.message;
-        }
-      } catch (jsonErr) {
-        errDetails = await response.text().catch(() => null);
+    if (!response || !response.ok) {
+      let errMessage = `Gagal memanggil seluruh model Gemini (${modelsToTry.join(', ')}): ${lastStatus}`;
+      if (lastErrorData?.error?.message) {
+        errMessage = lastErrorData.error.message;
       }
 
-      return res.status(response.status).json({
+      return res.status(lastStatus || 500).json({
         error: errMessage,
-        details: errDetails
+        details: lastErrorData
       });
     }
 
@@ -362,8 +370,11 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
       points: Number(item.points) || (validSubtes === 'TKP' ? 5 : 5)
     }));
 
-    // Kembalikan respons JSON dengan key baku questions
-    return res.status(200).json({ questions: formattedQuestions });
+    // Kembalikan respons JSON dengan key baku questions dan info model yang sukses
+    return res.status(200).json({
+      questions: formattedQuestions,
+      modelUsed: successModel
+    });
   } catch (error) {
     console.error('Error pada api/generate-soal:', error);
     return res.status(500).json({

@@ -521,7 +521,7 @@
           <p class="text-[10px] text-slate-400">Untuk aktivasi token dan kemudahan login manual berikutnya</p>
         </div>
       </div>
-      <button type="button" onclick="closeModal('modal-complete-profile')" class="text-slate-400 hover:text-slate-600">
+      <button type="button" onclick="handleCancelCompleteProfile()" class="text-slate-400 hover:text-slate-600">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
@@ -558,7 +558,7 @@
       </div>
 
       <div class="pt-2 flex justify-end gap-2">
-        <button type="button" onclick="closeModal('modal-complete-profile')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">Nanti Saja</button>
+        <button type="button" onclick="handleCancelCompleteProfile()" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">Nanti Saja</button>
         <button type="submit" id="btn-save-profile-complete" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">Simpan Profil &amp; Password</button>
       </div>
     </form>
@@ -934,7 +934,7 @@
 <span class="material-symbols-outlined text-[20px]">description</span>
 <span class="font-label-md text-label-md">Panduan Ujian CAT</span>
 </a>
-<a class="flex items-center gap-3 px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="https://wa.me/6281234567890?text=Halo%20Admin%20Bantuan%20CAT%20CPNS%20Pro" target="_blank">
+<a class="flex items-center gap-3 px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="javascript:void(0)" onclick="openWhatsAppHelp()">
 <span class="material-symbols-outlined text-[20px]">support_agent</span>
 <span class="font-label-md text-label-md">Bantuan WhatsApp</span>
 </a>
@@ -1046,7 +1046,7 @@ Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface
 </div>
 <div class="mt-3 pt-3 border-t border-outline-variant/20 flex items-center gap-2 text-label-sm font-label-sm text-secondary">
 <svg class="w-3.5 h-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg>
-<span>Kode token otomatis terkunci permanen pada nomor WhatsApp akun ini (<span class="font-mono-timer font-semibold text-on-surface">0812-3456-7890</span>).</span>
+<span>Kode token otomatis terkunci permanen pada nomor WhatsApp akun ini (<span id="dash-token-wa-binding" class="font-mono-timer font-semibold text-on-surface">-</span>).</span>
 </div>
 </div>
 <!-- C. GRAFIK ANALISIS PERFORMA & TREN SKOR PESERTA -->
@@ -1140,13 +1140,13 @@ Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface
 <div class="flex items-center justify-between text-body-sm mb-1.5">
 <div class="flex items-center gap-2">
 <span class="font-semibold text-on-surface">TWK (Tes Wawasan Kebangsaan)</span>
-<span class="text-[11px] px-2 py-0.2 rounded bg-surface-container text-on-secondary-fixed font-semibold">Lulus PG</span>
+<span id="eval-twk-badge" class="text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold">Belum Ujian</span>
 </div>
-<span class="font-mono-timer text-on-surface font-semibold text-body-sm">75 <span class="font-normal text-secondary text-xs">/ PG 65</span></span>
+<span id="eval-twk-score" class="font-mono-timer text-on-surface font-semibold text-body-sm">0 <span class="font-normal text-secondary text-xs">/ PG 65</span></span>
 </div>
 <div class="space-y-1">
 <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden flex">
-<div class="bg-slate-900 h-full rounded-full" style="width: 50%;"></div>
+<div id="eval-twk-bar" class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
 </div>
 <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
 <div class="bg-slate-300 h-full rounded-full" style="width: 43.3%;"></div>
@@ -1158,13 +1158,13 @@ Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface
 <div class="flex items-center justify-between text-body-sm mb-1.5">
 <div class="flex items-center gap-2">
 <span class="font-semibold text-on-surface">TIU (Tes Inteligensi Umum)</span>
-<span class="text-[11px] px-2 py-0.2 rounded bg-surface-container text-on-secondary-fixed font-semibold">Lulus PG</span>
+<span id="eval-tiu-badge" class="text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold">Belum Ujian</span>
 </div>
-<span class="font-mono-timer text-on-surface font-semibold text-body-sm">115 <span class="font-normal text-secondary text-xs">/ PG 80</span></span>
+<span id="eval-tiu-score" class="font-mono-timer text-on-surface font-semibold text-body-sm">0 <span class="font-normal text-secondary text-xs">/ PG 80</span></span>
 </div>
 <div class="space-y-1">
 <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden flex">
-<div class="bg-slate-900 h-full rounded-full" style="width: 65.7%;"></div>
+<div id="eval-tiu-bar" class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
 </div>
 <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
 <div class="bg-slate-300 h-full rounded-full" style="width: 45.7%;"></div>
@@ -1176,13 +1176,13 @@ Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface
 <div class="flex items-center justify-between text-body-sm mb-1.5">
 <div class="flex items-center gap-2">
 <span class="font-semibold text-on-surface">TKP (Tes Karakteristik Pribadi)</span>
-<span class="text-[11px] px-2 py-0.2 rounded bg-error-container text-error font-semibold">Di Bawah PG (-8)</span>
+<span id="eval-tkp-badge" class="text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold">Belum Ujian</span>
 </div>
-<span class="font-mono-timer text-error font-semibold text-body-sm">158 <span class="font-normal text-secondary text-xs">/ PG 166</span></span>
+<span id="eval-tkp-score" class="font-mono-timer text-on-surface font-semibold text-body-sm">0 <span class="font-normal text-secondary text-xs">/ PG 166</span></span>
 </div>
 <div class="space-y-1">
 <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden flex">
-<div class="bg-error h-full rounded-full" style="width: 70.2%;"></div>
+<div id="eval-tkp-bar" class="bg-slate-900 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
 </div>
 <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
 <div class="bg-slate-300 h-full rounded-full" style="width: 73.7%;"></div>
@@ -1202,8 +1202,8 @@ Target Formasi: <span id="dash-user-target" class="font-semibold text-on-surface
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg>
 </div>
 <div class="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2">
-<p class="font-body-sm text-body-sm text-secondary">
-<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Nilai TKP Anda saat ini masih berada 8 poin di bawah ambang batas (158 dari minimum 166). Fokuskan latihan pada soal Jejaring Kerja dan Pelayanan Publik untuk memaksimalkan opsi berbobot 5.
+<p id="eval-recommendation-text" class="font-body-sm text-body-sm text-secondary">
+<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Anda belum memiliki riwayat ujian. Mulai kerjakan Mini Try Out Diagnostik untuk mengetahui pemetaan skor kemampuan awal Anda.
 </p>
 <button class="font-label-sm text-label-sm font-semibold text-on-surface hover:text-secondary whitespace-nowrap underline shrink-0" onclick="openModal('modal-riwayat')">
 Lihat Riwayat &amp; Evaluasi Lengkap
@@ -1674,7 +1674,7 @@ Lihat Pembahasan
 </div>
 </div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20">
-<a class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm" href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20beli%20Paket%20Bundle%203x%20Try%20Out%20CPNS%20Pro%20(Rp%2030.000)" target="_blank">
+<a class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm" href="javascript:void(0)" onclick="openWhatsAppPurchase('bundle')">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
 <span>Beli via WhatsApp</span>
 </a>
@@ -1739,7 +1739,7 @@ Mulai Ujian CAT
 </div>
 </div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20">
-<a class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-surface border border-outline-variant/50 hover:bg-surface-container rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all" href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20beli%20Paket%20Satuan%20TO%20Seri%202%20atau%203%20(Rp%2012.000)" target="_blank">
+<a class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-surface border border-outline-variant/50 hover:bg-surface-container rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all" href="javascript:void(0)" onclick="openWhatsAppPurchase('satuan')">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
 <span>Beli via WhatsApp</span>
 </a>
@@ -2126,19 +2126,14 @@ Mengerti &amp; Tutup
         });
       }
 
-      // 6. Anti-Cheat: Tab Blur / Window blur notification
+      // 6. Anti-Cheat: Tombol Resume Ujian (Tanpa window.blur trigger)
       const antiCheatModal = document.getElementById('antiCheatModal');
       const resumeExamBtn = document.getElementById('resumeExamBtn');
 
-      window.addEventListener('blur', () => {
-        if (examStarted && rulesModal.classList.contains('hidden')) {
-          antiCheatModal.classList.remove('hidden');
-        }
-      });
-
-      if (resumeExamBtn) {
+      if (resumeExamBtn && antiCheatModal) {
         resumeExamBtn.addEventListener('click', () => {
           antiCheatModal.classList.add('hidden');
+          antiCheatModal.classList.remove('flex');
         });
       }
 
@@ -2848,27 +2843,27 @@ Mengerti &amp; Tutup
           </div>
         </div>
 
-        <!-- 4 Quick User Stats -->
+        <!-- 4 Quick User Stats (Real-Time Database) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="bg-white p-4 rounded-lg border border-slate-200">
             <span class="text-[11px] font-semibold text-slate-400 uppercase">Total Terdaftar</span>
-            <p class="text-xl font-bold text-slate-900 mt-1">248</p>
-            <span class="text-[10px] text-slate-500">+14 Minggu ini</span>
+            <p id="admin-userstat-total" class="text-xl font-bold text-slate-900 mt-1">0</p>
+            <span id="admin-userstat-total-sub" class="text-[10px] text-slate-500">+0 Minggu ini</span>
           </div>
           <div class="bg-white p-4 rounded-lg border border-slate-200">
             <span class="text-[11px] font-semibold text-slate-400 uppercase">Sedang Ujian</span>
-            <p class="text-xl font-bold text-slate-900 mt-1">182</p>
+            <p id="admin-userstat-active" class="text-xl font-bold text-slate-900 mt-1">0</p>
             <span class="text-[10px] text-slate-500">Aktif pengerjaan</span>
           </div>
           <div class="bg-white p-4 rounded-lg border border-slate-200">
             <span class="text-[11px] font-semibold text-slate-400 uppercase">Lulus Passing Grade</span>
-            <p class="text-xl font-bold text-slate-900 mt-1">42</p>
-            <span class="text-[10px] text-emerald-600 font-medium">Skor &gt; 380</span>
+            <p id="admin-userstat-passed" class="text-xl font-bold text-slate-900 mt-1">0</p>
+            <span class="text-[10px] text-emerald-600 font-medium">Lolos Standar BKN</span>
           </div>
           <div class="bg-white p-4 rounded-lg border border-slate-200">
             <span class="text-[11px] font-semibold text-slate-400 uppercase">Belum Menggunakan</span>
-            <p class="text-xl font-bold text-slate-900 mt-1">24</p>
-            <span class="text-[10px] text-slate-400">Token standby</span>
+            <p id="admin-userstat-unused" class="text-xl font-bold text-slate-900 mt-1">0</p>
+            <span class="text-[10px] text-slate-400">Belum ada riwayat ujian</span>
           </div>
         </div>
 
@@ -2935,10 +2930,7 @@ Mengerti &amp; Tutup
               <div class="space-y-1">
                 <label class="block font-semibold text-slate-700">Pilih Peserta Terdaftar</label>
                 <select id="token-user" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 text-xs text-slate-800">
-                  <option value="Rian Pratama|081234567890|S1 Akuntansi">Rian Pratama - 081234567890 (S1 Akuntansi)</option>
-                  <option value="Siti Nurhaliza|085698765432|S1 Pendidikan">Siti Nurhaliza - 085698765432 (S1 Pendidikan)</option>
-                  <option value="Budi Santoso|081377889900|D3 Keperawatan">Budi Santoso - 081377889900 (D3 Keperawatan)</option>
-                  <option value="Ahmad Fauzi|082155667788|SMA/SMK">Ahmad Fauzi - 082155667788 (SMA/SMK)</option>
+                  <option value="" disabled selected>-- Belum ada peserta terdaftar --</option>
                 </select>
               </div>
               <div class="space-y-1">
@@ -2952,7 +2944,7 @@ Mengerti &amp; Tutup
               </div>
               <div class="space-y-1">
                 <label class="block font-semibold text-slate-700">Catatan Pembayaran</label>
-                <input id="token-note" type="text" value="Transfer BCA Berhasil" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 text-xs text-slate-800" placeholder="Catatan transaksi"/>
+                <input id="token-note" type="text" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 text-xs text-slate-800" placeholder="Contoh: Transfer BCA / QRIS Lunas"/>
               </div>
             </div>
             <div class="flex justify-end pt-1">
@@ -3065,7 +3057,7 @@ Mengerti &amp; Tutup
             </div>
             <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
               <div class="flex-1 w-full space-y-1">
-                <input id="set-admin-wa" type="tel" placeholder="Contoh: 6281234567890" value="6281234567890" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 font-mono text-xs text-slate-800"/>
+                <input id="set-admin-wa" type="tel" placeholder="Contoh: 6281234567890" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-2.5 font-mono text-xs text-slate-800"/>
                 <span class="text-[10px] text-slate-400">Nomor ini menjadi tujuan pengiriman pesan WhatsApp ketika peserta menekan tombol 'Beli Paket' / 'Pesan Token' di Dashboard.</span>
               </div>
               <button type="button" onclick="saveAdminWhatsApp()" id="btn-save-admin-wa" class="shrink-0 px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors">
@@ -4973,7 +4965,30 @@ Mengerti &amp; Tutup
     }
   });
 
-    window.updateParticipantWhatsAppLinks = updateParticipantWhatsAppLinks;
+    window.getAdminWhatsAppNumber = function() {
+    return (state.settings && (state.settings.admin_whatsapp || state.settings.WA_ADMIN)) || '6281234567890';
+  };
+
+  window.openWhatsAppHelp = function() {
+    const wa = window.getAdminWhatsAppNumber().replace(/\D/g, '');
+    const user = state.currentUser ? `${state.currentUser.nama || ''} (${state.currentUser.email || ''})` : 'Peserta';
+    const text = encodeURIComponent(`Halo Admin Bantuan CAT CPNS Pro, saya ${user} butuh informasi/bantuan teknis.`);
+    window.open(`https://wa.me/${wa}?text=${text}`, '_blank');
+  };
+
+  window.openWhatsAppPurchase = function(type) {
+    const wa = window.getAdminWhatsAppNumber().replace(/\D/g, '');
+    const user = state.currentUser ? `${state.currentUser.nama || ''} (${state.currentUser.email || ''})` : 'Peserta';
+    let text = `Halo Admin CAT CPNS Pro, saya ${user} ingin membeli paket ujian.`;
+    if (type === 'bundle') {
+      text = `Halo Admin CAT CPNS Pro, saya ${user} ingin membeli Paket Bundle 3x Try Out CPNS Pro (Rp 30.000). Mohon panduan pembayaran & token akses.`;
+    } else if (type === 'satuan') {
+      text = `Halo Admin CAT CPNS Pro, saya ${user} ingin membeli Paket Satuan Try Out CPNS Pro (Rp 12.000). Mohon panduan pembayaran & token akses.`;
+    }
+    window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  window.updateParticipantWhatsAppLinks = updateParticipantWhatsAppLinks;
 
   window.openAdminLoginModal = function() {
     const pinInput = document.getElementById('admin-modal-pin');
@@ -5327,10 +5342,23 @@ Mengerti &amp; Tutup
     }
   };
 
+  window.handleCancelCompleteProfile = function() {
+    if (!state.currentUser?.has_password || !state.currentUser?.no_wa) {
+      if (confirm('Profil dan kata sandi wajib dilengkapi untuk dapat mengakses simulasi ujian CAT CPNS Pro. Apakah Anda ingin keluar dari sesi?')) {
+        closeModal('modal-complete-profile');
+        if (typeof window.handleUserLogout === 'function') {
+          window.handleUserLogout();
+        }
+      }
+    } else {
+      closeModal('modal-complete-profile');
+    }
+  };
+
   window.handleSaveProfileCompletion = async function() {
     const name = document.getElementById('complete-profile-name')?.value?.trim();
     const wa = document.getElementById('complete-profile-wa')?.value?.trim();
-    const target = document.getElementById('complete-profile-target')?.value?.trim() || 'Umum';
+    const target = document.getElementById('complete-profile-target')?.value?.trim();
     const password = document.getElementById('complete-profile-password')?.value;
     const alertEl = document.getElementById('complete-profile-alert');
     const btnSubmit = document.getElementById('btn-save-profile-complete');
@@ -5360,40 +5388,65 @@ Mengerti &amp; Tutup
     try {
       const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
 
-      // 1. Update password via Supabase Auth
+      // 1. Panggil await supabase.auth.updateUser({ password }) agar peserta bisa login via email & password
       if (authClient) {
-        const { error: pwdErr } = await authClient.auth.updateUser({ password });
+        const { error: pwdErr } = await authClient.auth.updateUser({ password: password });
         if (pwdErr) {
-          console.warn('Update password notice:', pwdErr);
+          console.warn('Update user password warning:', pwdErr);
         }
       }
 
-      // 2. Update user profile in Supabase table 'users'
-      if (state.currentUser) {
-        state.currentUser.nama = name;
-        state.currentUser.no_wa = wa;
-        state.currentUser.provinsi = target;
-        state.currentUser.has_password = true;
-        localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+      const userId = state.currentUser?.id;
+      const userEmail = state.currentUser?.email;
 
-        if (supabase) {
-          try {
+      // 2. Simpan data ke tabel public.users via .upsert()
+      if (supabase && (userId || userEmail)) {
+        const updatePayload = {
+          id: userId,
+          email: userEmail,
+          full_name: name,
+          nama: name,
+          phone: wa,
+          no_wa: wa,
+          target_instansi: target,
+          provinsi: target,
+          has_password: true
+        };
+
+        try {
+          const { error: upsertErr } = await supabase.from('users').upsert(updatePayload, { onConflict: 'id' });
+          if (upsertErr) {
+            console.warn('Upsert by id error, trying update by email:', upsertErr);
             await supabase.from('users').update({
               nama: name,
               no_wa: wa,
               provinsi: target,
               has_password: true
-            }).eq('email', state.currentUser.email);
-          } catch (e) {
-            console.warn('Update user profile warning:', e);
+            }).eq('email', userEmail);
           }
+        } catch (dbErr) {
+          console.warn('DB upsert error:', dbErr);
         }
       }
 
+      // 3. Update local state
+      if (state.currentUser) {
+        state.currentUser.nama = name;
+        state.currentUser.full_name = name;
+        state.currentUser.no_wa = wa;
+        state.currentUser.phone = wa;
+        state.currentUser.provinsi = target;
+        state.currentUser.target_instansi = target;
+        state.currentUser.has_password = true;
+        localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+      }
+
+      // 4. Tutup modal profil dan buka Dashboard Peserta
       closeModal('modal-complete-profile');
+      window.showView('dashboard');
       renderDashboardView();
       if (typeof showToast === 'function') {
-        showToast('Profil & Password berhasil disimpan!', 'success');
+        showToast('Profil & Password berhasil disimpan! Selamat datang di Dashboard.', 'success');
       }
     } catch (err) {
       console.error('Save profile completion error:', err);
@@ -5423,11 +5476,15 @@ Mengerti &amp; Tutup
     sessionStorage.removeItem('cat_admin_authed');
     sessionStorage.removeItem('adminToken');
     sessionStorage.removeItem('cat_user_session');
+    window.location.hash = '';
 
     state.currentUser = null;
     window.showView('login');
     if (typeof window.switchTab === 'function') {
       window.switchTab('login');
+    }
+    if (typeof showToast === 'function') {
+      showToast('Anda telah keluar dari akun.', 'info');
     }
   };
   window.adminLogout = window.handleUserLogout;
@@ -5508,6 +5565,9 @@ Mengerti &amp; Tutup
         bannerEl.classList.add('hidden');
       }
     }
+
+    // Render Evaluasi per Materi vs Passing Grade (Real-Time Attempt)
+    renderDashboardEvaluationCard();
 
     // Setup Chart.js dynamic rendering
     renderDashboardCharts();
@@ -5609,6 +5669,101 @@ Mengerti &amp; Tutup
     });
   }
 
+  function renderDashboardEvaluationCard() {
+    const attempts = state.attempts || [];
+    const latest = attempts.length > 0 ? attempts[0] : null;
+
+    const twkScoreEl = document.getElementById('eval-twk-score');
+    const twkBadgeEl = document.getElementById('eval-twk-badge');
+    const twkBarEl = document.getElementById('eval-twk-bar');
+
+    const tiuScoreEl = document.getElementById('eval-tiu-score');
+    const tiuBadgeEl = document.getElementById('eval-tiu-badge');
+    const tiuBarEl = document.getElementById('eval-tiu-bar');
+
+    const tkpScoreEl = document.getElementById('eval-tkp-score');
+    const tkpBadgeEl = document.getElementById('eval-tkp-badge');
+    const tkpBarEl = document.getElementById('eval-tkp-bar');
+
+    const recoTextEl = document.getElementById('eval-recommendation-text');
+
+    if (!latest) {
+      if (twkScoreEl) twkScoreEl.innerHTML = `0 <span class="font-normal text-secondary text-xs">/ PG 65</span>`;
+      if (twkBadgeEl) {
+        twkBadgeEl.className = 'text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold';
+        twkBadgeEl.textContent = 'Belum Ujian';
+      }
+      if (twkBarEl) twkBarEl.style.width = '0%';
+
+      if (tiuScoreEl) tiuScoreEl.innerHTML = `0 <span class="font-normal text-secondary text-xs">/ PG 80</span>`;
+      if (tiuBadgeEl) {
+        tiuBadgeEl.className = 'text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold';
+        tiuBadgeEl.textContent = 'Belum Ujian';
+      }
+      if (tiuBarEl) tiuBarEl.style.width = '0%';
+
+      if (tkpScoreEl) tkpScoreEl.innerHTML = `0 <span class="font-normal text-secondary text-xs">/ PG 166</span>`;
+      if (tkpBadgeEl) {
+        tkpBadgeEl.className = 'text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary font-semibold';
+        tkpBadgeEl.textContent = 'Belum Ujian';
+      }
+      if (tkpBarEl) tkpBarEl.style.width = '0%';
+
+      if (recoTextEl) {
+        recoTextEl.innerHTML = `<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Anda belum memiliki riwayat ujian. Mulai kerjakan Mini Try Out Diagnostik untuk mengetahui pemetaan skor kemampuan awal Anda.`;
+      }
+    } else {
+      const isMini = (latest.id_paket === 'mini-to' || latest.id_paket === 'mini');
+      const twkPG = isMini ? 15 : 65;
+      const tiuPG = isMini ? 15 : 80;
+      const tkpPG = isMini ? 28 : 166;
+      const twkMax = isMini ? 30 : 150;
+      const tiuMax = isMini ? 30 : 175;
+      const tkpMax = isMini ? 40 : 225;
+
+      const twkScore = latest.skor_twk || 0;
+      const tiuScore = latest.skor_tiu || 0;
+      const tkpScore = latest.skor_tkp || 0;
+
+      const twkPass = twkScore >= twkPG;
+      const tiuPass = tiuScore >= tiuPG;
+      const tkpPass = tkpScore >= tkpPG;
+
+      if (twkScoreEl) twkScoreEl.innerHTML = `${twkScore} <span class="font-normal text-secondary text-xs">/ PG ${twkPG}</span>`;
+      if (twkBadgeEl) {
+        twkBadgeEl.className = `text-[11px] px-2 py-0.5 rounded font-semibold ${twkPass ? 'bg-surface-container text-on-secondary-fixed' : 'bg-error-container text-error'}`;
+        twkBadgeEl.textContent = twkPass ? 'Lulus PG' : `Di Bawah PG (${twkScore - twkPG})`;
+      }
+      if (twkBarEl) twkBarEl.style.width = `${Math.min(100, Math.round((twkScore / twkMax) * 100))}%`;
+
+      if (tiuScoreEl) tiuScoreEl.innerHTML = `${tiuScore} <span class="font-normal text-secondary text-xs">/ PG ${tiuPG}</span>`;
+      if (tiuBadgeEl) {
+        tiuBadgeEl.className = `text-[11px] px-2 py-0.5 rounded font-semibold ${tiuPass ? 'bg-surface-container text-on-secondary-fixed' : 'bg-error-container text-error'}`;
+        tiuBadgeEl.textContent = tiuPass ? 'Lulus PG' : `Di Bawah PG (${tiuScore - tiuPG})`;
+      }
+      if (tiuBarEl) tiuBarEl.style.width = `${Math.min(100, Math.round((tiuScore / tiuMax) * 100))}%`;
+
+      if (tkpScoreEl) tkpScoreEl.innerHTML = `${tkpScore} <span class="font-normal text-secondary text-xs">/ PG ${tkpPG}</span>`;
+      if (tkpBadgeEl) {
+        tkpBadgeEl.className = `text-[11px] px-2 py-0.5 rounded font-semibold ${tkpPass ? 'bg-surface-container text-on-secondary-fixed' : 'bg-error-container text-error'}`;
+        tkpBadgeEl.textContent = tkpPass ? 'Lulus PG' : `Di Bawah PG (${tkpScore - tkpPG})`;
+      }
+      if (tkpBarEl) tkpBarEl.style.width = `${Math.min(100, Math.round((tkpScore / tkpMax) * 100))}%`;
+
+      if (recoTextEl) {
+        if (!tkpPass) {
+          recoTextEl.innerHTML = `<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Nilai TKP Anda (${tkpScore}) masih di bawah ambang batas minimum (${tkpPG}). Fokuskan latihan pada materi Jejaring Kerja dan Pelayanan Publik untuk membiasakan memilih opsi berbobot 5.`;
+        } else if (!tiuPass) {
+          recoTextEl.innerHTML = `<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Nilai TIU Anda (${tiuScore}) masih di bawah ambang batas minimum (${tiuPG}). Tingkatkan latihan logika silogisme dan berhitung cepat.`;
+        } else if (!twkPass) {
+          recoTextEl.innerHTML = `<strong class="text-on-surface font-semibold">Rekomendasi Peningkatan:</strong> Nilai TWK Anda (${twkScore}) masih di bawah ambang batas minimum (${twkPG}). Perbanyak analisis soal studi kasus Pancasila dan Integritas ASN.`;
+        } else {
+          recoTextEl.innerHTML = `<strong class="text-on-surface font-semibold">Selamat!</strong> Seluruh subtes Anda (${latest.total_skor || 0}) telah melampaui passing grade BKN. Pertahankan ritme pengerjaan dan manajemen waktu Anda.`;
+        }
+      }
+    }
+  }
+
   function renderDashboardCharts() {
     const vDash = document.getElementById('view-dashboard');
     if (!vDash || !window.Chart) return;
@@ -5624,13 +5779,11 @@ Mengerti &amp; Tutup
         chartContainer.appendChild(canvas);
       }
 
-      const attempts = state.attempts.length > 0 ? state.attempts.slice().reverse() : [
-        { nama_paket: 'Mini TO Diagnostik', total_skor: 385 },
-        { nama_paket: 'TO Seri 1', total_skor: 395 }
-      ];
+      const hasAttempts = state.attempts && state.attempts.length > 0;
+      const attempts = hasAttempts ? state.attempts.slice().reverse() : [];
 
-      const labels = attempts.map((a, i) => `Simulasi #${i + 1}`);
-      const dataPoints = attempts.map(a => a.total_skor || 0);
+      const labels = hasAttempts ? attempts.map((a, i) => `Simulasi #${i + 1}`) : ['Belum Ujian'];
+      const dataPoints = hasAttempts ? attempts.map(a => a.total_skor || 0) : [0];
 
       if (state.chartInstance) {
         state.chartInstance.destroy();
@@ -6004,6 +6157,7 @@ Mengerti &amp; Tutup
 
   let antiCheatGraceTimeout = null;
   window.isExamActive = false;
+  window.violationCount = 0;
 
   window.resetExamState = function() {
     if (state.exam.timerInterval) {
@@ -6014,6 +6168,7 @@ Mengerti &amp; Tutup
     state.exam.doubts = {};
     state.exam.isFinished = true;
     window.isExamActive = false;
+    window.violationCount = 0;
     if (antiCheatGraceTimeout) {
       clearTimeout(antiCheatGraceTimeout);
       antiCheatGraceTimeout = null;
@@ -6032,31 +6187,35 @@ Mengerti &amp; Tutup
 
   function setupAntiCheatProtection() {
     window.isExamActive = false;
+    window.violationCount = 0;
     if (antiCheatGraceTimeout) clearTimeout(antiCheatGraceTimeout);
 
-    // Grace period 3 detik setelah ujian dimulai sebelum listener aktif
+    // Jeda aman 4 detik setelah tombol mulai ujian diklik dan lembar soal selesai dirender
     antiCheatGraceTimeout = setTimeout(() => {
       if (state.activeView === 'exam' && !state.exam.isFinished) {
         window.isExamActive = true;
       }
-    }, 3000);
+    }, 4000);
 
     if (window._cheatListenerAttached) return;
     window._cheatListenerAttached = true;
 
+    // HANYA gunakan document.visibilitychange (document.hidden === true), TANPA window.blur
     document.addEventListener('visibilitychange', function() {
       if (window.isExamActive && document.hidden && state.activeView === 'exam' && !state.exam.isFinished) {
+        window.violationCount = (window.violationCount || 0) + 1;
         const modal = document.getElementById('antiCheatModal');
         if (modal) {
+          const violationText = modal.querySelector('.text-red-700');
+          if (violationText) {
+            violationText.textContent = `Pelanggaran: ${window.violationCount} kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!`;
+          }
           modal.classList.remove('hidden');
           modal.classList.add('flex');
         }
-      }
-    });
-
-    window.addEventListener('blur', function() {
-      if (window.isExamActive && state.activeView === 'exam' && !state.exam.isFinished) {
-        console.warn('Anti-cheat: Window blur detected during exam.');
+        if (window.violationCount >= 3) {
+          window.finishExam(true);
+        }
       }
     });
   }
@@ -6805,70 +6964,164 @@ Mengerti &amp; Tutup
     window.APP.users = [];
     window.APP.tokens = [];
 
-    let totalUsersCount = 0;
-    let activeTokensCount = 0;
-    let bundleCount = 0;
-    let satuanCount = 0;
-    let totalRevenue = 0;
+    let dbUsers = [];
+    let dbTokens = [];
+    let dbAttempts = [];
     let totalQuestionsCount = state.questions ? state.questions.length : 0;
+    let fetchedViaApi = false;
 
-    if (supabase) {
+    const adminToken = sessionStorage.getItem('adminToken');
+
+    // 1. Coba ambil data via serverless endpoint /api/admin-data (Bypass RLS)
+    if (adminToken) {
       try {
-        // 1. Fetch Users Real
-        const { data: dbUsers } = await supabase.from('users').select('*').order('created_at', { ascending: false });
-        if (dbUsers && dbUsers.length > 0) {
-          totalUsersCount = dbUsers.length;
-          dbUsers.forEach((u, i) => {
-            window.APP.users.push({
-              id: u.id || `USR-${i+1}`,
-              name: u.nama || 'Peserta',
-              phone: u.no_wa || '-',
-              edu: u.jurusan || '-',
-              loc: u.provinsi || '-',
-              miniStatus: 'Terdaftar',
-              maxScore: '-',
-              token: '-'
-            });
-          });
-        }
-
-        // 2. Fetch Tokens Real
-        const { data: dbTokens } = await supabase.from('tokens').select('*').order('created_at', { ascending: false });
-        if (dbTokens && dbTokens.length > 0) {
-          dbTokens.forEach(t => {
-            const isActive = (t.status_token === 'aktif' || t.status === 'aktif');
-            const targetPkg = t.target_paket || 'Satuan';
-            if (isActive) {
-              activeTokensCount++;
-              if (targetPkg.toLowerCase().includes('bundle')) {
-                bundleCount++;
-                totalRevenue += 99000;
-              } else {
-                satuanCount++;
-                totalRevenue += 39000;
-              }
+        const res = await fetch('/api/admin-data', {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.ok) {
+            dbUsers = json.users || [];
+            dbTokens = json.tokens || [];
+            dbAttempts = json.attempts || [];
+            if (json.totalQuestions !== undefined && json.totalQuestions !== null) {
+              totalQuestionsCount = json.totalQuestions;
             }
-            window.APP.tokens.push({
-              name: t.pemilik_nama || 'Peserta',
-              edu: 'Umum',
-              phone: t.pemilik_wa || '-',
-              token: t.kode_token,
-              pkg: targetPkg,
-              progress: isActive ? 'Aktif' : 'Nonaktif',
-              active: isActive
-            });
-          });
+            fetchedViaApi = true;
+          }
         }
+      } catch (apiErr) {
+        console.warn('Fetch /api/admin-data warning, mencoba query langsung Supabase:', apiErr);
+      }
+    }
 
-        // 3. Fetch Questions Count Real
+    // Fallback: Query langsung Supabase Client jika API belum aktif
+    if (!fetchedViaApi && supabase) {
+      try {
+        const { data: uData } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+        if (uData) dbUsers = uData;
+
+        const { data: tData } = await supabase.from('tokens').select('*').order('created_at', { ascending: false });
+        if (tData) dbTokens = tData;
+
+        const { data: aData } = await supabase.from('attempts').select('*').order('created_at', { ascending: false });
+        if (aData) dbAttempts = aData;
+
         const { count: qCount, data: qData } = await supabase.from('questions').select('*', { count: 'exact' });
         if (qCount !== null && qCount !== undefined) {
           totalQuestionsCount = qCount;
         } else if (qData) {
           totalQuestionsCount = qData.length;
         }
-      } catch (e) {
-        console.warn('Admin Supabase sync notice:', e);
+      } catch (dirErr) {
+        console.warn('Direct admin query warning:', dirErr);
+      }
+    }
+
+    let activeTokensCount = 0;
+    let bundleCount = 0;
+    let satuanCount = 0;
+    let totalRevenue = 0;
+
+    // Olah data pengguna
+    dbUsers.forEach((u, i) => {
+      const userEmail = u.email || '';
+      const userPhone = u.phone || u.no_wa || '-';
+      const userAttempts = dbAttempts.filter(a => a.user_email === userEmail || a.user_id === u.id);
+      let maxScore = '-';
+      let miniStatus = 'Belum Ujian';
+      if (userAttempts.length > 0) {
+        const highest = userAttempts.reduce((prev, cur) => ((cur.total_skor || 0) > (prev.total_skor || 0) ? cur : prev), userAttempts[0]);
+        maxScore = `${highest.total_skor || 0} / 550`;
+        miniStatus = `Selesai (${highest.total_skor || 0})`;
+      }
+
+      const userTokenList = dbTokens.filter(t => (t.pemilik_email && t.pemilik_email === userEmail) || (t.pemilik_wa && t.pemilik_wa === userPhone));
+      const activeTok = userTokenList.find(t => t.status_token === 'aktif' || t.status === 'aktif');
+      const tokenDisplay = activeTok ? `${activeTok.kode_token} (Aktif)` : '-';
+
+      window.APP.users.push({
+        id: u.id || `USR-${i+1}`,
+        name: u.full_name || u.nama || 'Peserta',
+        phone: userPhone,
+        edu: u.education || u.jurusan || 'Umum',
+        loc: u.target_instansi || u.provinsi || 'Indonesia',
+        miniStatus: miniStatus,
+        maxScore: maxScore,
+        token: tokenDisplay,
+        created_at: u.created_at
+      });
+    });
+
+    // Olah data token
+    dbTokens.forEach(t => {
+      const isActive = (t.status_token === 'aktif' || t.status === 'aktif');
+      const targetPkg = t.target_paket || 'Satuan';
+      if (isActive) {
+        activeTokensCount++;
+        if (targetPkg.toLowerCase().includes('bundle')) {
+          bundleCount++;
+          totalRevenue += 99000;
+        } else {
+          satuanCount++;
+          totalRevenue += 39000;
+        }
+      }
+      window.APP.tokens.push({
+        name: t.pemilik_nama || 'Peserta',
+        edu: 'Umum',
+        phone: t.pemilik_wa || '-',
+        token: t.kode_token,
+        pkg: targetPkg,
+        progress: isActive ? 'Aktif' : 'Nonaktif',
+        active: isActive
+      });
+    });
+
+    const totalUsersCount = window.APP.users.length;
+
+    // Hitung statistik Tab 3 (Database Pengguna)
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const newThisWeek = dbUsers.filter(u => u.created_at && new Date(u.created_at).getTime() >= oneWeekAgo).length;
+
+    const passedUserSet = new Set();
+    dbAttempts.forEach(a => {
+      const isPass = (a.skor_twk >= 65 && a.skor_tiu >= 80 && a.skor_tkp >= 166) || (a.status_pg && a.status_pg.includes('LULUS'));
+      if (isPass && (a.user_email || a.user_id)) {
+        passedUserSet.add(a.user_email || a.user_id);
+      }
+    });
+
+    const usersWithAttempts = new Set(dbAttempts.map(a => a.user_email).filter(Boolean));
+    const unusedCount = dbUsers.filter(u => !usersWithAttempts.has(u.email)).length;
+
+    const uStatTotal = document.getElementById('admin-userstat-total');
+    if (uStatTotal) uStatTotal.textContent = totalUsersCount;
+    const uStatTotalSub = document.getElementById('admin-userstat-total-sub');
+    if (uStatTotalSub) uStatTotalSub.textContent = `+${newThisWeek} Minggu ini`;
+
+    const uStatActive = document.getElementById('admin-userstat-active');
+    if (uStatActive) uStatActive.textContent = '0';
+
+    const uStatPassed = document.getElementById('admin-userstat-passed');
+    if (uStatPassed) uStatPassed.textContent = passedUserSet.size;
+
+    const uStatUnused = document.getElementById('admin-userstat-unused');
+    if (uStatUnused) uStatUnused.textContent = unusedCount;
+
+    // Isi dropdown formulir terbitkan token master
+    const tokenUserSelect = document.getElementById('token-user');
+    if (tokenUserSelect) {
+      if (window.APP.users.length === 0) {
+        tokenUserSelect.innerHTML = '<option value="" disabled selected>-- Belum ada peserta terdaftar --</option>';
+      } else {
+        tokenUserSelect.innerHTML = '<option value="" disabled selected>-- Pilih Peserta Terdaftar --</option>' + 
+          window.APP.users.map(u => {
+            const val = `${u.name}|${u.phone}|${u.edu}`;
+            return `<option value="${escapeHtml(val)}">${escapeHtml(u.name)} - ${escapeHtml(u.phone)} (${escapeHtml(u.edu)})</option>`;
+          }).join('');
       }
     }
 
@@ -6911,7 +7164,7 @@ Mengerti &amp; Tutup
     // Sync admin whatsapp field
     const adminWaInput = document.getElementById('set-admin-wa');
     if (adminWaInput) {
-      adminWaInput.value = state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890';
+      adminWaInput.value = state.settings.admin_whatsapp || state.settings.WA_ADMIN || '';
     }
 
     // Hook AI Generator form
@@ -7031,6 +7284,74 @@ Mengerti &amp; Tutup
     const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
 
     let hasConfirmedSession = false;
+    let isProfileComplete = false;
+
+    // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (phone, target_instansi, has_password === true)
+    async function syncAndCheckUserProfile(u, isGoogle) {
+      if (!u) return { isComplete: false, profile: null };
+
+      let profile = null;
+      const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0];
+
+      if (supabase) {
+        try {
+          // 1. Cek tabel public.users berdasarkan id
+          const { data: profsById } = await supabase.from('users').select('*').eq('id', u.id).limit(1);
+          if (profsById && profsById.length > 0) {
+            profile = profsById[0];
+          } else {
+            // Cek juga berdasarkan email
+            const { data: profsByEmail } = await supabase.from('users').select('*').eq('email', u.email).limit(1);
+            if (profsByEmail && profsByEmail.length > 0) {
+              profile = profsByEmail[0];
+            }
+          }
+
+          // 2. Jika baris belum ada di public.users, segera lakukan upsert awal
+          if (!profile) {
+            const initialUpsert = {
+              id: u.id,
+              email: u.email,
+              full_name: googleFullName,
+              nama: googleFullName,
+              has_password: false,
+              quota: 0,
+              role: 'peserta'
+            };
+            await supabase.from('users').upsert(initialUpsert, { onConflict: 'id' }).catch(() => {});
+            profile = initialUpsert;
+          }
+        } catch (pErr) {
+          console.warn('Sync profile error:', pErr);
+        }
+      }
+
+      const meta = u.user_metadata || {};
+      const pName = profile?.full_name || profile?.nama || meta.full_name || meta.name || googleFullName;
+      const pPhone = profile?.phone || profile?.no_wa || meta.phone || meta.whatsapp || '';
+      const pTarget = profile?.target_instansi || profile?.provinsi || meta.target_instansi || meta.target_formation || '';
+      const pHasPassword = Boolean(profile?.has_password);
+
+      state.currentUser = {
+        id: u.id,
+        nama: pName,
+        full_name: pName,
+        email: u.email,
+        no_wa: pPhone,
+        phone: pPhone,
+        jurusan: profile?.education || profile?.jurusan || 'Umum',
+        provinsi: pTarget,
+        target_instansi: pTarget,
+        has_password: pHasPassword,
+        role: profile?.role || 'peserta',
+        avatar_url: meta.avatar_url || meta.picture || null
+      };
+      localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+
+      const isComplete = Boolean(pPhone && pPhone.trim() && pTarget && pTarget.trim() && pHasPassword === true);
+      return { isComplete, profile };
+    }
+
     if (authClient) {
       try {
         const { data: sessionData } = await authClient.auth.getSession();
@@ -7047,45 +7368,8 @@ Mengerti &amp; Tutup
             hasConfirmedSession = false;
           } else {
             hasConfirmedSession = true;
-
-            // Sinkronkan data ke tabel users Supabase
-            let profile = null;
-            if (supabase) {
-              try {
-                const { data: profs } = await supabase.from('users').select('*').eq('email', activeAuthUser.email).limit(1);
-                if (profs && profs.length > 0) {
-                  profile = profs[0];
-                } else {
-                  // User Google belum ada di tabel users, otomatis simpan profil awal
-                  const googleName = activeAuthUser.user_metadata?.full_name || activeAuthUser.user_metadata?.name || activeAuthUser.email.split('@')[0];
-                  profile = {
-                    id: activeAuthUser.id,
-                    nama: googleName,
-                    email: activeAuthUser.email,
-                    no_wa: '',
-                    jurusan: '',
-                    provinsi: '',
-                    role: 'peserta'
-                  };
-                  await supabase.from('users').insert([profile]).catch(() => {});
-                }
-              } catch (profErr) {
-                console.warn('Profile sync notice:', profErr);
-              }
-            }
-
-            const meta = activeAuthUser.user_metadata || {};
-            state.currentUser = {
-              id: activeAuthUser.id,
-              nama: profile?.nama || meta.full_name || meta.name || activeAuthUser.email.split('@')[0],
-              email: activeAuthUser.email,
-              no_wa: profile?.no_wa || meta.whatsapp || '',
-              jurusan: profile?.jurusan || meta.education || '',
-              provinsi: profile?.provinsi || meta.target_formation || '',
-              role: profile?.role || 'peserta',
-              avatar_url: meta.avatar_url || meta.picture || null
-            };
-            localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+            const res = await syncAndCheckUserProfile(activeAuthUser, isGoogleUser);
+            isProfileComplete = res.isComplete;
 
             // Bersihkan token OAuth dari URL bar jika ada
             if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
@@ -7102,54 +7386,26 @@ Mengerti &amp; Tutup
 
         // Listener jika status login berubah (Google OAuth callback)
         authClient.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_IN' && session?.user && !state.currentUser) {
+          if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
             const u = session.user;
             const isGoogle = u.app_metadata?.provider === 'google' || (u.identities && u.identities.some(id => id.provider === 'google'));
             if (u.email_confirmed_at || isGoogle) {
-              let profile = null;
-              if (supabase) {
-                const { data: profs } = await supabase.from('users').select('*').eq('email', u.email).limit(1);
-                if (profs && profs.length > 0) profile = profs[0];
-                else {
-                  const googleName = u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0];
-                  profile = {
-                    id: u.id,
-                    nama: googleName,
-                    email: u.email,
-                    no_wa: '',
-                    jurusan: '',
-                    provinsi: '',
-                    role: 'peserta'
-                  };
-                  await supabase.from('users').insert([profile]).catch(() => {});
-                }
-              }
-              const meta = u.user_metadata || {};
-              state.currentUser = {
-                id: u.id,
-                nama: profile?.nama || meta.full_name || meta.name || u.email.split('@')[0],
-                email: u.email,
-                no_wa: profile?.no_wa || meta.whatsapp || '',
-                jurusan: profile?.jurusan || meta.education || '',
-                provinsi: profile?.provinsi || meta.target_formation || '',
-                role: profile?.role || 'peserta',
-                avatar_url: meta.avatar_url || meta.picture || null
-              };
-              localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
-              window.showView('dashboard');
-              renderDashboardView();
-
-              // Jika data profil belum lengkap atau belum memiliki password, munculkan modal
-              if (!profile?.no_wa || !profile?.provinsi || !profile?.has_password) {
+              const res = await syncAndCheckUserProfile(u, isGoogle);
+              if (res.isComplete) {
+                window.showView('dashboard');
+                renderDashboardView();
+              } else {
+                // Tahan tampilan Dashboard Peserta dan langsung tampilkan modal Lengkapi Profil
+                window.showView('login');
                 setTimeout(() => {
                   const nameInput = document.getElementById('complete-profile-name');
-                  if (nameInput && !nameInput.value) nameInput.value = state.currentUser?.nama || '';
+                  if (nameInput) nameInput.value = state.currentUser?.nama || '';
                   const waInput = document.getElementById('complete-profile-wa');
-                  if (waInput && !waInput.value) waInput.value = state.currentUser?.no_wa || '';
+                  if (waInput) waInput.value = state.currentUser?.no_wa || '';
                   const targetInput = document.getElementById('complete-profile-target');
-                  if (targetInput && !targetInput.value) targetInput.value = state.currentUser?.provinsi || '';
+                  if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
                   openModal('modal-complete-profile');
-                }, 400);
+                }, 200);
               }
             }
           }
@@ -7167,8 +7423,22 @@ Mengerti &amp; Tutup
         window.openAdminLoginModal();
       }
     } else if (state.currentUser && hasConfirmedSession) {
-      window.showView('dashboard');
-      renderDashboardView();
+      if (isProfileComplete) {
+        window.showView('dashboard');
+        renderDashboardView();
+      } else {
+        // TAHAN tampilan Dashboard Peserta dan langsung tampilkan modal Lengkapi Profil
+        window.showView('login');
+        setTimeout(() => {
+          const nameInput = document.getElementById('complete-profile-name');
+          if (nameInput) nameInput.value = state.currentUser?.nama || '';
+          const waInput = document.getElementById('complete-profile-wa');
+          if (waInput) waInput.value = state.currentUser?.no_wa || '';
+          const targetInput = document.getElementById('complete-profile-target');
+          if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
+          openModal('modal-complete-profile');
+        }, 300);
+      }
     } else if (state.currentUser && state.currentUser.role === 'admin' && sessionStorage.getItem('cat_admin_authed') === 'true' && sessionStorage.getItem('adminToken')) {
       window.showView('admin');
     } else {
