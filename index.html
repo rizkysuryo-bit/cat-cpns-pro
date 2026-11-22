@@ -276,25 +276,129 @@
     </div>
   </div>
   <script>
-    // Failsafe Timer Maksimal 3 Detik: Menjamin tidak pernah stuck pada layar pemuatan
+    // Failsafe Timer Maksimal 6 Detik: Menghilangkan layar pemuatan tanpa menendang user yang sedang/sudah login
     setTimeout(function() {
       var loader = document.getElementById('app-init-loader');
       if (loader && !loader.classList.contains('pointer-events-none')) {
-        console.warn('[Failsafe 3s] Inisialisasi melebihi 3 detik. Menghilangkan layar pemuatan & membuka Halaman Login.');
+        console.warn('[Failsafe 6s] Menghilangkan layar pemuatan awal.');
         if (typeof window.hideLoadingScreen === 'function') {
           window.hideLoadingScreen();
         } else {
           loader.classList.add('opacity-0', 'pointer-events-none');
           setTimeout(function() { if (loader.parentNode) loader.remove(); }, 300);
         }
-        if (typeof window.showLoginScreen === 'function') {
-          window.showLoginScreen();
-        } else if (typeof window.showView === 'function') {
-          window.showView('login');
+        var isOAuth = window.location.hash.indexOf('access_token') !== -1 || window.location.search.indexOf('code=') !== -1;
+        var dashEl = document.getElementById('view-dashboard');
+        var adminEl = document.getElementById('view-admin');
+        var alreadyInApp = (dashEl && !dashEl.classList.contains('hidden')) || (adminEl && !adminEl.classList.contains('hidden'));
+        if (!window._authInitialized && !isOAuth && !alreadyInApp) {
+          if (typeof window.showLoginScreen === 'function') {
+            window.showLoginScreen();
+          } else if (typeof window.showView === 'function') {
+            window.showView('login');
+          }
         }
       }
-    }, 3000);
+    }, 6000);
   </script>
+
+  <!-- Global Modal Otorisasi Login Admin (Akses dari halaman mana saja via Ctrl+Shift+A) -->
+  <div id="modal-admin-login" class="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"></path></svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 text-sm">Otorisasi Admin</h4>
+            <p class="text-[10px] text-slate-400">Masuk ke Panel Pengelola CAT CPNS</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="form-admin-login-modal" onsubmit="handleAdminModalSubmit(event)" class="space-y-3">
+        <div id="admin-pin-error" class="hidden p-2 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"></div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1" for="admin-modal-pin">Kode PIN / Sandi Admin</label>
+          <input id="admin-modal-pin" type="password" required placeholder="Masukkan PIN / Sandi Admin" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modal-admin-login')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors">Masuk Panel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Modal Lengkapi Profil & Buat Password (Pasca-Login Google OAuth) -->
+  <div id="modal-complete-profile" class="fixed inset-0 z-[90] bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 my-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 text-sm">Lengkapi Profil &amp; Buat Password Akun</h4>
+            <p class="text-[10px] text-slate-400">Untuk aktivasi token dan kemudahan login manual berikutnya</p>
+          </div>
+        </div>
+        <button type="button" onclick="handleCancelCompleteProfile()" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="form-complete-profile" onsubmit="event.preventDefault(); handleSaveProfileCompletion();" class="space-y-3 text-xs">
+        <div id="complete-profile-alert" class="hidden p-2.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs"></div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1" for="complete-profile-wa">
+            Nomor HP / WhatsApp Aktif <span class="text-rose-500">*</span>
+          </label>
+          <input type="tel" id="complete-profile-wa" required placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1" for="complete-profile-name">
+            Nama Lengkap <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="complete-profile-name" required placeholder="Nama lengkap sesuai KTP" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1" for="complete-profile-password">
+            Buat Kata Sandi Baru <span class="text-rose-500">*</span>
+            <span class="text-[10px] text-slate-400 font-normal">(untuk login manual tanpa Google)</span>
+          </label>
+          <input type="password" id="complete-profile-password" minlength="6" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1" for="complete-profile-edu">
+            Pendidikan / Jurusan Lulusan <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="complete-profile-edu" required placeholder="Contoh: S1 Akuntansi, S1 Pendidikan, D3 Keperawatan, SMA/SMK" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-medium text-slate-700" for="complete-profile-target">
+              Target Formasi / Instansi
+            </label>
+            <span class="text-[10px] text-slate-400 font-normal">Opsional</span>
+          </div>
+          <input type="text" id="complete-profile-target" placeholder="Contoh: Kemenkumham / Pranata Komputer (boleh dikosongkan)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="handleCancelCompleteProfile()" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">Nanti Saja</button>
+          <button type="submit" id="btn-save-profile-complete" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">Simpan Profil &amp; Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- View 1: Login (Halaman 1 Pro 1) -->
   <div id="view-login" class="min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
@@ -528,93 +632,7 @@
 
 </div>
 
-<!-- Modal Otorisasi Login Admin -->
-<div id="modal-admin-login" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
-  <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-sm w-full p-6 space-y-4">
-    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"></path></svg>
-        </div>
-        <div>
-          <h4 class="font-bold text-slate-900 text-sm">Otorisasi Admin</h4>
-          <p class="text-[10px] text-slate-400">Masuk ke Panel Pengelola CAT CPNS</p>
-        </div>
-      </div>
-      <button type="button" onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-slate-600">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <form id="form-admin-login-modal" onsubmit="handleAdminModalSubmit(event)" class="space-y-3">
-      <div id="admin-pin-error" class="hidden p-2 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"></div>
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1" for="admin-modal-pin">Kode PIN / Sandi Admin</label>
-        <input id="admin-modal-pin" type="password" required placeholder="Masukkan PIN / Sandi Admin" class="w-full h-9 bg-white border border-slate-200 rounded-lg px-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
-      </div>
-      <div class="flex items-center justify-end gap-2 pt-2">
-        <button type="button" onclick="closeModal('modal-admin-login')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Batal</button>
-        <button type="submit" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors">Masuk Panel</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal Lengkapi Profil & Buat Password (Google OAuth) -->
-<div id="modal-complete-profile" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
-  <div class="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
-    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </div>
-        <div>
-          <h4 class="font-bold text-slate-900 text-sm">Lengkapi Profil &amp; Buat Password Akun</h4>
-          <p class="text-[10px] text-slate-400">Untuk aktivasi token dan kemudahan login manual berikutnya</p>
-        </div>
-      </div>
-      <button type="button" onclick="handleCancelCompleteProfile()" class="text-slate-400 hover:text-slate-600">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <form id="form-complete-profile" onsubmit="event.preventDefault(); handleSaveProfileCompletion();" class="space-y-3 text-xs">
-      <div id="complete-profile-alert" class="hidden p-2.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs"></div>
-      
-      <div>
-        <label class="block font-medium text-slate-700 mb-1" for="complete-profile-name">
-          Nama Lengkap <span class="text-rose-500">*</span>
-        </label>
-        <input type="text" id="complete-profile-name" required placeholder="Nama lengkap sesuai KTP" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
-      </div>
-
-      <div>
-        <label class="block font-medium text-slate-700 mb-1" for="complete-profile-wa">
-          Nomor WhatsApp Aktif <span class="text-rose-500">*</span>
-        </label>
-        <input type="tel" id="complete-profile-wa" required placeholder="Contoh: 081234567890" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
-      </div>
-
-      <div>
-        <label class="block font-medium text-slate-700 mb-1" for="complete-profile-target">
-          Instansi / Formasi Tujuan <span class="text-rose-500">*</span>
-        </label>
-        <input type="text" id="complete-profile-target" required placeholder="Contoh: Kemenkumham / Pranata Komputer" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
-      </div>
-
-      <div>
-        <label class="block font-medium text-slate-700 mb-1" for="complete-profile-password">
-          Buat Kata Sandi Baru <span class="text-rose-500">*</span>
-          <span class="text-[10px] text-slate-400 font-normal">(untuk login manual ke depannya tanpa Google)</span>
-        </label>
-        <input type="password" id="complete-profile-password" minlength="6" required placeholder="Minimal 6 karakter" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900" />
-      </div>
-
-      <div class="pt-2 flex justify-end gap-2">
-        <button type="button" onclick="handleCancelCompleteProfile()" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">Nanti Saja</button>
-        <button type="submit" id="btn-save-profile-complete" class="px-4 py-1.5 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors">Simpan Profil &amp; Password</button>
-      </div>
-    </form>
-  </div>
-</div>
+<!-- Global modals dipindahkan ke root body agar dapat tampil di semua tampilan -->
 <!-- Micro Highlights / Trust Badges Minimalis -->
 <div class="mt-6 grid grid-cols-3 gap-2 px-2"><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">110 Soal BKN</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">TWK, TIU, TKP</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Anti-Curang</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">Deteksi Tab Layar</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Mini TO Gratis</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">20 Soal Diagnostik</p></div></div>
 </main>
@@ -693,246 +711,7 @@
 <span id="PING_CONTENT_PUSH_NOTIFICATION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
   </div>
 
-  <!-- View 2: Register (Halaman 1 Pro 2) -->
-  <div id="view-register" class="hidden min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
-<!-- Header / Top Bar Minimalis -->
-<header class="w-full max-w-6xl mx-auto flex items-center justify-between py-2">
-<div class="flex items-center gap-2.5">
-<div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20"><svg class="lucide lucide-award w-4 h-4 stroke-[2.2]" data-lucide="award" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"></path><circle cx="12" cy="8" r="6"></circle></svg></div>
-<div>
-<span class="text-sm font-bold tracking-tight text-slate-900 block leading-tight">CAT CPNS Pro</span>
-<span class="text-[11px] font-medium text-slate-500 tracking-wide block leading-none">Simulasi Standar BKN</span>
-</div>
-</div>
-<div class="flex items-center gap-2"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50/70 border border-blue-200 text-[11px] font-medium text-blue-700"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span><span>Seleksi CPNS 2026</span></div></div>
-</header>
-<!-- Kontainer Utama: Terpusat Maksimal 440px -->
-<main class="w-full max-w-[440px] mx-auto my-auto py-6">
-<!-- Card Wrapper -->
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8">
-<!-- Brand & Heading Info -->
-<div class="text-center mb-6">
-
-<h1 class="text-xl font-bold tracking-tight text-slate-900">CAT CPNS Pro</h1>
-<p class="text-xs text-slate-500 mt-1 font-normal">Platform Simulasi Ujian SKD Standar BKN</p>
-</div>
-<!-- Tab Switcher (Masuk Akun vs Daftar Akun Baru) -->
-<div class="bg-blue-50/80 p-1 rounded-lg border border-blue-200 flex items-center mb-6" role="tablist">
-<button aria-selected="false" class="flex-1 py-2 px-3 text-xs font-medium rounded-md transition-all text-center text-slate-600 hover:text-blue-600" id="tab-login-btn" onclick="switchTab('login')" role="tab" type="button">
-          Masuk Akun
-        </button>
-<button aria-selected="true" class="flex-1 py-2 px-3 text-xs font-semibold rounded-md transition-all text-center bg-white text-blue-600 shadow-sm border border-blue-200/80" id="tab-register-btn" onclick="switchTab('register')" role="tab" type="button">
-          Daftar Akun Baru
-        </button>
-</div>
-<!-- FORM 1: MASUK AKUN -->
-<div class="space-y-4 hidden" id="form-login"><form class="space-y-4" onsubmit="event.preventDefault();">
-<!-- Input Email / WhatsApp -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1.5" for="login-identifier">
-              Email atau Nomor WhatsApp
-            </label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-user w-4 h-4" data-lucide="user" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-</div>
-<input class="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors" id="login-identifier" placeholder="nama@email.com atau 08123456xxx" required="" type="text"/>
-</div>
-</div>
-<!-- Input Password -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1.5" for="login-password">
-              Kata Sandi
-            </label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-lock w-4 h-4" data-lucide="lock" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-</div>
-<input class="w-full pl-9 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors" id="login-password" placeholder="Masukkan kata sandi akun" required="" type="password"/>
-<button aria-label="Lihat kata sandi" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 transition-colors focus:outline-none" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" type="button">
-<svg class="lucide lucide-eye w-4 h-4" data-lucide="eye" fill="none" height="24" id="login-eye-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
-</button>
-</div>
-</div>
-<!-- Tombol Aksi Utama -->
-<div class="pt-1 space-y-3">
-<button class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-1" type="submit">
-<span>Masuk</span>
-<svg class="lucide lucide-arrow-right w-3.5 h-3.5" data-lucide="arrow-right" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-</button>
-<!-- Dedicated clean Lupa Kata Sandi link below the button -->
-<div class="text-center">
-<a class="inline-block text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors py-0.5" href="javascript:void(0)">
-                Lupa Kata Sandi?
-              </a>
-</div>
-</div>
-</form>
-<!-- Informasi Bantuan / Pendaftaran -->
-<div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-<span>Belum punya paket ujian?</span>
-<button class="font-semibold text-blue-600 hover:text-blue-700 hover:underline" onclick="switchTab('register')" type="button">
-            Daftar sekarang
-          </button>
-</div></div>
-<!-- FORM 2: DAFTAR AKUN BARU -->
-<div class="space-y-3.5" id="form-register">
-<form class="space-y-3" onsubmit="event.preventDefault();">
-<!-- Nama Lengkap -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1" for="reg-name">
-              Nama Lengkap <span class="text-rose-500">*</span>
-</label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-user w-3.5 h-3.5" data-lucide="user" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-</div>
-<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-name" placeholder="Sesuai KTP / Ijazah" required="" type="text"/>
-</div>
-</div>
-<!-- WhatsApp Aktif -->
-<div>
-<div class="flex items-center justify-between mb-1">
-<label class="block text-xs font-medium text-slate-700" for="reg-wa">
-                Nomor WhatsApp Aktif <span class="text-rose-500">*</span>
-</label>
-<span class="text-[10px] text-slate-400">Pengiriman token</span>
-</div>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-phone w-3.5 h-3.5" data-lucide="phone" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>
-</div>
-<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-wa" placeholder="Contoh: 081234567890" required="" type="tel"/>
-</div>
-</div>
-<!-- Email -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1" for="reg-email">
-              Alamat Email <span class="text-rose-500">*</span>
-</label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-mail w-3.5 h-3.5" data-lucide="mail" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect height="16" rx="2" width="20" x="2" y="4"></rect></svg>
-</div>
-<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-email" placeholder="nama@email.com" required="" type="email"/>
-</div>
-</div>
-<!-- Password -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1" for="reg-password">
-              Kata Sandi <span class="text-rose-500">*</span>
-</label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-lock w-3.5 h-3.5" data-lucide="lock" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-</div>
-<input class="w-full pl-9 pr-9 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-password" placeholder="Minimal 6 karakter" required="" type="password"/>
-<button aria-label="Lihat kata sandi" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 transition-colors focus:outline-none" onclick="togglePasswordVisibility('reg-password', 'reg-eye-icon')" type="button">
-<svg class="lucide lucide-eye w-3.5 h-3.5" data-lucide="eye" fill="none" height="24" id="reg-eye-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
-</button>
-</div>
-</div>
-<!-- Pendidikan / Jurusan Lulusan -->
-<div>
-<label class="block text-xs font-medium text-slate-700 mb-1" for="reg-major">
-              Pendidikan / Jurusan Lulusan <span class="text-rose-500">*</span>
-</label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-graduation-cap w-3.5 h-3.5" data-lucide="graduation-cap" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg>
-</div>
-<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-major" placeholder="Contoh: S1 Akuntansi, S1 Pendidikan, D3 Keperawatan" required="" type="text"/>
-</div>
-</div>
-<!-- Asal Provinsi / Target Formasi (Opsional) -->
-<div>
-<div class="flex items-center justify-between mb-1">
-<label class="block text-xs font-medium text-slate-700" for="reg-target">
-                Asal Provinsi / Target Formasi
-              </label>
-<span class="text-[10px] text-slate-400 font-normal">Opsional</span>
-</div>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-<svg class="lucide lucide-map-pin w-3.5 h-3.5" data-lucide="map-pin" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-</div>
-<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors" id="reg-target" placeholder="Contoh: Jawa Timur / Penata Kelola Sistem TI" type="text"/>
-</div>
-</div>
-<!-- Tombol Aksi Penuh -->
-<div class="pt-2"><button class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-1" type="submit"><span>Buat Akun &amp; Mulai Latihan</span><svg class="lucide lucide-check w-3.5 h-3.5" data-lucide="check" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 6 9 17l-5-5"></path></svg></button></div>
-</form>
-<!-- Informasi Ketentuan -->
-<p class="text-[11px] text-slate-400 text-center leading-relaxed pt-1">
-          Dengan mendaftar, Anda menyetujui ketentuan simulasi ujian SKD dan pengikatan token pada nomor WhatsApp aktif.
-        </p>
-</div>
-</div>
-<!-- Micro Highlights / Trust Badges Minimalis -->
-<div class="mt-6 grid grid-cols-3 gap-2 px-2"><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">110 Soal BKN</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">TWK, TIU, TKP</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Anti-Curang</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">Deteksi Tab Layar</p></div><div class="text-center py-2 bg-slate-50/80 rounded-lg border border-slate-100"><p class="text-[11px] font-semibold text-slate-800">Mini TO Gratis</p><p class="text-[10px] text-blue-600 font-medium mt-0.5">20 Soal Diagnostik</p></div></div>
-</main>
-<!-- Footer Bersih -->
-<footer class="w-full max-w-6xl mx-auto py-3 text-center">
-<p class="text-[11px] text-slate-400">
-      © 2026 CAT CPNS Pro. Sistem Simulasi Ujian Mandiri Berbasis Standar Kompetensi BKN.
-    </p>
-</footer>
-<script>
-    // Tab switching logic
-    function switchTab(tab) {
-      const loginBtn = document.getElementById('tab-login-btn');
-      const regBtn = document.getElementById('tab-register-btn');
-      const formLogin = document.getElementById('form-login');
-      const formRegister = document.getElementById('form-register');
-
-      const activeClasses = "flex-1 py-2 px-3 text-xs rounded-md transition-all text-center bg-white text-blue-600 shadow-sm border border-blue-200/80 font-semibold";
-      const inactiveClasses = "flex-1 py-2 px-3 text-xs rounded-md transition-all text-center text-slate-600 hover:text-blue-600 font-medium";
-
-      if (tab === 'login') {
-        formLogin.classList.remove('hidden');
-        formRegister.classList.add('hidden');
-        
-        loginBtn.className = activeClasses;
-        loginBtn.setAttribute('aria-selected', 'true');
-        
-        regBtn.className = inactiveClasses;
-        regBtn.setAttribute('aria-selected', 'false');
-      } else {
-        formLogin.classList.add('hidden');
-        formRegister.classList.remove('hidden');
-
-        regBtn.className = activeClasses;
-        regBtn.setAttribute('aria-selected', 'true');
-
-        loginBtn.className = inactiveClasses;
-        loginBtn.setAttribute('aria-selected', 'false');
-      }
-      lucide.createIcons();
-    }
-
-    // Toggle password visibility
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (!input || !icon) return;
-
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        input.type = 'password';
-        icon.setAttribute('data-lucide', 'eye');
-      }
-      lucide.createIcons();
-    }
-
-    // Initialize Lucide icons on load
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-    });
-  </script>
-
-  </div>
+  <!-- View 2: Register ditangani langsung melalui tab Daftar Akun Baru di #view-login untuk mencegah duplikasi ID -->
 
   <!-- View 3: Dashboard Peserta (Halaman 2) -->
   <div id="view-dashboard" class="hidden bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen">
@@ -1045,7 +824,7 @@
       <p class="text-[11px] text-slate-600">Dibutuhkan untuk pengikatan token akses dan pengiriman hasil simulasi SKD resmi.</p>
     </div>
   </div>
-  <button type="button" onclick="openModal('modal-complete-profile')" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold whitespace-nowrap text-xs shadow-sm flex items-center gap-1.5 transition-colors">
+  <button type="button" onclick="openCompleteProfileModal()" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold whitespace-nowrap text-xs shadow-sm flex items-center gap-1.5 transition-colors">
     <span>Lengkapi Sekarang</span>
     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
   </button>
@@ -1395,91 +1174,10 @@ Ingin menambah paket soal atau memperdalam materi latihan?
 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
 </button>
 </div>
-<!-- Content: Daftar Riwayat Try Out -->
-<div class="mt-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
-<!-- Item 1: TO Seri 1 Percobaan 2 -->
-<div class="p-4 rounded-lg border border-outline-variant/40 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-outline-variant transition-colors">
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-2">
-<span class="font-label-md text-label-md font-bold text-on-surface">Try Out Akbar Seri 1 (Percobaan 2)</span>
-<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-secondary-fixed border border-outline-variant/30">Lulus PG</span>
-</div>
-<div class="text-body-sm text-secondary flex flex-wrap items-center gap-x-4 gap-y-1">
-<span>Tanggal: 28 Feb 2026, 14:30 WIB</span>
-<span>• Durasi: 92 Menit</span>
-</div>
-<div class="flex items-center gap-3 text-body-sm mt-1 font-mono-timer">
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TWK:</strong> 85</span>
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TIU:</strong> 130</span>
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TKP:</strong> 177</span>
-</div>
-</div>
-<div class="flex items-center justify-between md:flex-col md:items-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-outline-variant/20">
-<div class="text-right">
-<div class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">392 <span class="text-body-sm font-normal text-secondary">/ 550</span></div>
-<div class="text-[11px] text-secondary">Surplus +81 dari PG</div>
-</div>
-<button class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-label-sm text-label-sm font-semibold hover:bg-slate-800 transition-all flex items-center gap-1.5" onclick="openEvaluasiModal('Try Out Akbar Seri 1 (Percobaan 2)', 392, 85, 130, 177)">
-<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-<span>Lihat Hasil &amp; Evaluasi</span>
-</button>
-</div>
-</div>
-<!-- Item 2: TO Seri 1 Percobaan 1 -->
-<div class="p-4 rounded-lg border border-outline-variant/40 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-outline-variant transition-colors">
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-2">
-<span class="font-label-md text-label-md font-bold text-on-surface">Try Out Akbar Seri 1 (Percobaan 1)</span>
-<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-surface-container text-on-secondary-fixed border border-outline-variant/30">Lulus PG</span>
-</div>
-<div class="text-body-sm text-secondary flex flex-wrap items-center gap-x-4 gap-y-1">
-<span>Tanggal: 26 Feb 2026, 09:15 WIB</span>
-<span>• Durasi: 98 Menit</span>
-</div>
-<div class="flex items-center gap-3 text-body-sm mt-1 font-mono-timer">
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TWK:</strong> 80</span>
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TIU:</strong> 120</span>
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TKP:</strong> 168</span>
-</div>
-</div>
-<div class="flex items-center justify-between md:flex-col md:items-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-outline-variant/20">
-<div class="text-right">
-<div class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">368 <span class="text-body-sm font-normal text-secondary">/ 550</span></div>
-<div class="text-[11px] text-secondary">Surplus +57 dari PG</div>
-</div>
-<button class="px-3.5 py-1.5 bg-surface border border-outline-variant/50 text-on-surface rounded-lg font-label-sm text-label-sm font-semibold hover:bg-surface-container transition-all flex items-center gap-1.5" onclick="openEvaluasiModal('Try Out Akbar Seri 1 (Percobaan 1)', 368, 80, 120, 168)">
-<svg class="w-3.5 h-3.5 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-<span>Lihat Hasil &amp; Evaluasi</span>
-</button>
-</div>
-</div>
-<!-- Item 3: Mini TO Diagnostik -->
-<div class="p-4 rounded-lg border border-outline-variant/40 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-outline-variant transition-colors">
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-2">
-<span class="font-label-md text-label-md font-bold text-on-surface">Mini Try Out Diagnostik</span>
-<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-error-container text-error border border-error/20">TKP Belum PG</span>
-</div>
-<div class="text-body-sm text-secondary flex flex-wrap items-center gap-x-4 gap-y-1">
-<span>Tanggal: 20 Feb 2026, 19:00 WIB</span>
-<span>• Durasi: 19 Menit</span>
-</div>
-<div class="flex items-center gap-3 text-body-sm mt-1 font-mono-timer">
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TWK:</strong> 75</span>
-<span class="text-on-surface"><strong class="font-semibold text-secondary">TIU:</strong> 115</span>
-<span class="text-error font-semibold"><strong class="text-secondary">TKP:</strong> 158</span>
-</div>
-</div>
-<div class="flex items-center justify-between md:flex-col md:items-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-outline-variant/20">
-<div class="text-right">
-<div class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">385 <span class="text-body-sm font-normal text-secondary">/ 550</span></div>
-<div class="text-[11px] text-error">TKP kurang 8 poin dari PG</div>
-</div>
-<button class="px-3.5 py-1.5 bg-surface border border-outline-variant/50 text-on-surface rounded-lg font-label-sm text-label-sm font-semibold hover:bg-surface-container transition-all flex items-center gap-1.5" onclick="openEvaluasiModal('Mini Try Out Diagnostik', 385, 75, 115, 158)">
-<svg class="w-3.5 h-3.5 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-<span>Lihat Hasil &amp; Evaluasi</span>
-</button>
-</div>
+<!-- Content: Daftar Riwayat Try Out (Dinamis dari Database) -->
+<div id="modal-riwayat-list" class="mt-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
+<div class="p-6 text-center rounded-lg border border-outline-variant/40 bg-surface text-secondary text-sm">
+Belum ada riwayat pengerjaan ujian. Mulai kerjakan Mini Try Out Diagnostik untuk melihat hasil evaluasi Anda.
 </div>
 </div>
 <!-- Modal Footer -->
@@ -1679,13 +1377,13 @@ Aktivasi
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
-<span>Status: <strong class="text-on-surface">Sudah Dikerjakan</strong></span>
+<span>Status: <strong class="text-on-surface">Aktif &amp; Gratis</strong></span>
 </div>
 </div>
 </div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20">
-<button class="w-full py-2 bg-surface-container hover:bg-surface-container-high rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all" onclick="closeModal('modal-katalog-lengkap'); openEvaluasiModal('Mini Try Out Diagnostik', 385, 75, 115, 158);" type="button">
-Lihat Pembahasan
+<button class="w-full py-2 bg-slate-900 hover:bg-slate-800 rounded-lg font-label-md text-label-md text-white font-semibold transition-all" onclick="closeModal('modal-katalog-lengkap'); window.startExam('mini-to');" type="button">
+Mulai Mini TO Gratis
 </button>
 </div>
 </div>
@@ -1895,8 +1593,9 @@ Mengerti &amp; Tutup
     if (tkpEl) tkpEl.innerText = tkp;
 
     const modalContainer = document.getElementById('modal-evaluasi-container');
+    const st = window.state || { attempts: [], questions: [] };
     if (modalContainer && typeof window.renderQuestionsToContainer === 'function') {
-      const matchAttempt = (state && state.attempts) ? state.attempts.find(a => a.nama_paket === namaUjian) : null;
+      const matchAttempt = (st.attempts || []).find(a => (a.nama_paket === namaUjian || a.package_name === namaUjian));
       const targetAttempt = matchAttempt || {
         nama_paket: namaUjian,
         id_paket: (namaUjian && namaUjian.toLowerCase().includes('mini')) ? 'mini' : 'to1',
@@ -1904,7 +1603,7 @@ Mengerti &amp; Tutup
         skor_twk: twk,
         skor_tiu: tiu,
         skor_tkp: tkp,
-        questions: (state.questions && state.questions.length > 0) ? state.questions.slice(0, 20) : [],
+        questions: (st.questions && st.questions.length > 0) ? st.questions.slice(0, 20) : [],
         answers: {}
       };
       window.renderQuestionsToContainer(modalContainer, targetAttempt);
@@ -1914,35 +1613,19 @@ Mengerti &amp; Tutup
     openModal('modal-evaluasi-detail');
   }
 
-  // Token Activation Handler for Dashboard Form
-  function handleTokenActivation() {
-    const input = document.getElementById('token-input');
-    const val = input.value.trim().toUpperCase();
-    if (!val) return;
-
-    if (val.startsWith('MASTER-') || val.length >= 8) {
-      const uname = (window.state && window.state.currentUser && window.state.currentUser.nama) ? window.state.currentUser.nama : 'Peserta';
-      if (typeof showToast === 'function') {
-        showToast('Token ' + val + ' berhasil diverifikasi untuk akun ' + uname + '!', 'success');
-      }
-      input.value = '';
-    } else {
-      alert('Format token tidak valid. Gunakan format standar contoh: MASTER-CPNS-2026-XXXX.');
-    }
-  }
-
-  // Token Activation Handler for Modal Form
+  // Token Activation Handler for Modal Form (delegasi langsung ke validasi Supabase)
   function handleModalTokenActivation() {
     const input = document.getElementById('modal-token-input');
-    const val = input.value.trim().toUpperCase();
-    if (!val) return;
-
-    if (val.startsWith('MASTER-') || val.length >= 8) {
-      alert('Token ' + val + ' berhasil diverifikasi! Paket Try Out telah aktif.');
-      input.value = '';
-      closeModal('modal-katalog-lengkap');
-    } else {
-      alert('Format token tidak valid. Gunakan format contoh: MASTER-CPNS-XXXX.');
+    const val = input ? input.value.trim().toUpperCase() : '';
+    if (!val) {
+      alert('Masukkan kode token Anda.');
+      return;
+    }
+    if (typeof window.handleTokenActivation === 'function') {
+      window.handleTokenActivation(val, function() {
+        if (input) input.value = '';
+        closeModal('modal-katalog-lengkap');
+      });
     }
   }
 
@@ -2233,10 +1916,10 @@ Mengerti &amp; Tutup
   </div>
 
   <!-- View 5: Riwayat Try Out & Pembahasan (Halaman 4) -->
-  <div id="view-history" class="hidden bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><!-- Mobile & Tablet Navigation Drawer (Sidebar) --><aside aria-label="Navigasi Utama" class="fixed left-0 top-0 h-full w-72 lg:w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-200" id="sidebar"><div class="flex flex-col"><div class="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-slate-100"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white text-[19px]">verified</span></div><div class="flex flex-col"><span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface leading-none text-base">CAT CPNS</span><span class="font-label-sm text-secondary leading-none uppercase tracking-wider font-semibold text-[10px] mt-0.5">Pro Exam System</span></div></div><!-- Tombol Tutup Drawer (X) --><button aria-label="Tutup navigasi" class="lg:hidden p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-close-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="p-4"><div class="font-label-sm text-secondary uppercase px-3 py-1 tracking-wider font-semibold text-[11px]">Navigasi Utama</div><nav class="flex flex-col gap-1 mt-1.5"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-slate-500">dashboard</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 transition-all bg-slate-900 text-white font-semibold rounded-lg shadow-sm text-sm" data-path="riwayat-try-out" href="#"><span class="material-symbols-outlined text-[20px] text-white">history_edu</span><span>Riwayat Try Out</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium cursor-pointer" data-path="paket-dan-token" href="javascript:void(0)" onclick="openBeliPaketFromHistory()"><span class="material-symbols-outlined text-[20px] text-slate-500">shopping_bag</span><span>Beli Paket &amp; Token</span></a></nav></div></div><div class="p-4 mx-4 mb-6 rounded-xl bg-slate-50 border border-slate-200"><div class="flex items-center justify-between mb-2"><span class="text-xs text-secondary font-medium">Sisa Token Ujian</span><span id="sidebar-token-count" class="text-xs font-bold text-on-surface">0 Kuota</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div id="sidebar-token-bar" class="bg-slate-900 h-full w-0 rounded-full" style="width: 0%;"></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between"><a class="text-[11px] font-semibold text-slate-900 hover:underline inline-flex items-center gap-1 cursor-pointer" href="javascript:void(0)" onclick="openBeliPaketFromHistory()">Isi Ulang Token <span class="material-symbols-outlined text-[13px]">arrow_forward</span></a></div></div></aside><!-- Backdrop Overlay --><div aria-hidden="true" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="sidebar-backdrop"></div><div class="lg:pl-64 flex flex-col min-h-screen w-full overflow-x-hidden"><!-- Navbar Atas --><header class="sticky top-0 z-30 h-16 bg-surface/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full"><div class="flex items-center gap-3"><!-- Tombol Hamburger Menu (Jelas terlihat di HP & Tablet, hidden di lg desktop) --><button aria-label="Buka navigasi menu" class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 active:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-open-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="flex items-center gap-2"><span class="hidden sm:inline-block font-label-sm text-secondary bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Simulasi Resmi BKN</span><span class="hidden sm:inline-block text-outline-variant font-body-sm text-body-sm">/</span><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate max-w-[190px] sm:max-w-none">SKD Kedinasan &amp; Umum 2024</span></div></div><div class="flex items-center gap-3 sm:gap-4"><nav class="hidden md:flex items-center gap-2"><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="panduan-ujian" href="#">Panduan</a><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="bantuan" href="#">Bantuan</a></nav><div class="flex items-center gap-3 border-l border-slate-200 pl-3 sm:pl-4"><div class="flex flex-col text-right hidden sm:flex"><span id="hist-header-user-name" class="text-xs font-semibold text-on-surface leading-tight">Peserta</span><span class="text-[11px] text-secondary leading-tight">Peserta CAT CPNS</span></div><div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"><span class="material-symbols-outlined text-[18px]">person</span></div></div></div></header><main class="relative bg-surface w-full flex-1"><div class="flex flex-col w-full"><div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8"><!-- 1. Header Halaman / Breadcrumb & Action Buttons --><header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6"><div class="flex flex-col gap-1"><nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label-sm text-secondary text-xs"><a class="hover:text-primary transition-colors font-medium" href="#">Riwayat Try Out</a><span class="text-slate-300">/</span><span class="text-on-surface font-medium truncate max-w-[240px] sm:max-w-md">Detail &amp; Pembahasan: Mini Try Out (20 Soal)</span></nav><h1 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight mt-0.5">Riwayat Try Out</h1><p class="text-xs sm:text-sm text-secondary">Daftar riwayat simulasi ujian, evaluasi skor, dan arsip pembahasan CAT SKD.</p></div><div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full lg:w-auto"><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Cetak Rekap (PDF)</span></button><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Kembali ke Riwayat</span></button><a class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" href="#"><svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dashboard</span></a></div></header><!-- Bilah Riwayat Ujian / Switch View --><div class="flex flex-col gap-2.5"><div class="flex items-center justify-between"><span class="font-semibold text-on-surface uppercase tracking-wider text-xs">Pilih Sesi Ujian:</span><span class="text-xs text-secondary font-medium">2 Simulasi Terdaftar</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"><!-- Kartu Riwayat 1 (Aktif / Sedang Dibuka) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 shadow-sm relative"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Sedang Dibuka</span><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Skor: 359 (Lulus PG)</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Mini Try Out Diagnostik Gratis (20 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>24 Okt 2026, 10:45 WIB</span><span>•</span><span>Durasi: 18m 40d</span></div></div><div class="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><!-- Kartu Riwayat 2 (Tersedia / Siap Dikerjakan) --><div class="bg-surface-container-lowest border border-slate-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:border-slate-300 transition-all"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">Belum Selesai</span><span class="text-[11px] font-medium text-slate-500">110 Soal SKD Penuh</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Simulasi SKD Paket TO Seri 1 (110 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>Siap Dikerjakan</span><span>•</span><span>Waktu: 100 Menit</span></div></div><button class="shrink-0 text-xs font-semibold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors whitespace-nowrap min-h-[36px]" type="button">Mulai Ujian</button></div></div></div><!-- 2. Kartu Ringkasan Skor --><section class="bg-surface-container-lowest border border-slate-200 rounded-xl p-4 sm:p-6 lg:p-7 flex flex-col gap-5 sm:gap-6 shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4"><div class="flex flex-col gap-1.5"><div class="flex flex-wrap items-center gap-2"><span id="hist-pg-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>LULUS PASSING GRADE</span><span class="text-[11px] text-secondary font-medium px-2 py-0.5 bg-slate-100 rounded border border-slate-200">KepmenPANRB No. 651/2023</span></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-secondary pt-0.5"><span>Nama: <strong id="hist-user-name" class="text-on-surface font-semibold">Peserta</strong></span><span>•</span><span>Paket: <strong id="hist-package-name" class="text-on-surface font-semibold">Mini Try Out Diagnostik Gratis (20 Soal)</strong></span></div></div><div class="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 sm:px-4 sm:py-2.5 rounded-lg border border-slate-200"><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Benar</span><span id="hist-correct-count" class="font-bold text-emerald-600 text-xs sm:text-sm">16 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Salah/Kurang</span><span id="hist-wrong-count" class="font-bold text-rose-600 text-xs sm:text-sm">4 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Total Butir</span><span id="hist-total-count" class="font-bold text-on-surface text-xs sm:text-sm">20 Soal</span></div></div></div><!-- Grid 4 Kotak Metrik Nilai --><div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"><!-- Kotak 1: TWK --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TWK</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 65</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Wawasan Kebangsaan</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-twk" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">80</span><span id="hist-max-twk" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-twk" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 2: TIU --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TIU</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 80</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Inteligensia Umum</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tiu" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">95</span><span id="hist-max-tiu" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tiu" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 3: TKP --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TKP</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 166</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Karakteristik Pribadi</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tkp" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">184</span><span id="hist-max-tkp" class="text-[10px] sm:text-xs text-secondary font-medium">/ 40</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tkp" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+18</span></div></div><!-- Kotak 4: Total Skor SKD (Utama) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between shadow-sm"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-bold text-slate-900 truncate">Total SKD</span><span class="bg-slate-900 text-white font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium">RESMI</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Nilai Kumulatif</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">359</span><span id="hist-max-total" class="text-[10px] sm:text-xs text-secondary font-medium">/ 100</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between"><span class="text-[11px] sm:text-xs font-bold text-slate-900">Ambang Batas</span><span id="hist-status-total" class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Aman</span></div></div></div></section><!-- 3. Banner Penawaran Paket Bundle --><section class="border-2 border-slate-900 bg-surface-container-lowest p-4 sm:p-7 rounded-xl relative overflow-hidden shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6"><div class="flex flex-col gap-2 max-w-2xl"><div class="inline-flex items-center gap-1.5 self-start"><span class="bg-slate-900 text-white text-[10px] sm:text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded">PENAWARAN SPESIAL PESERTA MINI TRY OUT</span></div><h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Buka Seluruh Pembahasan &amp; Akses Paket Bundle 3x Try Out (330 Soal HOTS)</h2><p class="text-xs sm:text-sm text-secondary leading-relaxed">Tingkatkan kesiapan SKD CPNS 2026 Anda dengan bank soal standar kisi-kisi terbaru BKN, analisis performa mendalam, dan pembahasan lengkap setiap butir soal tanpa terkunci.</p></div><div class="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between shrink-0 gap-3 sm:gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto"><div class="flex flex-col lg:text-right"><div class="flex items-center lg:justify-end gap-2"><span class="text-xs line-through text-slate-400 font-medium">Rp 75.000</span><span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Hemat 60%</span></div><div class="text-2xl font-extrabold text-slate-900 tracking-tight">Hanya Rp 30.000</div><span class="text-[11px] text-secondary">Akses 3 paket penuh (TO Seri 1, 2, &amp; 3)</span></div><a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm rounded-lg active:translate-y-px transition-all min-h-[44px] shadow-sm" href="https://wa.me/?text=Halo%20Admin,%20saya%20ingin%20mengaktifkan%20Paket%20Bundle%203x%20Try%20Out%20CPNS%20seharga%20Rp%2030.000" id="hist-banner-wa-link" rel="noopener noreferrer" target="_blank"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Beli Paket Bundle via WhatsApp</span></a></div></div></section><!-- 4. Navigasi Tab / Filter Pembahasan Soal --><div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-3"><div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none" id="subtest-filter-group"><button id="btn-hist-filter-all" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white shadow-sm whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('ALL')">Semua Soal (20)</button><button id="btn-hist-filter-twk" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TWK')">TWK (1-6)</button><button id="btn-hist-filter-tiu" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TIU')">TIU (7-12)</button><button id="btn-hist-filter-tkp" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TKP')">TKP (13-20)</button></div><div class="flex items-center gap-2 justify-between sm:justify-start shrink-0"><span class="text-xs text-secondary font-medium">Status:</span><div class="inline-flex rounded-lg border border-slate-200 bg-surface-container-lowest p-0.5 text-xs"><button id="btn-hist-status-all" class="px-2.5 py-1 font-semibold bg-slate-100 text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('ALL')">Semua</button><button id="btn-hist-status-correct" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('CORRECT')">Benar</button><button id="btn-hist-status-wrong" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('WRONG')">Salah</button></div></div></div><!-- 5. Daftar Evaluasi & Pembahasan Soal --><div id="history-evaluation-container" class="flex flex-col gap-5 sm:gap-6"></div></div></div></div></main></div><!-- Vanilla JavaScript untuk Toggle Drawer & Backdrop --><script>
+  <div id="view-history" class="hidden bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><!-- Mobile & Tablet Navigation Drawer (Sidebar) --><aside aria-label="Navigasi Utama" class="fixed left-0 top-0 h-full w-72 lg:w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-200" id="sidebar"><div class="flex flex-col"><div class="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-slate-100"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white text-[19px]">verified</span></div><div class="flex flex-col"><span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface leading-none text-base">CAT CPNS</span><span class="font-label-sm text-secondary leading-none uppercase tracking-wider font-semibold text-[10px] mt-0.5">Pro Exam System</span></div></div><!-- Tombol Tutup Drawer (X) --><button aria-label="Tutup navigasi" class="lg:hidden p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-close-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="p-4"><div class="font-label-sm text-secondary uppercase px-3 py-1 tracking-wider font-semibold text-[11px]">Navigasi Utama</div><nav class="flex flex-col gap-1 mt-1.5"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-slate-500">dashboard</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 transition-all bg-slate-900 text-white font-semibold rounded-lg shadow-sm text-sm" data-path="riwayat-try-out" href="#"><span class="material-symbols-outlined text-[20px] text-white">history_edu</span><span>Riwayat Try Out</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium cursor-pointer" data-path="paket-dan-token" href="javascript:void(0)" onclick="openBeliPaketFromHistory()"><span class="material-symbols-outlined text-[20px] text-slate-500">shopping_bag</span><span>Beli Paket &amp; Token</span></a></nav></div></div><div class="p-4 mx-4 mb-6 rounded-xl bg-slate-50 border border-slate-200"><div class="flex items-center justify-between mb-2"><span class="text-xs text-secondary font-medium">Sisa Token Ujian</span><span id="sidebar-token-count" class="text-xs font-bold text-on-surface">0 Kuota</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div id="sidebar-token-bar" class="bg-slate-900 h-full w-0 rounded-full" style="width: 0%;"></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between"><a class="text-[11px] font-semibold text-slate-900 hover:underline inline-flex items-center gap-1 cursor-pointer" href="javascript:void(0)" onclick="openBeliPaketFromHistory()">Isi Ulang Token <span class="material-symbols-outlined text-[13px]">arrow_forward</span></a></div></div></aside><!-- Backdrop Overlay --><div aria-hidden="true" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="history-sidebar-backdrop"></div><div class="lg:pl-64 flex flex-col min-h-screen w-full overflow-x-hidden"><!-- Navbar Atas --><header class="sticky top-0 z-30 h-16 bg-surface/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full"><div class="flex items-center gap-3"><!-- Tombol Hamburger Menu (Jelas terlihat di HP & Tablet, hidden di lg desktop) --><button aria-label="Buka navigasi menu" class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 active:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-open-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="flex items-center gap-2"><span class="hidden sm:inline-block font-label-sm text-secondary bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Simulasi Resmi BKN</span><span class="hidden sm:inline-block text-outline-variant font-body-sm text-body-sm">/</span><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate max-w-[190px] sm:max-w-none">SKD Kedinasan &amp; Umum 2024</span></div></div><div class="flex items-center gap-3 sm:gap-4"><nav class="hidden md:flex items-center gap-2"><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="panduan-ujian" href="#">Panduan</a><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="bantuan" href="#">Bantuan</a></nav><div class="flex items-center gap-3 border-l border-slate-200 pl-3 sm:pl-4"><div class="flex flex-col text-right hidden sm:flex"><span id="hist-header-user-name" class="text-xs font-semibold text-on-surface leading-tight">Peserta</span><span class="text-[11px] text-secondary leading-tight">Peserta CAT CPNS</span></div><div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"><span class="material-symbols-outlined text-[18px]">person</span></div></div></div></header><main class="relative bg-surface w-full flex-1"><div class="flex flex-col w-full"><div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8"><!-- 1. Header Halaman / Breadcrumb & Action Buttons --><header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6"><div class="flex flex-col gap-1"><nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label-sm text-secondary text-xs"><a class="hover:text-primary transition-colors font-medium" href="#">Riwayat Try Out</a><span class="text-slate-300">/</span><span class="text-on-surface font-medium truncate max-w-[240px] sm:max-w-md">Detail &amp; Pembahasan: Mini Try Out (20 Soal)</span></nav><h1 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight mt-0.5">Riwayat Try Out</h1><p class="text-xs sm:text-sm text-secondary">Daftar riwayat simulasi ujian, evaluasi skor, dan arsip pembahasan CAT SKD.</p></div><div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full lg:w-auto"><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Cetak Rekap (PDF)</span></button><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Kembali ke Riwayat</span></button><a class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" href="#"><svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dashboard</span></a></div></header><!-- Bilah Riwayat Ujian / Switch View --><div class="flex flex-col gap-2.5"><div class="flex items-center justify-between"><span class="font-semibold text-on-surface uppercase tracking-wider text-xs">Pilih Sesi Ujian:</span><span class="text-xs text-secondary font-medium">2 Simulasi Terdaftar</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"><!-- Kartu Riwayat 1 (Aktif / Sedang Dibuka) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 shadow-sm relative"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Sedang Dibuka</span><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Skor: 359 (Lulus PG)</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Mini Try Out Diagnostik Gratis (20 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>24 Okt 2026, 10:45 WIB</span><span>•</span><span>Durasi: 18m 40d</span></div></div><div class="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><!-- Kartu Riwayat 2 (Tersedia / Siap Dikerjakan) --><div class="bg-surface-container-lowest border border-slate-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:border-slate-300 transition-all"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">Belum Selesai</span><span class="text-[11px] font-medium text-slate-500">110 Soal SKD Penuh</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Simulasi SKD Paket TO Seri 1 (110 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>Siap Dikerjakan</span><span>•</span><span>Waktu: 100 Menit</span></div></div><button class="shrink-0 text-xs font-semibold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors whitespace-nowrap min-h-[36px]" type="button">Mulai Ujian</button></div></div></div><!-- 2. Kartu Ringkasan Skor --><section class="bg-surface-container-lowest border border-slate-200 rounded-xl p-4 sm:p-6 lg:p-7 flex flex-col gap-5 sm:gap-6 shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4"><div class="flex flex-col gap-1.5"><div class="flex flex-wrap items-center gap-2"><span id="hist-pg-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>LULUS PASSING GRADE</span><span class="text-[11px] text-secondary font-medium px-2 py-0.5 bg-slate-100 rounded border border-slate-200">KepmenPANRB No. 651/2023</span></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-secondary pt-0.5"><span>Nama: <strong id="hist-user-name" class="text-on-surface font-semibold">Peserta</strong></span><span>•</span><span>Paket: <strong id="hist-package-name" class="text-on-surface font-semibold">Mini Try Out Diagnostik Gratis (20 Soal)</strong></span></div></div><div class="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 sm:px-4 sm:py-2.5 rounded-lg border border-slate-200"><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Benar</span><span id="hist-correct-count" class="font-bold text-emerald-600 text-xs sm:text-sm">16 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Salah/Kurang</span><span id="hist-wrong-count" class="font-bold text-rose-600 text-xs sm:text-sm">4 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Total Butir</span><span id="hist-total-count" class="font-bold text-on-surface text-xs sm:text-sm">20 Soal</span></div></div></div><!-- Grid 4 Kotak Metrik Nilai --><div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"><!-- Kotak 1: TWK --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TWK</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 65</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Wawasan Kebangsaan</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-twk" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">80</span><span id="hist-max-twk" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-twk" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 2: TIU --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TIU</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 80</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Inteligensia Umum</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tiu" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">95</span><span id="hist-max-tiu" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tiu" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 3: TKP --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TKP</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 166</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Karakteristik Pribadi</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tkp" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">184</span><span id="hist-max-tkp" class="text-[10px] sm:text-xs text-secondary font-medium">/ 40</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tkp" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+18</span></div></div><!-- Kotak 4: Total Skor SKD (Utama) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between shadow-sm"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-bold text-slate-900 truncate">Total SKD</span><span class="bg-slate-900 text-white font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium">RESMI</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Nilai Kumulatif</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">359</span><span id="hist-max-total" class="text-[10px] sm:text-xs text-secondary font-medium">/ 100</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between"><span class="text-[11px] sm:text-xs font-bold text-slate-900">Ambang Batas</span><span id="hist-status-total" class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Aman</span></div></div></div></section><!-- 3. Banner Penawaran Paket Bundle --><section class="border-2 border-slate-900 bg-surface-container-lowest p-4 sm:p-7 rounded-xl relative overflow-hidden shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6"><div class="flex flex-col gap-2 max-w-2xl"><div class="inline-flex items-center gap-1.5 self-start"><span class="bg-slate-900 text-white text-[10px] sm:text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded">PENAWARAN SPESIAL PESERTA MINI TRY OUT</span></div><h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Buka Seluruh Pembahasan &amp; Akses Paket Bundle 3x Try Out (330 Soal HOTS)</h2><p class="text-xs sm:text-sm text-secondary leading-relaxed">Tingkatkan kesiapan SKD CPNS 2026 Anda dengan bank soal standar kisi-kisi terbaru BKN, analisis performa mendalam, dan pembahasan lengkap setiap butir soal tanpa terkunci.</p></div><div class="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between shrink-0 gap-3 sm:gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto"><div class="flex flex-col lg:text-right"><div class="flex items-center lg:justify-end gap-2"><span class="text-xs line-through text-slate-400 font-medium">Rp 75.000</span><span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Hemat 60%</span></div><div class="text-2xl font-extrabold text-slate-900 tracking-tight">Hanya Rp 30.000</div><span class="text-[11px] text-secondary">Akses 3 paket penuh (TO Seri 1, 2, &amp; 3)</span></div><a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm rounded-lg active:translate-y-px transition-all min-h-[44px] shadow-sm" href="https://wa.me/?text=Halo%20Admin,%20saya%20ingin%20mengaktifkan%20Paket%20Bundle%203x%20Try%20Out%20CPNS%20seharga%20Rp%2030.000" id="hist-banner-wa-link" rel="noopener noreferrer" target="_blank"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Beli Paket Bundle via WhatsApp</span></a></div></div></section><!-- 4. Navigasi Tab / Filter Pembahasan Soal --><div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-3"><div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none" id="subtest-filter-group"><button id="btn-hist-filter-all" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white shadow-sm whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('ALL')">Semua Soal (20)</button><button id="btn-hist-filter-twk" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TWK')">TWK (1-6)</button><button id="btn-hist-filter-tiu" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TIU')">TIU (7-12)</button><button id="btn-hist-filter-tkp" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TKP')">TKP (13-20)</button></div><div class="flex items-center gap-2 justify-between sm:justify-start shrink-0"><span class="text-xs text-secondary font-medium">Status:</span><div class="inline-flex rounded-lg border border-slate-200 bg-surface-container-lowest p-0.5 text-xs"><button id="btn-hist-status-all" class="px-2.5 py-1 font-semibold bg-slate-100 text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('ALL')">Semua</button><button id="btn-hist-status-correct" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('CORRECT')">Benar</button><button id="btn-hist-status-wrong" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('WRONG')">Salah</button></div></div></div><!-- 5. Daftar Evaluasi & Pembahasan Soal --><div id="history-evaluation-container" class="flex flex-col gap-5 sm:gap-6"></div></div></div></div></main></div><!-- Vanilla JavaScript untuk Toggle Drawer & Backdrop --><script>
   (function() {
     const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
+    const backdrop = document.getElementById('history-sidebar-backdrop');
     const btnOpen = document.getElementById('btn-open-sidebar');
     const btnClose = document.getElementById('btn-close-sidebar');
 
@@ -2979,7 +2662,7 @@ Mengerti &amp; Tutup
             <h3 class="font-bold text-slate-900 text-sm">Formulir Terbitkan Token Master</h3>
             <span class="text-xs text-slate-400">Otomatisasi Kirim Template Notifikasi</span>
           </div>
-          <form id="token-form" onsubmit="handleCreateToken(event)" class="space-y-4">
+          <form id="admin-token-form" onsubmit="handleCreateToken(event)" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
               <div class="space-y-1">
                 <label class="block font-semibold text-slate-700">Pilih Peserta Terdaftar</label>
@@ -3380,10 +3063,10 @@ Mengerti &amp; Tutup
     };
     window.APP = APP;
 
-    // --- TAB SWITCHING LOGIC ---
-    function switchAdminTab(tabKey) {
+    // --- TAB SWITCHING LOGIC (Bebas Rekursi Infinite Loop) ---
+    function switchAdminTab(tabKey, skipReload) {
       try {
-        APP.activeTab = tabKey;
+        APP.activeTab = tabKey || 'dashboard';
         const tabs = ['dashboard', 'banksoal', 'pengguna', 'token', 'pengaturan'];
         const breadcrumbMap = {
           dashboard: 'Dashboard Utama',
@@ -3397,14 +3080,14 @@ Mengerti &amp; Tutup
           const view = document.getElementById(`admin-view-${t}`);
           const navBtn = document.getElementById(`nav-${t}`);
           if (view) {
-            if (t === tabKey) {
+            if (t === APP.activeTab) {
               view.classList.remove('hidden');
             } else {
               view.classList.add('hidden');
             }
           }
           if (navBtn) {
-            if (t === tabKey) {
+            if (t === APP.activeTab) {
               navBtn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-colors bg-slate-900 text-white shadow-sm text-left';
             } else {
               navBtn.className = 'nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-left';
@@ -3413,27 +3096,29 @@ Mengerti &amp; Tutup
         });
 
         const breadcrumb = document.getElementById('page-title-breadcrumb');
-        if (breadcrumb) breadcrumb.textContent = breadcrumbMap[tabKey] || 'Dashboard Utama';
+        if (breadcrumb) breadcrumb.textContent = breadcrumbMap[APP.activeTab] || 'Dashboard Utama';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (typeof toggleSidebar === 'function') toggleSidebar(false);
 
-        if (tabKey === 'dashboard') {
+        if (skipReload) return;
+
+        if (APP.activeTab === 'dashboard') {
           if (typeof window.loadAdminData === 'function') {
             window.loadAdminData().catch(e => console.warn(e));
           }
-        } else if (tabKey === 'banksoal') {
+        } else if (APP.activeTab === 'banksoal') {
           if (typeof window.loadQuestionsFromSupabase === 'function') {
             window.loadQuestionsFromSupabase().catch(e => console.warn(e));
           }
           if (typeof updatePackageView === 'function') updatePackageView();
           if (typeof renderQuestions === 'function') renderQuestions();
-        } else if (tabKey === 'pengguna') {
+        } else if (APP.activeTab === 'pengguna') {
           if (typeof window.loadAdminData === 'function') {
             window.loadAdminData().catch(e => console.warn(e));
           } else if (typeof renderUserTable === 'function') {
             renderUserTable();
           }
-        } else if (tabKey === 'token') {
+        } else if (APP.activeTab === 'token') {
           if (typeof window.loadAdminData === 'function') {
             window.loadAdminData().catch(e => console.warn(e));
           } else if (typeof renderTokenTable === 'function') {
@@ -4838,53 +4523,122 @@ Mengerti &amp; Tutup
       `).join('');
     }
 
-    function toggleTokenStatus(idx) {
-      APP.tokens[idx].active = !APP.tokens[idx].active;
+    async function toggleTokenStatus(idx) {
+      const tok = APP.tokens[idx];
+      if (!tok) return;
+      tok.active = !tok.active;
+      tok.progress = tok.active ? 'Aktif' : 'Nonaktif';
+      const newStatus = tok.active ? 'aktif' : 'nonaktif';
+
+      const client = window.dbClient || window.supabaseClient;
+      if (client && client.from && tok.token) {
+        try {
+          await client.from('tokens').update({ status_token: newStatus, status: newStatus }).eq('kode_token', tok.token);
+        } catch (err) {
+          console.warn('Update token status notice:', err);
+        }
+      }
       renderTokenTable();
-      showToast('Status token diperbarui.', 'info');
+      showToast(`Status token ${tok.token} diubah menjadi ${tok.progress}.`, 'info');
     }
 
-    function handleCreateToken(e) {
+    async function handleCreateToken(e) {
       e.preventDefault();
-      const userVal = document.getElementById('token-user').value.split('|');
-      const pkgVal = document.getElementById('token-pkg').value.split('|');
+      const userSelectVal = document.getElementById('token-user')?.value || '';
+      if (!userSelectVal) {
+        alert('Silakan pilih peserta terdaftar terlebih dahulu.');
+        return;
+      }
+      const userVal = userSelectVal.split('|');
+      const pkgVal = (document.getElementById('token-pkg')?.value || 'Bundle 3 TO (TO 1, 2, 3)|Rp 30.000|BNDL').split('|');
       const prefix = pkgVal[2] || 'BNDL';
       const rand = Math.floor(1000 + Math.random() * 9000);
       const tokenCode = `CPNS-${prefix}-${rand}`;
+      const uName = userVal[0] || 'Peserta';
+      const uPhone = userVal[1] || '-';
+      const uEdu = userVal[2] || 'Umum';
+      const uEmail = userVal[3] || '';
+      const pkgLabel = pkgVal[0] || 'Bundle 3 TO';
+      const pkgPrice = pkgVal[1] || 'Rp 30.000';
+      const targetPaketDb = prefix === 'BNDL' ? 'to-1,to-2,to-3' : (prefix === 'TO01' ? 'to-1' : (prefix === 'TO02' ? 'to-2' : 'to-3'));
+
+      const client = window.dbClient || window.supabaseClient;
+      if (client && client.from) {
+        const tokenPayload = {
+          kode_token: tokenCode,
+          code: tokenCode,
+          token_code: tokenCode,
+          pemilik_nama: uName,
+          pemilik_wa: uPhone,
+          pemilik_email: uEmail,
+          user_email: uEmail,
+          target_paket: pkgLabel,
+          package_id: targetPaketDb,
+          package_type: prefix === 'BNDL' ? 'bundle' : 'satuan',
+          status_token: 'aktif',
+          status: 'aktif',
+          is_used: false
+        };
+        try {
+          let payloadToInsert = Object.assign({}, tokenPayload);
+          for (let attempt = 0; attempt < 6; attempt++) {
+            const { error } = await client.from('tokens').insert([payloadToInsert]);
+            if (!error) break;
+            const m = String(error.message || '').match(/Could not find the '([^']+)' column/i);
+            if (m && m[1] && Object.prototype.hasOwnProperty.call(payloadToInsert, m[1])) {
+              delete payloadToInsert[m[1]];
+            } else {
+              console.warn('Supabase token insert warning:', error);
+              break;
+            }
+          }
+        } catch (err) {
+          console.warn('Supabase token insert exception:', err);
+        }
+      }
 
       APP.tokens.unshift({
-        name: userVal[0],
-        edu: userVal[2],
-        phone: userVal[1],
+        name: uName,
+        edu: uEdu,
+        phone: uPhone,
+        email: uEmail,
         token: tokenCode,
-        pkg: pkgVal[0],
-        progress: '0 Selesai',
+        pkg: pkgLabel,
+        price: pkgPrice,
+        progress: 'Aktif',
         active: true
       });
 
       renderTokenTable();
-      showToast(`Token ${tokenCode} berhasil diterbitkan.`, 'success');
-      openWAPreview(userVal[0], userVal[1], tokenCode, pkgVal[0]);
+      showToast(`Token ${tokenCode} berhasil diterbitkan & disimpan ke Supabase.`, 'success');
+      openWAPreview(uName, uPhone, tokenCode, pkgLabel, pkgPrice);
     }
 
-    function openWAPreview(name, phone, token, pkg) {
+    function openWAPreview(name, phone, token, pkg, nominal) {
       document.getElementById('wa-preview-name').textContent = name;
       document.getElementById('wa-preview-phone').textContent = phone;
 
-      const template = document.getElementById('set-wa-template')?.value || `Halo {{nama}}, pembayaran {{paket}} berhasil diverifikasi. Kode Token akses Anda: {{token}}. Silakan mulai latihan simulasi CAT CPNS Pro.`;
+      const template = document.getElementById('set-wa-template')?.value || `Halo {{nama}}, pembayaran {{paket}} sebesar {{nominal}} berhasil diverifikasi. Kode Token akses Anda: {{token}}. Silakan gunakan kode ini untuk mulai simulasi CAT CPNS Pro.`;
+      const nom = nominal || (String(pkg || '').toLowerCase().includes('bundle') ? 'Rp 30.000' : 'Rp 12.000');
       const msg = template
         .replace(/{{nama}}/g, name)
         .replace(/{{token}}/g, token)
         .replace(/{{paket}}/g, pkg)
-        .replace(/{{nominal}}/g, 'Rp 30.000');
+        .replace(/{{nominal}}/g, nom);
 
       document.getElementById('wa-preview-text').textContent = msg;
       openModal('modal-wa-send');
     }
 
     function executeSendWA() {
+      let phone = (document.getElementById('wa-preview-phone')?.textContent || '').replace(/\D/g, '');
+      if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+      const rawMsg = document.getElementById('wa-preview-text')?.textContent || '';
+      if (phone) {
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(rawMsg)}`, '_blank');
+      }
       closeModal('modal-wa-send');
-      showToast('Pesan WhatsApp otomatis terkirim melalui Gateway Port 8080.', 'success');
+      showToast('Membuka WhatsApp untuk pengiriman token...', 'success');
     }
 
     // --- SETTINGS ---
@@ -5070,6 +4824,83 @@ Mengerti &amp; Tutup
       isFinished: false
     }
   };
+  window.state = state;
+
+  // Helper: Upsert aman ke tabel users (otomatis melewati kolom alias yang belum ada di skema)
+  async function safeUpsertUser(client, payload) {
+    if (!client || !client.from) return { error: null };
+    let dataToSave = Object.assign({}, payload);
+    let lastError = null;
+    for (let i = 0; i < 8; i++) {
+      const res = await client.from('users').upsert(dataToSave, { onConflict: 'id' });
+      if (!res.error) return { error: null };
+      lastError = res.error;
+      const m = String(res.error.message || '').match(/Could not find the '([^']+)' column/i);
+      if (m && m[1] && Object.prototype.hasOwnProperty.call(dataToSave, m[1])) {
+        delete dataToSave[m[1]];
+      } else {
+        break;
+      }
+    }
+    return { error: lastError };
+  }
+
+  // Helper: Parse poin TKP (mendukung objek JSON, string JSON {"A":5}, maupun "A=5, B=4" / "A:5, B:4")
+  function getTkpPointsMap(q) {
+    const map = {};
+    if (!q) return map;
+    const tryObj = (obj) => {
+      if (!obj || typeof obj !== 'object') return false;
+      let found = false;
+      ['A', 'B', 'C', 'D', 'E'].forEach(l => {
+        const v = obj[l] ?? obj[l.toLowerCase()];
+        if (v !== undefined && v !== null && !isNaN(parseInt(v, 10))) {
+          map[l] = parseInt(v, 10);
+          found = true;
+        }
+      });
+      return found;
+    };
+    if (q.scores && typeof q.scores === 'object' && tryObj(q.scores)) return map;
+    const raw = String(q.kunci_atau_bobot || (typeof q.scores === 'string' ? q.scores : '') || '').trim();
+    if (!raw) return map;
+    if (raw.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (tryObj(parsed)) return map;
+      } catch (e) {}
+    }
+    const parts = raw.replace(/[{}"]/g, '').split(/[,;\n]+/);
+    parts.forEach(p => {
+      const delim = p.includes(':') ? ':' : (p.includes('=') ? '=' : null);
+      if (delim) {
+        const [letter, val] = p.split(delim);
+        if (letter) {
+          const cleanL = letter.replace(/[^A-Ea-e]/g, '').toUpperCase();
+          const num = parseInt(String(val || '').replace(/[^0-9]/g, ''), 10);
+          if (cleanL && !isNaN(num)) map[cleanL] = num;
+        }
+      }
+    });
+    return map;
+  }
+
+  function getQuestionOptionText(q, letter) {
+    if (!q) return '-';
+    const lo = letter.toLowerCase();
+    const up = letter.toUpperCase();
+    if (q[`opsi_${lo}`]) return q[`opsi_${lo}`];
+    if (q[`option_${lo}`]) return q[`option_${lo}`];
+    if (q.options && typeof q.options === 'object') {
+      if (Array.isArray(q.options)) {
+        const idx = ['A', 'B', 'C', 'D', 'E'].indexOf(up);
+        if (idx >= 0 && q.options[idx]) return q.options[idx];
+      } else if (q.options[up] || q.options[lo]) {
+        return q.options[up] || q.options[lo];
+      }
+    }
+    return q[lo] || '-';
+  }
 
   // Helper check user token
   function hasPaidToken() {
@@ -5162,11 +4993,12 @@ Mengerti &amp; Tutup
       }
     }
 
-    const views = ['login', 'register', 'dashboard', 'exam', 'history', 'admin'];
+    const targetDomView = (viewId === 'register') ? 'login' : viewId;
+    const views = ['login', 'dashboard', 'exam', 'history', 'admin'];
     views.forEach(v => {
       const el = document.getElementById('view-' + v);
       if (el) {
-        if (v === viewId) {
+        if (v === targetDomView) {
           el.classList.remove('hidden');
         } else {
           el.classList.add('hidden');
@@ -5177,13 +5009,20 @@ Mengerti &amp; Tutup
     // Pastikan seluruh modal yang sedang tidak dipakai memiliki class hidden agar tidak menghalangi klik mouse
     const allModals = document.querySelectorAll('[id^="modal-"]');
     allModals.forEach(m => {
-      if (viewId === 'login' && m.id === 'modal-admin-login') return;
+      if (m.id === 'modal-admin-login') return;
       m.classList.add('hidden');
       m.classList.remove('flex');
     });
+    document.body.classList.remove('overflow-hidden');
 
     state.activeView = viewId;
-    window.location.hash = viewId;
+    if (viewId !== 'exam') {
+      try {
+        if (window.location.hash !== '#' + viewId && !window.location.hash.includes('access_token')) {
+          window.history.replaceState(null, '', window.location.pathname + '#' + viewId);
+        }
+      } catch (e) {}
+    }
     window.scrollTo(0, 0);
 
     if (viewId === 'login') {
@@ -5354,6 +5193,35 @@ Mengerti &amp; Tutup
   };
 
   window.updateParticipantWhatsAppLinks = updateParticipantWhatsAppLinks;
+
+  window.saveAdminWhatsApp = async function() {
+    const input = document.getElementById('set-admin-wa');
+    const raw = (input ? input.value : '').trim();
+    const cleaned = raw.replace(/\D/g, '');
+    if (!cleaned) {
+      if (typeof showToast === 'function') showToast('Masukkan nomor WhatsApp Admin terlebih dahulu.', 'info');
+      return;
+    }
+    const normalized = cleaned.startsWith('0') ? ('62' + cleaned.slice(1)) : cleaned;
+    if (input) input.value = normalized;
+    state.settings.admin_whatsapp = normalized;
+    state.settings.WA_ADMIN = normalized;
+    try { localStorage.setItem('cat_admin_whatsapp', normalized); } catch (e) {}
+    updateParticipantWhatsAppLinks(normalized);
+
+    const client = window.dbClient || window.supabaseClient;
+    if (client && client.from) {
+      try {
+        await client.from('app_settings').upsert({ id: 1, admin_whatsapp: normalized }, { onConflict: 'id' });
+      } catch (e) {}
+      try {
+        await client.from('settings').upsert({ key: 'WA_ADMIN', value: normalized }, { onConflict: 'key' });
+      } catch (e) {}
+    }
+    if (typeof showToast === 'function') {
+      showToast(`Nomor WhatsApp Admin (${normalized}) berhasil disimpan.`, 'success');
+    }
+  };
 
   window.openAdminLoginModal = function() {
     const pinInput = document.getElementById('admin-modal-pin');
@@ -5631,6 +5499,8 @@ Mengerti &amp; Tutup
       }
 
       const userId = authUser?.id || `usr-${Date.now()}`;
+      const cleanEdu = String(jurusan || 'Umum').trim();
+      const cleanTarget = String(provinsi || '').trim();
       const newUser = {
         id: userId,
         email: cleanEmail,
@@ -5638,18 +5508,18 @@ Mengerti &amp; Tutup
         nama: String(nama).trim(),
         phone: cleanWa,
         no_wa: cleanWa,
-        password: password,
-        jurusan: String(jurusan || 'Umum').trim(),
-        target_instansi: String(provinsi || 'Indonesia').trim(),
-        provinsi: String(provinsi || 'Indonesia').trim(),
+        pendidikan: cleanEdu,
+        education: cleanEdu,
+        jurusan: cleanEdu,
+        target_instansi: cleanTarget || null,
+        provinsi: cleanTarget || '-',
         has_password: true,
-        role: 'peserta',
-        created_at: new Date().toISOString()
+        role: 'peserta'
       };
 
       if (window.dbClient && window.dbClient.from) {
         try {
-          await window.dbClient.from('users').upsert(newUser, { onConflict: 'id' });
+          await safeUpsertUser(window.dbClient, newUser);
         } catch (err) {
           console.warn('Supabase register error:', err);
         }
@@ -5735,39 +5605,52 @@ Mengerti &amp; Tutup
     }
   };
 
+  window.openCompleteProfileModal = function() {
+    const u = state.currentUser || {};
+    const waInput = document.getElementById('complete-profile-wa');
+    if (waInput) waInput.value = (u.no_wa && u.no_wa !== '-') ? u.no_wa : '';
+    const nameInput = document.getElementById('complete-profile-name');
+    if (nameInput) nameInput.value = u.nama || u.full_name || '';
+    const eduInput = document.getElementById('complete-profile-edu');
+    if (eduInput) eduInput.value = (u.jurusan && u.jurusan !== '-' && u.jurusan !== 'Umum') ? u.jurusan : '';
+    const targetInput = document.getElementById('complete-profile-target');
+    if (targetInput) targetInput.value = (u.provinsi && u.provinsi !== '-' && u.provinsi !== 'Indonesia') ? u.provinsi : '';
+    const passInput = document.getElementById('complete-profile-password');
+    if (passInput) passInput.value = '';
+    const alertEl = document.getElementById('complete-profile-alert');
+    if (alertEl) alertEl.classList.add('hidden');
+    if (typeof openModal === 'function') openModal('modal-complete-profile');
+  };
+
   window.handleCancelCompleteProfile = function() {
-    if (!state.currentUser?.has_password || !state.currentUser?.no_wa) {
-      if (confirm('Profil dan kata sandi wajib dilengkapi untuk dapat mengakses simulasi ujian CAT CPNS Pro. Apakah Anda ingin keluar dari sesi?')) {
-        closeModal('modal-complete-profile');
-        if (typeof window.handleUserLogout === 'function') {
-          window.handleUserLogout();
-        }
-      }
-    } else {
-      closeModal('modal-complete-profile');
+    closeModal('modal-complete-profile');
+    if (state.currentUser && state.activeView !== 'dashboard') {
+      window.showView('dashboard');
+      renderDashboardView();
     }
   };
 
   window.handleSaveProfileCompletion = async function() {
-    const name = document.getElementById('complete-profile-name')?.value?.trim();
     const wa = document.getElementById('complete-profile-wa')?.value?.trim();
-    const target = document.getElementById('complete-profile-target')?.value?.trim();
-    const password = document.getElementById('complete-profile-password')?.value;
+    const name = document.getElementById('complete-profile-name')?.value?.trim();
+    const password = document.getElementById('complete-profile-password')?.value || '';
+    const edu = document.getElementById('complete-profile-edu')?.value?.trim();
+    const target = document.getElementById('complete-profile-target')?.value?.trim() || '';
     const alertEl = document.getElementById('complete-profile-alert');
     const btnSubmit = document.getElementById('btn-save-profile-complete');
 
-    // 1. Validasi bahwa Nama Lengkap, Nomor WhatsApp, dan Instansi tidak kosong
-    if (!name || !wa || !target) {
+    // 1. Validasi field wajib: No HP, Nama, Kata Sandi (min 6), Pendidikan. Target Formasi OPSIONAL.
+    if (!wa || !name || !edu) {
       if (alertEl) {
-        alertEl.textContent = 'Harap lengkapi semua kolom: Nama Lengkap, Nomor WhatsApp, dan Instansi Tujuan.';
+        alertEl.textContent = 'Harap lengkapi Nomor HP/WhatsApp, Nama Lengkap, dan Pendidikan.';
         alertEl.classList.remove('hidden');
       }
       return;
     }
 
-    if (password && password.length < 6) {
+    if (!password || password.length < 6) {
       if (alertEl) {
-        alertEl.textContent = 'Kata sandi minimal 6 karakter.';
+        alertEl.textContent = 'Harap buat kata sandi baru minimal 6 karakter.';
         alertEl.classList.remove('hidden');
       }
       return;
@@ -5783,29 +5666,31 @@ Mengerti &amp; Tutup
       const client = window.dbClient || window.supabaseClient;
       const currentUser = state.currentUser || {};
 
-      if (!currentUser.id) {
-        if (client && client.auth) {
-          const { data: sData } = await client.auth.getSession();
-          if (sData?.session?.user) {
-            currentUser.id = sData.session.user.id;
-            currentUser.email = currentUser.email || sData.session.user.email;
-          }
+      if (!currentUser.id && client && client.auth) {
+        const { data: sData } = await client.auth.getSession();
+        if (sData?.session?.user) {
+          currentUser.id = sData.session.user.id;
+          currentUser.email = currentUser.email || sData.session.user.email;
         }
       }
 
-      // 2. Lakukan upsert ke tabel users menggunakan dbClient
+      // 2. Upsert aman ke tabel public.users (otomatis menyesuaikan kolom yang tersedia di Supabase)
       if (client && client.from) {
-        const { error } = await client.from('users').upsert({
+        const { error } = await safeUpsertUser(client, {
           id: currentUser.id,
           email: currentUser.email,
           full_name: name,
           nama: name,
           phone: wa,
           no_wa: wa,
-          target_instansi: target,
-          provinsi: target,
-          has_password: true
-        }, { onConflict: 'id' });
+          pendidikan: edu,
+          education: edu,
+          jurusan: edu,
+          target_instansi: target || null,
+          provinsi: target || '-',
+          has_password: true,
+          role: currentUser.role || 'peserta'
+        });
 
         if (error) {
           console.error('Gagal menyimpan profil:', error);
@@ -5819,15 +5704,21 @@ Mengerti &amp; Tutup
         localStorage.setItem('profile_done_' + currentUser.id, 'true');
       }
 
-      // 4. Update password autentikasi dalam blok try-catch terpisah
-      if (password && password.length >= 6) {
-        try {
-          if (client && client.auth) {
-            await client.auth.updateUser({ password: password });
-          }
-        } catch (pwdErr) {
-          console.warn('Update user password notice:', pwdErr);
+      // 4. Update password autentikasi dalam blok try-catch terpisah agar tidak membatalkan simpan profil
+      try {
+        if (client && client.auth) {
+          await client.auth.updateUser({
+            password: password,
+            data: {
+              full_name: name,
+              whatsapp: wa,
+              education: edu,
+              target_formation: target
+            }
+          });
         }
+      } catch (pwdErr) {
+        console.warn('Update user password notice:', pwdErr);
       }
 
       // 5. Update state currentUser
@@ -5835,23 +5726,23 @@ Mengerti &amp; Tutup
       currentUser.full_name = name;
       currentUser.no_wa = wa;
       currentUser.phone = wa;
-      currentUser.provinsi = target;
-      currentUser.target_instansi = target;
+      currentUser.jurusan = edu;
+      currentUser.education = edu;
+      currentUser.pendidikan = edu;
+      currentUser.provinsi = target || '-';
+      currentUser.target_instansi = target || '';
       currentUser.has_password = true;
       state.currentUser = currentUser;
       localStorage.setItem('cat_user_session', JSON.stringify(currentUser));
 
-      // 6. Tutup modal profil dan langsung tampilkan Dashboard Peserta
-      const modalProfileEl = document.getElementById('modal-complete-profile');
-      if (modalProfileEl) {
-        modalProfileEl.classList.add('hidden');
-        modalProfileEl.classList.remove('flex');
-      }
+      // 6. Tutup modal profil dan perbarui Dashboard Peserta
       closeModal('modal-complete-profile');
-      window.showView('dashboard');
+      if (state.activeView !== 'dashboard') {
+        window.showView('dashboard');
+      }
       renderDashboardView();
       if (typeof showToast === 'function') {
-        showToast('Profil & Password berhasil disimpan! Selamat datang di Dashboard.', 'success');
+        showToast('Profil & Kata Sandi berhasil disimpan!', 'success');
       }
     } catch (err) {
       console.error('Save profile completion error:', err);
@@ -5959,8 +5850,9 @@ Mengerti &amp; Tutup
       }).catch(() => {});
     }
 
-    // Periksa kelengkapan nomor WhatsApp, target formasi, dan status password (Google OAuth)
-    const isProfileIncomplete = (!u.no_wa || u.no_wa === '-' || !u.provinsi || u.provinsi === '-' || !u.has_password);
+    // Periksa kelengkapan profil wajib (No HP, Pendidikan, Password — Target Formasi opsional)
+    const isLocalProfileDone = u.id && localStorage.getItem('profile_done_' + u.id) === 'true';
+    const isProfileIncomplete = !isLocalProfileDone && (!u.no_wa || u.no_wa === '-' || !u.jurusan || u.jurusan === '-' || !u.has_password);
     const bannerEl = document.getElementById('banner-complete-profile');
     if (bannerEl) {
       if (isProfileIncomplete) {
@@ -5970,11 +5862,14 @@ Mengerti &amp; Tutup
       }
     }
 
+    // Render daftar riwayat modal secara dinamis dari state.attempts
+    try { renderModalRiwayatList(); } catch (e) { console.warn('renderModalRiwayatList notice:', e); }
+
     // Render Evaluasi per Materi vs Passing Grade (Real-Time Attempt)
-    renderDashboardEvaluationCard();
+    try { renderDashboardEvaluationCard(); } catch (e) { console.warn('renderDashboardEvaluationCard notice:', e); }
 
     // Setup Chart.js dynamic rendering
-    renderDashboardCharts();
+    try { renderDashboardCharts(); } catch (e) { console.warn('renderDashboardCharts notice:', e); }
 
     // Attach token activation form listener
     const tokenForm = document.getElementById('token-form');
@@ -5987,13 +5882,59 @@ Mengerti &amp; Tutup
     }
 
     // Wire Start Exam buttons on cards & update access status
-    updateDashboardPackageCards();
+    try { updateDashboardPackageCards(); } catch (e) { console.warn('updateDashboardPackageCards notice:', e); }
   }
 
-  window.handleTokenActivation = async function() {
+  function renderModalRiwayatList() {
+    const listEl = document.getElementById('modal-riwayat-list');
+    if (!listEl) return;
+    const atts = state.attempts || [];
+    if (atts.length === 0) {
+      listEl.innerHTML = `
+        <div class="p-6 text-center rounded-lg border border-outline-variant/40 bg-surface text-secondary text-sm">
+          Belum ada riwayat pengerjaan ujian. Mulai kerjakan Mini Try Out Diagnostik untuk melihat hasil evaluasi Anda.
+        </div>
+      `;
+      return;
+    }
+    listEl.innerHTML = atts.map((a) => {
+      const pName = a.nama_paket || a.package_name || 'Simulasi CAT SKD';
+      const total = a.total_skor ?? a.total_score ?? 0;
+      const twk = a.skor_twk ?? a.score_twk ?? 0;
+      const tiu = a.skor_tiu ?? a.score_tiu ?? 0;
+      const tkp = a.skor_tkp ?? a.score_tkp ?? 0;
+      const isPass = String(a.status_pg || '').toUpperCase().includes('LULUS') && !String(a.status_pg || '').toUpperCase().includes('TIDAK');
+      const dateStr = a.created_at ? new Date(a.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
+      return `
+        <div class="p-4 rounded-lg border border-outline-variant/40 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-outline-variant transition-colors">
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+              <span class="font-label-md text-label-md font-bold text-on-surface">${escapeHtml(pName)}</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded ${isPass ? 'bg-surface-container text-on-secondary-fixed border border-outline-variant/30' : 'bg-error-container text-error border border-error/20'}">${isPass ? 'Lulus PG' : 'Belum PG'}</span>
+            </div>
+            <div class="text-body-sm text-secondary">Tanggal: ${escapeHtml(dateStr)}</div>
+            <div class="flex items-center gap-3 text-body-sm mt-1 font-mono-timer">
+              <span class="text-on-surface"><strong class="font-semibold text-secondary">TWK:</strong> ${twk}</span>
+              <span class="text-on-surface"><strong class="font-semibold text-secondary">TIU:</strong> ${tiu}</span>
+              <span class="text-on-surface"><strong class="font-semibold text-secondary">TKP:</strong> ${tkp}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between md:flex-col md:items-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-outline-variant/20">
+            <div class="text-right">
+              <div class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">${total} <span class="text-body-sm font-normal text-secondary">/ 550</span></div>
+            </div>
+            <button class="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg font-label-sm text-label-sm font-semibold hover:bg-slate-800 transition-all flex items-center gap-1.5" onclick="openEvaluasiModal('${escapeHtml(pName)}', ${total}, ${twk}, ${tiu}, ${tkp})">
+              <span>Lihat Hasil &amp; Evaluasi</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.handleTokenActivation = async function(explicitCode, onSuccess) {
     const input = document.getElementById('token-input');
-    if (!input) return;
-    const code = input.value.trim().toUpperCase();
+    const code = String(explicitCode || (input ? input.value : '') || '').trim().toUpperCase();
     if (!code) {
       alert('Masukkan kode token Anda.');
       return;
@@ -6005,28 +5946,34 @@ Mengerti &amp; Tutup
     }
 
     let tokenObj = null;
-    if (window.dbClient && window.dbClient.from) {
+    const client = window.dbClient || window.supabaseClient;
+    if (client && client.from) {
       try {
-        const { data } = await window.dbClient.from('tokens')
+        const { data } = await client.from('tokens')
           .select('*')
-          .eq('kode_token', code)
+          .or(`kode_token.eq.${code},code.eq.${code},token_code.eq.${code}`)
           .limit(1);
         if (data && data.length > 0) tokenObj = data[0];
-      } catch (e) {}
-    }
-
-    if (!tokenObj) {
-      if (code === 'BND3-2026A' || code === 'MASTER-CPNS-2026' || code.startsWith('BND3-')) {
-        tokenObj = {
-          kode_token: code,
-          target_paket: 'to-1,to-2,to-3',
-          status_token: 'aktif'
-        };
+      } catch (e) {
+        try {
+          const { data } = await client.from('tokens').select('*').eq('kode_token', code).limit(1);
+          if (data && data.length > 0) tokenObj = data[0];
+        } catch (e2) {}
       }
     }
 
     if (!tokenObj) {
-      alert('Kode token tidak valid atau tidak terdaftar.');
+      alert('Kode token tidak valid atau tidak terdaftar di sistem. Silakan hubungi Admin WhatsApp.');
+      return;
+    }
+
+    const st = String(tokenObj.status_token || tokenObj.status || '').toLowerCase();
+    if (st === 'nonaktif') {
+      alert('Kode token ini sudah dinonaktifkan oleh Admin.');
+      return;
+    }
+    if (tokenObj.pemilik_email && tokenObj.pemilik_email.toLowerCase() !== (state.currentUser.email || '').toLowerCase() && st === 'terpakai') {
+      alert('Kode token ini sudah terikat pada akun peserta lain.');
       return;
     }
 
@@ -6035,20 +5982,23 @@ Mengerti &amp; Tutup
     tokenObj.pemilik_nama = state.currentUser.nama;
     tokenObj.status_token = 'terpakai';
 
-    if (window.dbClient && window.dbClient.from) {
+    if (client && client.from) {
       try {
-        await window.dbClient.from('tokens').update({
+        await client.from('tokens').update({
           pemilik_email: state.currentUser.email,
           pemilik_wa: state.currentUser.no_wa,
           pemilik_nama: state.currentUser.nama,
-          status_token: 'terpakai'
-        }).eq('kode_token', code);
+          status_token: 'terpakai',
+          status: 'terpakai',
+          is_used: true
+        }).eq('kode_token', tokenObj.kode_token || code);
       } catch (e) {}
     }
 
     state.tokens.push(tokenObj);
-    input.value = '';
-    alert(`Token berhasil diaktifkan! Seluruh paket try out telah terbuka penuh.`);
+    if (input && !explicitCode) input.value = '';
+    if (typeof onSuccess === 'function') onSuccess();
+    alert('Token berhasil diaktifkan! Paket Try Out Anda kini terbuka penuh.');
     renderDashboardView();
     updateDashboardPackageCards();
   };
@@ -6868,28 +6818,19 @@ Mengerti &amp; Tutup
       const qId = q.id_soal || q.id || `q-${idx + 1}`;
       const userAns = (state.exam.answers[qId] || '').trim().toUpperCase();
       const sub = (q.subtes || q.subtest || 'TWK').toUpperCase();
-      const keyOrWeight = q.kunci_atau_bobot || 'A';
+      const keyOrWeight = String(q.correct_answer || q.kunci_jawaban || q.kunci_atau_bobot || 'A');
 
       if (sub === 'TKP') {
         if (userAns) {
-          let pts = 1;
-          const parts = keyOrWeight.split(/[,;\n]+/);
-          parts.forEach(p => {
-            const delim = p.includes(':') ? ':' : (p.includes('=') ? '=' : null);
-            if (delim) {
-              const [letter, val] = p.split(delim);
-              if (letter && letter.trim().toUpperCase() === userAns) {
-                pts = parseInt(val.trim(), 10) || 1;
-              }
-            }
-          });
+          const ptsMap = getTkpPointsMap(q);
+          const pts = ptsMap[userAns] || 1;
           tkpScore += pts;
           if (pts >= 4) correctCount++; else wrongCount++;
         } else {
           wrongCount++;
         }
       } else {
-        const correctLetter = keyOrWeight.trim().toUpperCase();
+        const correctLetter = keyOrWeight.trim().charAt(0).toUpperCase();
         if (userAns && userAns === correctLetter) {
           if (sub === 'TWK') twkScore += 5;
           if (sub === 'TIU') tiuScore += 5;
@@ -7072,8 +7013,13 @@ Mengerti &amp; Tutup
 
   window.openTokenFromUser = function(name, phone, edu) {
     if (typeof window.switchAdminTab === 'function') window.switchAdminTab('token');
-    const uInput = document.getElementById('token-user');
-    if (uInput) uInput.value = name;
+    setTimeout(function() {
+      const uInput = document.getElementById('token-user');
+      if (uInput) {
+        const match = Array.from(uInput.options).find(opt => opt.value.startsWith(`${name}|${phone}|`));
+        if (match) uInput.value = match.value;
+      }
+    }, 150);
     if (typeof window.showToast === 'function') window.showToast(`Membuat token untuk ${name}...`, 'info');
   };
 
@@ -7181,7 +7127,8 @@ Mengerti &amp; Tutup
       const qId = q.id_soal || q.id || `q-${qNum}`;
       const sub = (q.subtes || q.subtest || 'TWK').toUpperCase();
       const userAns = (answers[qId] || '').trim().toUpperCase();
-      const keyOrWeight = (q.kunci_atau_bobot || 'A').trim();
+      const keyOrWeight = String(q.correct_answer || q.kunci_jawaban || q.kunci_atau_bobot || 'A').trim();
+      const tkpPtsMap = (sub === 'TKP') ? getTkpPointsMap(q) : {};
 
       // Filter subtest
       if (subFilter !== 'ALL' && sub !== subFilter) {
@@ -7192,21 +7139,10 @@ Mengerti &amp; Tutup
       let isCorrect = false;
       let userPts = 0;
       if (sub === 'TKP') {
-        let pts = 1;
-        const parts = keyOrWeight.split(/[,;\n]+/);
-        parts.forEach(p => {
-          const delim = p.includes(':') ? ':' : (p.includes('=') ? '=' : null);
-          if (delim) {
-            const [letter, val] = p.split(delim);
-            if (letter && letter.trim().toUpperCase() === userAns) {
-              pts = parseInt(val.trim(), 10) || 1;
-            }
-          }
-        });
-        userPts = userAns ? pts : 0;
+        userPts = userAns ? (tkpPtsMap[userAns] || 1) : 0;
         isCorrect = userPts >= 4;
       } else {
-        const correctLetter = keyOrWeight.toUpperCase();
+        const correctLetter = keyOrWeight.charAt(0).toUpperCase();
         isCorrect = Boolean(userAns && userAns === correctLetter);
       }
 
@@ -7244,22 +7180,11 @@ Mengerti &amp; Tutup
       let optionsHtml = '';
       if (!isLocked) {
         letters.forEach(letter => {
-          const optKey = `opsi_${letter.toLowerCase()}`;
-          const optText = q[optKey] || q[letter.toLowerCase()] || '-';
+          const optText = getQuestionOptionText(q, letter);
           const isUserChoice = (userAns === letter);
 
           if (sub === 'TKP') {
-            let pts = 1;
-            const parts = keyOrWeight.split(/[,;\n]+/);
-            parts.forEach(p => {
-              const delim = p.includes(':') ? ':' : (p.includes('=') ? '=' : null);
-              if (delim) {
-                const [l, val] = p.split(delim);
-                if (l && l.trim().toUpperCase() === letter) {
-                  pts = parseInt(val.trim(), 10) || 1;
-                }
-              }
-            });
+            const pts = tkpPtsMap[letter] || 1;
 
             if (isUserChoice) {
               const borderBg = (pts === 5)
@@ -7333,8 +7258,7 @@ Mengerti &amp; Tutup
       } else {
         // LOCKED: Render choices, highlighting ONLY user selection without revealing correct answer or points!
         letters.forEach(letter => {
-          const optKey = `opsi_${letter.toLowerCase()}`;
-          const optText = q[optKey] || q[letter.toLowerCase()] || '-';
+          const optText = getQuestionOptionText(q, letter);
           const isUserChoice = (userAns === letter);
 
           if (isUserChoice) {
@@ -7532,10 +7456,13 @@ Mengerti &amp; Tutup
       pgBadge.innerHTML = `<svg class="w-3.5 h-3.5 ${isPass ? 'text-emerald-600' : 'text-rose-600'}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="${isPass ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}" stroke-linecap="round" stroke-linejoin="round"></path></svg>${isPass ? 'LULUS PASSING GRADE' : 'BELUM MEMENUHI PASSING GRADE'}`;
     }
 
+    const latestQuestions = Array.isArray(latest.questions) ? latest.questions : [];
+    const computedTotal = latestQuestions.length || ((latest.jumlah_benar || 0) + (latest.jumlah_salah || 0));
+
     // Counts
-    if (corrEl) corrEl.textContent = `${latest.jumlah_benar ?? 16} Soal`;
-    if (wrongEl) wrongEl.textContent = `${latest.jumlah_salah ?? 4} Soal`;
-    if (totEl) totEl.textContent = `${latest.questions.length} Soal`;
+    if (corrEl) corrEl.textContent = `${latest.jumlah_benar ?? 0} Soal`;
+    if (wrongEl) wrongEl.textContent = `${latest.jumlah_salah ?? 0} Soal`;
+    if (totEl) totEl.textContent = `${computedTotal} Soal`;
 
     // TWK Box
     const maxTwk = isMini ? 30 : 175;
@@ -7588,10 +7515,10 @@ Mengerti &amp; Tutup
     if (waBannerLink) waBannerLink.href = waUrl;
 
     // Update Filter Tab Labels
-    const totalQCount = latest.questions.length;
-    const twkQCount = latest.questions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK').length;
-    const tiuQCount = latest.questions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU').length;
-    const tkpQCount = latest.questions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP').length;
+    const totalQCount = latestQuestions.length;
+    const twkQCount = latestQuestions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK').length;
+    const tiuQCount = latestQuestions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU').length;
+    const tkpQCount = latestQuestions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP').length;
 
     if (btnAll) btnAll.textContent = `Semua Soal (${totalQCount})`;
     if (btnTwk) btnTwk.textContent = isMini ? `TWK (1-6)` : `TWK (1-${twkQCount})`;
@@ -7616,7 +7543,7 @@ Mengerti &amp; Tutup
     const btnOpen = document.getElementById('btn-open-sidebar');
     const btnClose = document.getElementById('btn-close-sidebar');
     const side = document.getElementById('sidebar');
-    const bdrop = document.getElementById('sidebar-backdrop');
+    const bdrop = document.getElementById('history-sidebar-backdrop');
     if (btnOpen && side) {
       btnOpen.onclick = () => {
         side.classList.remove('-translate-x-full');
@@ -7632,7 +7559,17 @@ Mengerti &amp; Tutup
   }
 
   // 10. PANEL ADMIN MODULE (Mulai Segar dari 0 / Real-Time Database)
+  let _adminViewLoading = false;
   async function initAdminView() {
+    if (!window.APP || _adminViewLoading) return;
+    _adminViewLoading = true;
+    try {
+      await _initAdminViewCore();
+    } finally {
+      _adminViewLoading = false;
+    }
+  }
+  async function _initAdminViewCore() {
     if (!window.APP) return;
 
     window.APP.users = [];
@@ -7691,6 +7628,9 @@ Mengerti &amp; Tutup
         }
 
         const { count: qCount, data: qData } = await activeDb.from('questions').select('*', { count: 'exact' });
+        if (Array.isArray(qData)) {
+          state.questions = qData;
+        }
         if (qCount !== null && qCount !== undefined) {
           totalQuestionsCount = qCount;
         } else if (qData) {
@@ -7725,10 +7665,11 @@ Mengerti &amp; Tutup
 
       window.APP.users.push({
         id: u.id || `USR-${i+1}`,
+        email: userEmail,
         name: u.full_name || u.nama || 'Peserta',
         phone: userPhone,
-        edu: u.education || u.jurusan || 'Umum',
-        loc: u.target_instansi || u.provinsi || 'Indonesia',
+        edu: u.pendidikan || u.education || u.jurusan || 'Umum',
+        loc: u.target_instansi || u.provinsi || '-',
         miniStatus: miniStatus,
         maxScore: maxScore,
         token: tokenDisplay,
@@ -7740,14 +7681,15 @@ Mengerti &amp; Tutup
     dbTokens.forEach(t => {
       const isActive = (t.status_token === 'aktif' || t.status === 'aktif');
       const targetPkg = t.target_paket || 'Satuan';
-      if (isActive) {
+      const isSold = (t.status_token === 'aktif' || t.status === 'aktif' || t.status_token === 'terpakai' || t.status === 'terpakai');
+      if (isSold) {
         activeTokensCount++;
-        if (targetPkg.toLowerCase().includes('bundle')) {
+        if (targetPkg.toLowerCase().includes('bundle') || String(t.package_type || '').toLowerCase() === 'bundle') {
           bundleCount++;
-          totalRevenue += 99000;
+          totalRevenue += 30000;
         } else {
           satuanCount++;
-          totalRevenue += 39000;
+          totalRevenue += 12000;
         }
       }
       window.APP.tokens.push({
@@ -7800,11 +7742,15 @@ Mengerti &amp; Tutup
       } else {
         tokenUserSelect.innerHTML = '<option value="" disabled selected>-- Pilih Peserta Terdaftar --</option>' + 
           window.APP.users.map(u => {
-            const val = `${u.name}|${u.phone}|${u.edu}`;
+            const val = `${u.name}|${u.phone}|${u.edu}|${u.email || ''}`;
             return `<option value="${escapeHtml(val)}">${escapeHtml(u.name)} - ${escapeHtml(u.phone)} (${escapeHtml(u.edu)})</option>`;
           }).join('');
       }
     }
+
+    // Update Sidebar User Count Badge
+    const sidebarUserCount = document.getElementById('admin-sidebar-user-count');
+    if (sidebarUserCount) sidebarUserCount.textContent = totalUsersCount;
 
     // Update 4 Top Cards
     const statUsers = document.getElementById('admin-stat-users');
@@ -7840,7 +7786,8 @@ Mengerti &amp; Tutup
     if (typeof window.renderTokenTable === 'function') window.renderTokenTable();
     if (typeof window.renderQuestions === 'function') window.renderQuestions();
     if (typeof window.updatePackageView === 'function') window.updatePackageView();
-    if (typeof window.switchAdminTab === 'function') window.switchAdminTab(window.APP.activeTab || 'dashboard');
+    // Panggil switchAdminTab dengan skipReload=true agar TIDAK memicu infinite recursion!
+    if (typeof window.switchAdminTab === 'function') window.switchAdminTab(window.APP.activeTab || 'dashboard', true);
 
     // Sync admin whatsapp field
     const adminWaInput = document.getElementById('set-admin-wa');
@@ -7860,13 +7807,13 @@ Mengerti &amp; Tutup
     }
 
     window.executeSendWA = function() {
-      const phone = document.getElementById('wa-preview-phone').textContent.replace(/\D/g, '');
-      const text = encodeURIComponent(document.getElementById('wa-preview-text').value);
+      let phone = (document.getElementById('wa-preview-phone')?.textContent || '').replace(/\D/g, '');
+      if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+      const rawText = document.getElementById('wa-preview-text')?.textContent || '';
       if (phone) {
-        window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(rawText)}`, '_blank');
       }
-      const modal = document.getElementById('modal-wa-send');
-      if (modal) modal.classList.add('hidden');
+      if (typeof closeModal === 'function') closeModal('modal-wa-send');
     };
 
     window.confirmExitToUser = function() {
@@ -8013,33 +7960,29 @@ Mengerti &amp; Tutup
         return;
       }
 
-      // 5. CEK SESI PESERTA VIA SUPABASE AUTH (Instance konsisten)
+      // 5. CEK SESI PESERTA VIA SUPABASE AUTH (Instance konsisten & anti-mental)
       const authClient = window.dbClient || window.supabaseClient;
-
       let participantSessionFound = false;
       let participantProfileComplete = false;
+      window._lastHandledAuthUserId = null;
 
-      // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (nama, phone, target_instansi)
+      // Helper: Sinkronisasi ke public.users & cek kelengkapan profil (No HP, Nama, Kata Sandi, Pendidikan; Target Formasi OPSIONAL)
       async function syncAndCheckUserProfile(u, isGoogle) {
         if (!u) return { isComplete: false, profile: null };
 
-        // 1. Cek tanda tersimpan lokal (profile_done_)
         const isLocalDone = localStorage.getItem('profile_done_' + u.id) === 'true';
-
         let profile = null;
         const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || (u.email ? u.email.split('@')[0] : 'Peserta');
         const activeClient = window.dbClient || window.supabaseClient;
 
         if (activeClient && activeClient.from) {
           try {
-            const { data: profsById } = await activeClient.from('users').select('*').eq('id', u.id).limit(1);
-            if (profsById && profsById.length > 0) {
-              profile = profsById[0];
-            } else {
-              const { data: profsByEmail } = await activeClient.from('users').select('*').eq('email', u.email).limit(1);
-              if (profsByEmail && profsByEmail.length > 0) {
-                profile = profsByEmail[0];
-              }
+            const { data: profById } = await activeClient.from('users').select('*').eq('id', u.id).maybeSingle();
+            if (profById) {
+              profile = profById;
+            } else if (u.email) {
+              const { data: profByEmail } = await activeClient.from('users').select('*').eq('email', u.email).maybeSingle();
+              if (profByEmail) profile = profByEmail;
             }
 
             if (!profile) {
@@ -8048,11 +7991,10 @@ Mengerti &amp; Tutup
                 email: u.email,
                 full_name: googleFullName,
                 nama: googleFullName,
-                has_password: false,
-                quota: 0,
+                has_password: !isGoogle,
                 role: 'peserta'
               };
-              await activeClient.from('users').upsert(initialUpsert, { onConflict: 'id' }).catch(() => {});
+              await safeUpsertUser(activeClient, initialUpsert);
               profile = initialUpsert;
             }
           } catch (pErr) {
@@ -8063,32 +8005,31 @@ Mengerti &amp; Tutup
         const meta = u.user_metadata || {};
         const pName = profile?.full_name || profile?.nama || meta.full_name || meta.name || googleFullName;
         const pPhone = profile?.phone || profile?.no_wa || meta.phone || meta.whatsapp || '';
+        const pEdu = profile?.pendidikan || profile?.education || profile?.jurusan || meta.education || '';
         const pTarget = profile?.target_instansi || profile?.provinsi || meta.target_instansi || meta.target_formation || '';
-        const pHasPassword = Boolean(profile?.has_password);
+        const pHasPassword = Boolean(profile?.has_password) || !isGoogle;
 
         state.currentUser = {
           id: u.id,
           nama: pName,
           full_name: pName,
           email: u.email,
-          no_wa: pPhone,
-          phone: pPhone,
-          jurusan: profile?.education || profile?.jurusan || 'Umum',
-          provinsi: pTarget,
-          target_instansi: pTarget,
+          no_wa: pPhone || '-',
+          phone: pPhone || '',
+          jurusan: pEdu || '-',
+          education: pEdu || '',
+          pendidikan: pEdu || '',
+          provinsi: pTarget || '-',
+          target_instansi: pTarget || '',
           has_password: pHasPassword,
           role: profile?.role || 'peserta',
           avatar_url: meta.avatar_url || meta.picture || null
         };
         localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
 
-        // Cek kelengkapan: jika localStorage profile_done_ bernilai true ATAU di database sudah ada phone dan target_instansi
-        const hasDbPhoneAndTarget = Boolean(
-          (profile?.phone || profile?.no_wa) && 
-          (profile?.target_instansi || profile?.provinsi)
-        );
-        const isComplete = isLocalDone || hasDbPhoneAndTarget || Boolean(pName && pPhone && pTarget);
-
+        // Profil lengkap jika No HP + Pendidikan + Kata Sandi sudah ada (Target Formasi OPSIONAL)
+        const hasDbMandatory = Boolean(pPhone && pEdu && pHasPassword);
+        const isComplete = isLocalDone || hasDbMandatory;
         if (isComplete) {
           localStorage.setItem('profile_done_' + u.id, 'true');
         }
@@ -8096,14 +8037,69 @@ Mengerti &amp; Tutup
         return { isComplete, profile };
       }
 
+      // Helper: Masuk ke Dashboard Peserta secara aman (buka Dashboard dulu, baru tampilkan modal profil jika belum lengkap)
+      async function enterAuthenticatedParticipant(u) {
+        if (!u) return;
+        window._lastHandledAuthUserId = u.id;
+        window._authInitialized = true;
+        const isGoogle = u.app_metadata?.provider === 'google' ||
+                         (Array.isArray(u.identities) && u.identities.some(id => id.provider === 'google'));
+
+        const res = await syncAndCheckUserProfile(u, isGoogle);
+        participantSessionFound = true;
+        participantProfileComplete = res.isComplete;
+
+        window.showView('dashboard');
+        try {
+          await Promise.race([
+            syncInitialData(),
+            new Promise(resolve => setTimeout(resolve, 2000))
+          ]);
+        } catch (e) {}
+        try { renderDashboardView(); } catch (e) { console.warn(e); }
+        window.hideLoadingScreen();
+
+        if (!res.isComplete) {
+          setTimeout(function() {
+            if (typeof window.openCompleteProfileModal === 'function') {
+              window.openCompleteProfileModal();
+            }
+          }, 150);
+        }
+      }
+
+      const isOAuthRedirect = window.location.hash.includes('access_token') ||
+                              window.location.search.includes('code=') ||
+                              window.location.hash.includes('refresh_token');
+
       if (authClient && authClient.auth) {
         try {
-          const isOAuthRedirect = window.location.hash.includes('access_token') || 
-                                  window.location.search.includes('code=') ||
-                                  window.location.hash.includes('refresh_token');
+          // Pasang listener SEBELUM getSession agar tidak melewatkan callback OAuth PKCE/Implicit
+          authClient.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+              return;
+            }
 
-          const timeoutMs = isOAuthRedirect ? 5000 : 2500;
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+              // Cegah reset tampilan / pop-up ulang saat pindah tab browser (Supabase v2 mengirim ulang SIGNED_IN)
+              if (window._lastHandledAuthUserId === session.user.id &&
+                  state.activeView !== 'login' &&
+                  state.activeView !== 'register') {
+                return;
+              }
+              if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+                try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {}
+              }
+              await enterAuthenticatedParticipant(session.user);
+            } else if (event === 'SIGNED_OUT') {
+              window._lastHandledAuthUserId = null;
+              state.currentUser = null;
+              localStorage.removeItem('cat_user_session');
+              window.showLoginScreen();
+            }
+          });
 
+          const timeoutMs = isOAuthRedirect ? 6000 : 3000;
           const { data: sessionData } = await Promise.race([
             authClient.auth.getSession(),
             new Promise((_, reject) => setTimeout(() => reject(new Error('Auth getSession timeout')), timeoutMs))
@@ -8114,83 +8110,37 @@ Mengerti &amp; Tutup
 
           const activeAuthUser = sessionData?.session?.user;
           if (activeAuthUser) {
-            const isGoogleUser = activeAuthUser.app_metadata?.provider === 'google' || 
-                                 (activeAuthUser.identities && activeAuthUser.identities.some(id => id.provider === 'google'));
-
-            participantSessionFound = true;
-            const res = await syncAndCheckUserProfile(activeAuthUser, isGoogleUser);
-            participantProfileComplete = res.isComplete;
-
             if (isOAuthRedirect) {
-              window.history.replaceState(null, '', window.location.pathname);
+              try { window.history.replaceState(null, '', window.location.pathname); } catch (e) {}
+            }
+            if (window._lastHandledAuthUserId !== activeAuthUser.id) {
+              await enterAuthenticatedParticipant(activeAuthUser);
             }
           }
-
-          authClient.auth.onAuthStateChange(async (event, session) => {
-            // Abaikan event TOKEN_REFRESHED dan USER_UPDATED agar modal tidak muncul kembali saat token auto-refresh atau saat peserta berganti tab browser!
-            if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-              return;
-            }
-
-            if (event === 'SIGNED_IN' && session?.user) {
-              const u = session.user;
-              const isGoogle = u.app_metadata?.provider === 'google' || (u.identities && u.identities.some(id => id.provider === 'google'));
-              const res = await syncAndCheckUserProfile(u, isGoogle);
-              if (res.isComplete) {
-                window.showView('dashboard');
-                renderDashboardView();
-              } else {
-                window.showView('login');
-                setTimeout(() => {
-                  const nameInput = document.getElementById('complete-profile-name');
-                  if (nameInput) nameInput.value = state.currentUser?.nama || '';
-                  const waInput = document.getElementById('complete-profile-wa');
-                  if (waInput) waInput.value = state.currentUser?.no_wa || '';
-                  const targetInput = document.getElementById('complete-profile-target');
-                  if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
-                  if (typeof openModal === 'function') openModal('modal-complete-profile');
-                }, 200);
-              }
-            } else if (event === 'SIGNED_OUT') {
-              state.currentUser = null;
-              localStorage.removeItem('cat_user_session');
-              window.showLoginScreen();
-            }
-          });
         } catch (sessErr) {
           console.warn('Session verification notice:', sessErr);
         }
       }
 
-      // 6. TENTUKAN TAMPILAN BERDASARKAN HASIL PENGECEKAN
-      if (participantSessionFound && state.currentUser) {
-        const isDone = (localStorage.getItem('profile_done_' + state.currentUser.id) === 'true') || participantProfileComplete;
-        if (isDone) {
-          window.showView('dashboard');
-          renderDashboardView();
-        } else {
-          window.showView('login');
+      // 6. TENTUKAN TAMPILAN JIKA BELUM ADA SESI AKTIF
+      window._authInitialized = true;
+      if (!participantSessionFound && !window._lastHandledAuthUserId) {
+        if (isOAuthRedirect) {
+          // Beri jeda singkat untuk callback onAuthStateChange jika OAuth code masih diproses
           setTimeout(() => {
-            const nameInput = document.getElementById('complete-profile-name');
-            if (nameInput) nameInput.value = state.currentUser?.nama || '';
-            const waInput = document.getElementById('complete-profile-wa');
-            if (waInput) waInput.value = state.currentUser?.no_wa || '';
-            const targetInput = document.getElementById('complete-profile-target');
-            if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
-            if (typeof openModal === 'function') openModal('modal-complete-profile');
-          }, 300);
+            if (!window._lastHandledAuthUserId && !state.currentUser) {
+              window.showLoginScreen();
+              window.hideLoadingScreen();
+            }
+          }, 2500);
+        } else {
+          const hash = window.location.hash.replace('#', '');
+          if (hash === 'register') {
+            window.showView('register');
+          } else {
+            window.showLoginScreen();
+          }
         }
-      } else {
-        const isOAuthRedirect = window.location.hash.includes('access_token') || window.location.search.includes('code=');
-        if (!isOAuthRedirect) {
-          window.showLoginScreen();
-        }
-      }
-
-      // Check URL Hash
-      const hash = window.location.hash.replace('#', '');
-      if (hash && ['login', 'register'].includes(hash)) {
-        window.showView(hash);
       }
     } catch (err) {
       console.error('Init error:', err);
