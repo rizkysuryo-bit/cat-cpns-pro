@@ -1,6 +1,52 @@
 // api/generate-soal.js
 // Vercel Serverless Function (Node.js) - Native fetch tanpa library eksternal
 
+const crypto = require('crypto');
+
+// In-memory rate limiter per IP / token: maksimal 10 request per menit
+const rateLimitMap = new Map();
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 menit
+
+function isRateLimited(key) {
+  const now = Date.now();
+  if (rateLimitMap.size > 500) {
+    for (const [k, v] of rateLimitMap.entries()) {
+      if (now > v.resetAt) rateLimitMap.delete(k);
+    }
+  }
+
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return true;
+  }
+
+  entry.count += 1;
+  return false;
+}
+
+function verifyAdminToken(token, secretPin) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  const [expiresAtStr, signature] = parts;
+  const expiresAt = parseInt(expiresAtStr, 10);
+  if (isNaN(expiresAt) || Date.now() > expiresAt) return false;
+
+  const expectedHmac = crypto.createHmac('sha256', secretPin).update(expiresAtStr).digest('hex');
+  const sigBuf = Buffer.from(signature, 'hex');
+  const expBuf = Buffer.from(expectedHmac, 'hex');
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    return false;
+  }
+  return true;
+}
+
 module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -20,6 +66,31 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({
       error: 'Method not allowed. Gunakan metode POST.'
+    });
+  }
+
+  // 1. Verifikasi Otorisasi Token Admin HMAC-SHA256
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: 'Akses ditolak. Header Authorization: Bearer <adminToken> wajib disertakan.'
+    });
+  }
+
+  const adminToken = authHeader.slice(7).trim();
+  const secretPin = process.env.ADMIN_PIN || 'admin123';
+  if (!verifyAdminToken(adminToken, secretPin)) {
+    return res.status(401).json({
+      error: 'Sesi token otorisasi Admin tidak valid atau telah kedaluwarsa. Silakan masuk ulang sebagai Admin.'
+    });
+  }
+
+  // 2. In-Memory Rate Limiter (Maksimal 10 request per menit)
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'client';
+  const rateKey = `${clientIp}_${adminToken.slice(-12)}`;
+  if (isRateLimited(rateKey)) {
+    return res.status(429).json({
+      error: 'Terlalu banyak permintaan generate soal (Rate limit tercapai). Maksimal 10 request per menit. Silakan tunggu beberapa saat.'
     });
   }
 
@@ -117,9 +188,6 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
   ]
 }`;
 
-    // Panggil Gemini 2.5 Flash API menggunakan fetch bawaan
-    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
-
     const geminiPayload = {
       systemInstruction: {
         parts: [{ text: systemInstruction }]
@@ -171,19 +239,47 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
       }
     };
 
-    const response = await fetch(geminiEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(geminiPayload)
-    });
+    // Fungsi pemanggil Google Gemini REST API
+    async function requestGemini(modelName) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
+      return await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(geminiPayload)
+      });
+    }
+
+    // Panggil model utama: gemini-2.5-flash
+    let response = await requestGemini('gemini-2.5-flash');
+
+    // Jika terjadi error selain 401/403 (misal 404 karena model belum tersedia atau 503), coba fallback otomatis ke gemini-2.0-flash
+    if (!response.ok && response.status !== 401 && response.status !== 403) {
+      console.warn(`Panggilan ke gemini-2.5-flash menghasilkan status ${response.status}. Mencoba fallback ke gemini-2.0-flash...`);
+      const fallbackResponse = await requestGemini('gemini-2.0-flash');
+      if (fallbackResponse.ok) {
+        response = fallbackResponse;
+      }
+    }
 
     if (!response.ok) {
-      const errText = await response.text();
+      let errMessage = `Gagal memanggil Gemini API: ${response.status} ${response.statusText}`;
+      let errDetails = null;
+
+      try {
+        const errData = await response.json();
+        errDetails = errData;
+        if (errData?.error?.message) {
+          errMessage = errData.error.message;
+        }
+      } catch (jsonErr) {
+        errDetails = await response.text().catch(() => null);
+      }
+
       return res.status(response.status).json({
-        error: `Gagal memanggil Gemini API: ${response.status} ${response.statusText}`,
-        details: errText
+        error: errMessage,
+        details: errDetails
       });
     }
 
