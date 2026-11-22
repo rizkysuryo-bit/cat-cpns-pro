@@ -69,7 +69,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // 1. Verifikasi Otorisasi Token Admin HMAC-SHA256
+  // 1. Verifikasi Otorisasi Token Admin HMAC-SHA256 (Tanpa hardcoded fallback)
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
@@ -78,7 +78,14 @@ module.exports = async function handler(req, res) {
   }
 
   const adminToken = authHeader.slice(7).trim();
-  const secretPin = process.env.ADMIN_PIN || 'admin123';
+  const secretPin = process.env.ADMIN_PIN;
+  if (!secretPin) {
+    console.error('ADMIN_PIN environment variable is not configured.');
+    return res.status(500).json({
+      error: 'Konfigurasi server bermasalah: ADMIN_PIN belum diatur di environment variable server.'
+    });
+  }
+
   if (!verifyAdminToken(adminToken, secretPin)) {
     return res.status(401).json({
       error: 'Sesi token otorisasi Admin tidak valid atau telah kedaluwarsa. Silakan masuk ulang sebagai Admin.'
@@ -239,7 +246,7 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
       }
     };
 
-    // Fungsi pemanggil Google Gemini REST API
+    // Fungsi pemanggil Google Gemini REST API (Endpoint v1beta)
     async function requestGemini(modelName) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
       return await fetch(endpoint, {
@@ -251,13 +258,13 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
       });
     }
 
-    // Panggil model utama: gemini-2.5-flash
-    let response = await requestGemini('gemini-2.5-flash');
+    // Panggil model utama: gemini-3.8-flash (sesuai arahan pengguna)
+    let response = await requestGemini('gemini-3.8-flash');
 
-    // Jika terjadi error selain 401/403 (misal 404 karena model belum tersedia atau 503), coba fallback otomatis ke gemini-2.0-flash
+    // Jika terjadi error selain 401/403 (misal status 404 jika model belum tersedia di region akun atau 503), coba fallback otomatis ke gemini-2.5-flash
     if (!response.ok && response.status !== 401 && response.status !== 403) {
-      console.warn(`Panggilan ke gemini-2.5-flash menghasilkan status ${response.status}. Mencoba fallback ke gemini-2.0-flash...`);
-      const fallbackResponse = await requestGemini('gemini-2.0-flash');
+      console.warn(`Panggilan ke gemini-3.8-flash menghasilkan status ${response.status}. Mencoba fallback ke gemini-2.5-flash...`);
+      const fallbackResponse = await requestGemini('gemini-2.5-flash');
       if (fallbackResponse.ok) {
         response = fallbackResponse;
       }
@@ -296,13 +303,19 @@ Keluarkan data HANYA dalam format JSON valid dengan key baku persis seperti beri
     // Bersihkan karakter markdown ```json atau ``` sebelum JSON.parse() agar tidak pernah gagal parsing
     let cleaned = rawContent.trim();
     cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    
+    // Ekstrak blok JSON utuh jika terdapat teks pembuka/penutup
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleaned = jsonMatch[0];
+    }
 
     let parsedResult;
     try {
       parsedResult = JSON.parse(cleaned);
     } catch (parseError) {
       return res.status(500).json({
-        error: 'Gagal mengurai teks respon JSON dari Gemini.',
+        error: `Gagal mengurai respon Gemini API menjadi format JSON soal: ${parseError.message}`,
         details: parseError.message,
         rawText: rawContent
       });

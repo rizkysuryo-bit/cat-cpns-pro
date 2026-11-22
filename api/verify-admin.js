@@ -44,10 +44,17 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Ambil PIN rahasia dari environment variable serverless process.env.ADMIN_PIN
-    const secretPin = process.env.ADMIN_PIN || 'admin123';
+    // Ambil PIN rahasia dari environment variable serverless process.env.ADMIN_PIN (tanpa fallback hardcoded)
+    const secretPin = process.env.ADMIN_PIN;
+    if (!secretPin) {
+      console.error('Konfigurasi server bermasalah: ADMIN_PIN belum diatur di environment variable server.');
+      return res.status(500).json({
+        ok: false,
+        error: 'Konfigurasi server bermasalah: Variabel ADMIN_PIN belum disetel di Dashboard Vercel.'
+      });
+    }
 
-    // Verifikasi PIN
+    // Verifikasi PIN secara aman
     if (String(pin).trim() !== String(secretPin).trim()) {
       return res.status(401).json({
         ok: false,
