@@ -1053,9 +1053,9 @@ Lihat Riwayat &amp; Evaluasi Lengkap
 <span id="dash-ready-packages-count">1 Paket Siap Akses</span>
 </span>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
 <!-- Card 1: Mini Try Out Diagnostik -->
-<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm hover:border-outline-variant transition-all">
+<div id="card-package-mini" class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm hover:border-outline-variant transition-all">
 <div class="flex flex-col gap-3">
 <div class="flex items-center justify-between">
 <span class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-on-surface border border-outline-variant/30">Gratis (1x Akses)</span>
@@ -1114,6 +1114,72 @@ Lihat Riwayat &amp; Evaluasi Lengkap
 </div>
 </div>
 <div id="action-package-to-1" class="pt-4 mt-4 border-t border-outline-variant/20">
+<button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
+<svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Aktivasi / Beli Token</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Paket Satuan TO Seri 2 -->
+<div id="card-package-to-2" class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span id="badge-package-to-2" class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30">TERKUNCI / BELUM AKTIF</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">Rp 12.000</span>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-bold">Paket Satuan TO Seri 2</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Simulasi tingkat lanjut variasi penalaran analitis HOTS</p>
+</div>
+<div class="space-y-2 pt-2 border-t border-outline-variant/20 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<span>Durasi: <strong>100 Menit</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+<span>110 Butir Soal CAT BKN: <strong>TWK 35, TIU 30, TKP 45</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Status: <strong id="status-package-to-2" class="text-secondary font-medium">Membutuhkan Token Akses</strong></span>
+</div>
+</div>
+</div>
+<div id="action-package-to-2" class="pt-4 mt-4 border-t border-outline-variant/20">
+<button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
+<svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Aktivasi / Beli Token</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Paket Satuan TO Seri 3 -->
+<div id="card-package-to-3" class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span id="badge-package-to-3" class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30">TERKUNCI / BELUM AKTIF</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">Rp 12.000</span>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-bold">Paket Satuan TO Seri 3</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Simulasi komprehensif prediksi soal seleksi CPNS 2026</p>
+</div>
+<div class="space-y-2 pt-2 border-t border-outline-variant/20 font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<span>Durasi: <strong>100 Menit</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+<span>110 Butir Soal CAT BKN: <strong>TWK 35, TIU 30, TKP 45</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Status: <strong id="status-package-to-3" class="text-secondary font-medium">Membutuhkan Token Akses</strong></span>
+</div>
+</div>
+</div>
+<div id="action-package-to-3" class="pt-4 mt-4 border-t border-outline-variant/20">
 <button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
 <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
 <span>Aktivasi / Beli Token</span>
@@ -1707,212 +1773,340 @@ Mengerti &amp; Tutup
 </div>
 
   <!-- View 4: Ruang Ujian CAT Standar BKN (Halaman 3) -->
-  <div id="view-exam" class="hidden bg-[#f8fafc] font-sans text-slate-900 antialiased min-h-screen flex flex-col relative pb-20 lg:pb-0"><!-- Anti-Cheat Red Top Banner --><header class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm"><div class="bg-red-600 text-white px-3 py-1.5 sm:py-2 text-center flex items-center justify-center gap-1.5 sm:gap-2"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg><span class="text-[10px] sm:text-xs tracking-wide uppercase font-semibold leading-tight line-clamp-1 sm:line-clamp-none">Mode Ujian Terkunci: Dilarang buka tab/aplikasi lain</span></div><!-- Header Clean Bar --><div class="h-14 sm:h-16 w-full px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 sm:gap-4"><div class="flex items-center gap-2 sm:gap-3 min-w-0"><div class="flex flex-col min-w-0"><span class="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">CAT CPNS 2026</span><span class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Simulasi SKD CPNS Paket Satuan TO Seri 1</span></div></div><!-- Center Timer Badge for Mobile/Tablet Header --><div class="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 border border-slate-200"><svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="font-mono text-xs sm:text-sm font-bold text-slate-900 tabular-nums" id="mobileHeaderTimer">94:11</span></div><div class="flex items-center gap-2 sm:gap-4 shrink-0"><div class="hidden md:flex items-center gap-2.5 pr-2 border-r border-slate-200 text-right"><div><span id="exam-user-name" class="block text-xs sm:text-sm font-semibold text-slate-900 leading-none">Peserta</span><span id="exam-user-id" class="block text-[11px] text-slate-500 mt-1 font-mono">Peserta CAT CPNS</span></div><div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div></div><button class="inline-flex items-center justify-center gap-1 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold tracking-wide transition-colors shrink-0" id="finishExamHeaderBtn" type="button"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span class="hidden sm:inline">Selesai Ujian</span><span class="sm:hidden">Selesai</span></button></div></div></header><main class="w-full pt-20 sm:pt-24 lg:pt-28 pb-10 bg-[#f8fafc] flex-1"><!-- Sub-Header Status Context Bar --><section class="w-full bg-white border-b border-slate-200 py-2 px-3 sm:px-4 lg:px-6"><div class="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs"><div class="flex items-center gap-1.5 sm:gap-2 text-slate-600 truncate"><span class="w-2 h-2 rounded-full bg-slate-900 shrink-0"></span><span class="font-semibold text-slate-900 truncate">SKD CPNS 2026</span><span class="text-slate-300 hidden sm:inline">/</span><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold shrink-0">TWK</span><span class="text-slate-300 hidden md:inline">/</span><span class="text-slate-600 font-medium hidden md:inline truncate">Peserta: <span id="exam-subhead-name">Peserta</span></span></div><div class="flex items-center gap-2 text-slate-500 shrink-0"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-[11px] sm:text-xs text-slate-600 font-medium hidden sm:inline">Sistem Online</span></div></div></section><!-- Mobile Quick Navigation & Sheet Trigger Bar (Visible only on Mobile & Tablet) --><section class="lg:hidden w-full px-3 sm:px-4 pt-3 pb-1 max-w-7xl mx-auto"><div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-center justify-between gap-2 shadow-sm"><div class="flex items-center gap-2"><span class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-bold">No. 1</span><span class="text-xs text-slate-500">Dijawab: <strong class="text-slate-900 font-bold">18</strong>/110</span></div><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors" id="openMobileNavBtn" type="button"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="7" rx="1" width="7" x="3" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="14"></rect><rect height="7" rx="1" width="7" x="3" y="14"></rect></svg><span>Daftar Nomor Soal</span></button></div></section><!-- Workspace Container: Responsive Ordering (Mobile/Tablet: Question first; Desktop: Sidebar left, Question right) --><div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-6"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><!-- LEFT COLUMN (Desktop only in-flow; on Mobile/Tablet it turns into collapsible drawer/bottom-sheet) --><aside class="hidden lg:flex lg:col-span-4 w-full flex-col gap-4 sticky top-28" id="desktopNavSidebar"><!-- Timer Card Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-md bg-slate-100 text-slate-800 flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div><span class="block text-[11px] font-bold text-slate-500 tracking-wider uppercase leading-none">Sisa Waktu</span><div class="flex items-center gap-1.5 mt-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-xs text-slate-500 font-medium">Waktu Berjalan</span></div></div></div><div class="text-right"><span class="font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums examTimerDisplay">94:11</span></div></div><!-- Number Navigation Panel Desktop --><div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-4 shadow-sm"><!-- Header & Progress Summary --><div class="flex items-start justify-between pb-3 border-b border-slate-100"><div><h2 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h2><p class="text-xs text-slate-500 mt-0.5">Pilih nomor untuk lompat ke butir soal</p></div><div class="text-right"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Dijawab</span><span class="text-base font-bold text-slate-900 tabular-nums">18 <span class="text-xs font-normal text-slate-500">/ 110</span></span></div></div><!-- Filter Tabs (TWK, TIU, TKP) --><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-md text-xs font-semibold"><button class="py-1.5 rounded bg-slate-900 text-white text-center transition-colors" type="button">TWK (1-30)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TIU (31-65)</button><button class="py-1.5 rounded text-slate-600 hover:text-slate-900 text-center transition-colors" type="button">TKP (66-110)</button></div><!-- Question Grid Desktop --><div class="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto pr-1"><button aria-current="true" class="q-cell w-full aspect-square rounded border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-xs relative flex items-center justify-center transition-all" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="2" type="button">2</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="3" type="button">3</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="4" type="button">4</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="5" type="button">5</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="6" type="button">6</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="7" type="button">7</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="8" type="button">8</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="10" type="button">10</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="11" type="button">11</button><button class="q-cell w-full aspect-square rounded bg-amber-500 text-white font-medium text-xs flex items-center justify-center hover:bg-amber-600 transition-colors" data-q="12" type="button">12</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="13" type="button">13</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="14" type="button">14</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="15" type="button">15</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="17" type="button">17</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="18" type="button">18</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="19" type="button">19</button><button class="q-cell w-full aspect-square rounded bg-blue-600 text-white font-medium text-xs flex items-center justify-center hover:bg-blue-700 transition-colors" data-q="20" type="button">20</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell w-full aspect-square rounded bg-slate-100 border border-slate-200 text-slate-600 font-medium text-xs hover:bg-slate-200 transition-colors flex items-center justify-center" data-q="25" type="button">25</button></div><!-- Color Status Legend --><div class="pt-3 border-t border-slate-100 flex flex-col gap-2 text-xs text-slate-700"><span class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">Keterangan Status</span><div class="grid grid-cols-2 gap-2"><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-blue-600 shrink-0"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-500 shrink-0"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 shrink-0"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded border-2 border-slate-900 bg-slate-100 shrink-0"></span><span>Soal Aktif (#1)</span></div></div></div><!-- Fast Jump Control Input --><div class="pt-2 flex items-center gap-2"><input class="w-full px-3 py-1.5 text-xs rounded border border-slate-200 focus:outline-none focus:border-slate-900 text-slate-800 bg-slate-50" max="110" min="1" placeholder="Lompat no..." type="number"><button class="px-3 py-1.5 bg-slate-100 text-slate-800 rounded text-xs font-semibold hover:bg-slate-200 transition-colors shrink-0" type="button">Buka</button></div></div></aside><!-- RIGHT COLUMN: Main Question Canvas (Full width on mobile/tablet, 8 cols on desktop) --><section class="lg:col-span-8 w-full flex flex-col gap-4"><!-- Question Card --><article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"><!-- Card Header & Metadata --><div class="px-3.5 sm:px-5 py-3 sm:py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2"><div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-bold tracking-tight">Soal No. 1 dari 110</span><span class="w-1 h-1 rounded-full bg-slate-300"></span><span class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-800 text-xs font-semibold">TWK</span></div><div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 text-xs"><svg class="w-3.5 h-3.5 text-slate-900 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Bobot Skor: <strong class="text-slate-900">+5</strong> Benar • <strong class="text-slate-900">0</strong> Salah</span></div></div><!-- Question Body: HOTS Case Study --><div class="p-4 sm:p-6 lg:p-7 flex flex-col gap-4 sm:gap-5"><div class="text-slate-800 text-[15px] sm:text-base leading-relaxed sm:leading-loose space-y-3"><p>Anda adalah seorang pejabat fungsional auditor kepegawaian muda pada instansi pemerintah daerah yang sedang memimpin audit kepatuhan pengadaan barang dan jasa publik senilai 4,2 miliar rupiah. Di tengah proses telaah dokumen audit, seorang perwakilan vendor pihak ketiga didampingi oleh seorang kolega senior satu unit kerja mendatangi ruang kerja Anda. Mereka menyerahkan map berisi berkas teknis tambahan disertai amplop tebal berisi uang tunai yang dinyatakan secara informal sebagai "uang transportasi dan pengganti lelah tim pemeriksa".</p><p>Kolega senior tersebut memberi isyarat bahwa kebiasaan semacam ini lazim diterima untuk mempercepat penerbitan Berita Acara Pemeriksaan (BAP) tanpa mempengaruhi independensi substansi temuan. Berdasarkan asas etika Aparatur Sipil Negara, nilai integritas nasional, dan ketentuan perundang-undangan pencegahan tindak pidana korupsi yang berlaku, sikap paling tepat dan berintegritas yang wajib Anda ambil adalah...</p></div><!-- Mini Context / Regulatory Reference --><div class="bg-slate-50 border-l-4 border-slate-900 p-3 sm:p-3.5 rounded-r flex items-start gap-2.5 sm:gap-3"><svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><p class="text-[11px] sm:text-xs text-slate-600 leading-normal">Petunjuk: Penilaian menguji implementasi Core Values ASN BerAKHLAK pilar "Akuntabel" dan Pasal 12B UU No. 20/2001 terkait gratifikasi kedinasan.</p></div><!-- 5 Answer Options (A - E) touch-friendly min 48px --><div aria-label="Pilihan Jawaban Soal 1" class="flex flex-col gap-3 pt-2" id="optionsContainer" role="radiogroup"><!-- Option A --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="A"><input class="sr-only" name="exam_q1" type="radio" value="A"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">A</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima amplop tersebut atas dasar menghormati kolega senior, namun mencatatnya ke dalam buku kas informal tim pemeriksa dan mengalihkannya sebagai donasi panti asuhan setelah pemeriksaan selesai.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option B (Selected Default) --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border-2 border-blue-600 bg-blue-50/70 cursor-pointer transition-all select-none" data-option="B"><input checked="" class="sr-only" name="exam_q1" type="radio" value="B"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-blue-600 text-white text-xs font-bold flex items-center justify-center transition-colors">B</span><div class="flex-1 text-slate-900 text-[14px] sm:text-sm font-medium leading-relaxed pt-0.5">Menolak dengan tegas dan santun penerimaan uang tersebut, meminta vendor membawa kembali amplopnya, serta segera menyusun laporan kronologis potensi benturan kepentingan kepada Unit Pengendalian Gratifikasi (UPG) dan atasan langsung.</div><div class="option-indicator w-5 h-5 rounded-full border-2 border-blue-600 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></div></label><!-- Option C --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="C"><input class="sr-only" name="exam_q1" type="radio" value="C"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">C</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menunda pengambilan keputusan dan meminta kolega senior tersebut menandatangani surat pertanggungjawaban mutlak apabila pemberian tersebut di kemudian hari terindikasi gratifikasi ilegal.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option D --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="D"><input class="sr-only" name="exam_q1" type="radio" value="D"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">D</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menolak amplop secara sepihak di depan vendor dan langsung menghentikan proses audit secara mendadak sembari memviralkannya di kanal pengaduan publik.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label><!-- Option E --><label class="option-item flex items-start gap-3 sm:gap-3.5 p-3.5 sm:p-4 min-h-[52px] rounded-lg border border-slate-200 bg-white hover:border-slate-300 active:bg-slate-100/50 cursor-pointer transition-all select-none" data-option="E"><input class="sr-only" name="exam_q1" type="radio" value="E"><span class="option-badge shrink-0 w-8 h-8 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center transition-colors">E</span><div class="flex-1 text-slate-800 text-[14px] sm:text-sm leading-relaxed pt-0.5">Menerima berkas administrasi dan uang tersebut untuk disimpan di brankas kantor sampai pemeriksaan lapangan berakhir agar tidak menyinggung rekan kerja senior.</div><div class="option-indicator w-5 h-5 rounded-full border border-slate-300 shrink-0 flex items-center justify-center mt-1 transition-colors"><span class="w-2.5 h-2.5 rounded-full bg-transparent"></span></div></label></div></div><!-- Bottom Action Bar (Desktop only embedded view, mobile has sticky dock) --><div class="hidden lg:flex px-6 py-4 bg-slate-50 border-t border-slate-200 items-center justify-between gap-3"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors disabled:opacity-50" id="prevBtnDesktop" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span>Sebelumnya</span></button><div class="flex items-center gap-3 ml-auto"><button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu-Ragu</span></button><button class="inline-flex items-center gap-2 px-6 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" type="button"><span>Selanjutnya</span><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div></div></article><!-- Exam Shortcut & Notification Info Bar --><div class="hidden sm:flex flex-wrap items-center justify-between text-slate-500 text-xs px-1"><div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M6 8h.001"></path><path d="M10 8h.001"></path><path d="M14 8h.001"></path><path d="M18 8h.001"></path><path d="M8 12h.001"></path><path d="M12 12h.001"></path><path d="M16 12h.001"></path><path d="M7 16h10"></path></svg><span>Shortcut: Tekan <strong class="text-slate-700 font-mono">1-5</strong> untuk Opsi A-E • <strong class="text-slate-700 font-mono">→</strong> Berikutnya • <strong class="text-slate-700 font-mono">R</strong> Ragu</span></div><span class="font-mono text-slate-500">Jawaban tersimpan instan ke server BKN</span></div></section></div></div><!-- MOBILE/TABLET STICKY BOTTOM DOCK (Thumb-friendly easy reach) --><nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-lg"><div class="max-w-md mx-auto grid grid-cols-3 gap-2 items-center"><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold active:bg-slate-100 transition-colors" id="prevBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg><span>Sebelum</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold tracking-wide transition-colors flagBtn" id="flagBtnMobile" type="button"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span class="flagBtnText">Ragu</span></button><button class="h-11 inline-flex items-center justify-center gap-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" id="nextBtnMobile" type="button"><span>Lanjut</span><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></nav><!-- MOBILE & TABLET BOTTOM SHEET / DRAWER FOR QUESTION NUMBERS --><div class="lg:hidden fixed inset-0 z-50 bg-slate-900/60 transition-opacity hidden" id="mobileNavBackdrop"><div class="fixed bottom-0 left-0 right-0 max-h-[85vh] bg-white rounded-t-2xl shadow-2xl flex flex-col overflow-hidden border-slate-200 border-t" id="mobileNavSheet" style="background-color: rgb(255, 255, 255) !important; opacity: 1;"><div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-slate-900"></div><h3 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h3><span class="text-xs text-slate-500">(18/110)</span></div><button class="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors" id="closeMobileNavBtn" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg></button></div><!-- Category Filters --><div class="px-4 py-2 border-b border-slate-100 bg-white"><div class="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg text-xs font-semibold"><button class="py-1.5 rounded-md bg-slate-900 text-white text-center" type="button">TWK (1-30)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TIU (31-65)</button><button class="py-1.5 rounded-md text-slate-600 text-center" type="button">TKP (66-110)</button></div></div><!-- Grid Scrollable Area (Touch-friendly 44px min touch target) --><div class="p-4 overflow-y-auto max-h-[50vh] bg-white"><div class="grid grid-cols-5 gap-2.5 text-center"><button class="q-cell h-11 w-full rounded-lg border-2 border-slate-900 bg-slate-100 text-slate-900 font-bold text-sm relative flex items-center justify-center" data-q="1" type="button">1<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-900"></span></button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="2" type="button">2</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="3" type="button">3</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="4" type="button">4</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="5" type="button">5</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="6" type="button">6</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="7" type="button">7</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="8" type="button">8</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="9" type="button">9</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="10" type="button">10</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="11" type="button">11</button><button class="q-cell h-11 w-full rounded-lg bg-amber-500 text-white font-semibold text-sm flex items-center justify-center" data-q="12" type="button">12</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="13" type="button">13</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="14" type="button">14</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="15" type="button">15</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="16" type="button">16</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="17" type="button">17</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="18" type="button">18</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="19" type="button">19</button><button class="q-cell h-11 w-full rounded-lg bg-blue-600 text-white font-semibold text-sm flex items-center justify-center" data-q="20" type="button">20</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="21" type="button">21</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="22" type="button">22</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="23" type="button">23</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="24" type="button">24</button><button class="q-cell h-11 w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-sm flex items-center justify-center" data-q="25" type="button">25</button></div></div><!-- Legend Footer inside Sheet --><div class="p-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-700 border-slate-200 bg-white" style="background-color: #ffffff !important;"><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-600"></span><span>Sudah Dijawab (18)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span><span>Ragu-Ragu (2)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span><span>Belum Dijawab (90)</span></div><div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border-2 border-slate-900 bg-slate-100"></span><span>Soal Aktif (#1)</span></div></div></div></div><!-- MODAL 1: Petunjuk dan Tata Tertib Pengerjaan Ujian CAT SKD (Mobile & Desktop Responsive) --><div class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden" id="rulesModal"><div class="bg-white border border-slate-200 rounded-xl max-w-2xl w-full max-h-[90vh] p-4 sm:p-6 sm:p-7 flex flex-col gap-4 overflow-hidden shadow-2xl"><div class="flex items-start justify-between pb-3 sm:pb-4 border-b border-slate-100 shrink-0"><div><span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Standar BKN RI</span><h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Petunjuk &amp; Tata Tertib Ujian Try Out SKD</h2></div><div class="px-2.5 py-1 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] sm:text-xs font-semibold shrink-0">SKD CPNS 2026</div></div><!-- Scrollable Content on Mobile --><div class="overflow-y-auto pr-1 space-y-4 flex-1"><!-- Duration and breakdown tags --><div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Durasi Ujian</span><span class="text-xs sm:text-sm font-bold text-slate-900">100 Menit</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">Jumlah Soal</span><span class="text-xs sm:text-sm font-bold text-slate-900">110 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TWK &amp; TIU</span><span class="text-xs sm:text-sm font-bold text-slate-900">30 &amp; 35 Butir</span></div><div class="p-2.5 sm:p-3 rounded-lg bg-slate-50 border border-slate-200 text-center sm:text-left"><span class="block text-[10px] sm:text-[11px] text-slate-500 font-medium">TKP</span><span class="text-xs sm:text-sm font-bold text-slate-900">45 Butir</span></div></div><!-- Rules list --><div class="space-y-2.5 py-1"><h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ketentuan &amp; Tata Tertib:</h3><ol class="space-y-2 text-xs text-slate-700 leading-relaxed list-decimal list-outside pl-4"><li><strong>Sistem Penilaian :</strong> TWK dan TIU menerapkan bobot <strong>+5 untuk benar</strong> dan <strong>0 untuk salah</strong>. TKP menggunakan <strong>skala nilai 1 sampai 5</strong> tanpa minus.</li><li><strong>Larangan Pelanggaran Integritas:</strong> Dilarang berpindah tab browser atau meminimalkan jendela. Sistem akan <strong>langsung mengakhiri sesi (auto-submit)</strong> jika terdeteksi curang.</li><li><strong>Status Warna:</strong> Biru solid = Dijawab, Kuning/Amber solid = Ragu-ragu, Abu-abu netral = Belum Dijawab.</li><li><strong>Pengakhiran Sesi:</strong> Klik tombol merah <strong>'Selesai Ujian'</strong> jika telah selesai.</li></ol></div><!-- Checkbox confirmation --><div class="pt-1"><label class="flex items-start gap-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 cursor-pointer"><input class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer" id="agreeCheckbox" type="checkbox"><span class="text-xs text-slate-800 font-medium leading-relaxed">Saya telah membaca, memahami, dan menyetujui seluruh tata tertib ujian Try Out SKD CPNS ini.</span></label></div></div><!-- Action button --><div class="pt-2 border-t border-slate-100 flex items-center justify-end shrink-0"><button class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-semibold tracking-wide hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all" id="startExamBtn" type="button">Mulai Kerjakan Soal</button></div></div></div><!-- MODAL 2: Anti-Cheat Warning --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="antiCheatModal"><div class="bg-white border-2 border-red-600 rounded-xl max-w-lg w-full p-5 sm:p-6 text-center flex flex-col items-center gap-4"><div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><div class="space-y-1"><h3 class="text-base font-bold text-slate-900">Peringatan Integritas Ujian!</h3><p class="text-xs text-slate-600 leading-relaxed">Sistem mendeteksi bahwa jendela atau tab ujian Anda kehilangan fokus. Seluruh aktivitas terekam di log pengawas CAT.</p></div><div class="w-full bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-md text-xs font-semibold">Pelanggaran: 1 kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!</div><button class="w-full py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all" id="resumeExamBtn" type="button">Kembali ke Lembar Ujian Sekarang</button></div></div><!-- MODAL 3: Finish Exam Confirmation --><div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="finishExamModal"><div class="bg-white border border-slate-200 rounded-xl max-w-md w-full p-5 sm:p-6 flex flex-col gap-4 shadow-xl"><div class="flex items-center gap-3 pb-2 border-b border-slate-100"><div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" x2="12.01" y1="17" y2="17"></line></svg></div><h3 class="text-sm font-bold text-slate-900">Konfirmasi Selesai Ujian</h3></div><p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin mengakhiri sesi ujian ini? Dari total <strong>110 butir</strong>, Anda telah menjawab <strong>18 butir</strong> dan masih terdapat <strong>2 butir</strong> dengan status ragu-ragu.</p><div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-800 text-xs space-y-1.5"><div class="flex justify-between"><span>Sisa Waktu Ujian:</span><span class="font-mono font-bold text-slate-900" id="modalTimeRemaining">094 Menit 11 Detik</span></div><div class="flex justify-between"><span>Status Nilai:</span><span class="text-slate-600 font-medium">Akan langsung dikalkulasi CAT BKN</span></div></div><div class="flex items-center justify-end gap-2.5 pt-2"><button class="px-3.5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-medium hover:bg-slate-100 transition-colors" id="cancelFinishBtn" type="button">Batal</button><button class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors" id="confirmFinishBtn" type="button">Ya, Akhiri Ujian</button></div></div></div></main><footer class="hidden lg:block w-full bg-white border-t border-slate-200 py-3 mt-auto"><div class="w-full px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2"><div class="flex items-center gap-3 text-slate-500 text-xs"><span>Badan Kepegawaian Negara (BKN) RI © 2026</span><span class="hidden sm:inline">•</span><span class="hidden sm:inline font-mono">Sesi II • Ruang Lab-04 • PIN Sesi: 8904</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span>Status Jaringan: Terhubung Stabil (Latency 14ms)</span></div></div></footer><!-- Client-side Interactive Logic --><script>
-    (function initExamRoom() {
-      // 1. Rules Modal & Checkbox Validation
-      const rulesModal = document.getElementById('rulesModal');
-      const agreeCheckbox = document.getElementById('agreeCheckbox');
-      const startExamBtn = document.getElementById('startExamBtn');
-      let examStarted = true; // Set active for interactive showcase
+  <div id="view-exam" class="hidden bg-[#f8fafc] font-sans text-slate-900 antialiased min-h-screen flex flex-col relative pb-20 lg:pb-0">
+    <!-- Anti-Cheat Red Top Banner -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <div class="bg-red-600 text-white px-3 py-1.5 sm:py-2 text-center flex items-center justify-center gap-1.5 sm:gap-2">
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+        <span class="text-[10px] sm:text-xs tracking-wide uppercase font-semibold leading-tight line-clamp-1 sm:line-clamp-none">Mode Ujian Terkunci: Dilarang buka tab/aplikasi lain</span>
+      </div>
+      <!-- Header Clean Bar -->
+      <div class="h-14 sm:h-16 w-full px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="flex flex-col min-w-0">
+            <span class="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">CAT CPNS 2026</span>
+            <span id="exam-header-package-title" class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Simulasi SKD CPNS Standar BKN</span>
+          </div>
+        </div>
+        <!-- Center Timer Badge for Mobile/Tablet Header -->
+        <div class="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 border border-slate-200">
+          <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span class="font-mono text-xs sm:text-sm font-bold text-slate-900 tabular-nums examTimerDisplay" id="mobileHeaderTimer">00:00</span>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div class="hidden md:flex items-center gap-2.5 pr-2 border-r border-slate-200 text-right">
+            <div>
+              <span id="exam-user-name" class="block text-xs sm:text-sm font-semibold text-slate-900 leading-none">Peserta</span>
+              <span id="exam-user-id" class="block text-[11px] text-slate-500 mt-1 font-mono">Peserta CAT CPNS</span>
+            </div>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+          <button class="inline-flex items-center justify-center gap-1 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold tracking-wide transition-colors shrink-0" id="finishExamHeaderBtn" type="button">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+            <span class="hidden sm:inline">Selesai Ujian</span>
+            <span class="sm:hidden">Selesai</span>
+          </button>
+        </div>
+      </div>
+    </header>
 
-      if (agreeCheckbox && startExamBtn) {
-        agreeCheckbox.addEventListener('change', () => {
-          startExamBtn.disabled = !agreeCheckbox.checked;
-        });
+    <main class="w-full pt-20 sm:pt-24 lg:pt-28 pb-10 bg-[#f8fafc] flex-1">
+      <!-- Sub-Header Status Context Bar -->
+      <section class="w-full bg-white border-b border-slate-200 py-2 px-3 sm:px-4 lg:px-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1.5 sm:gap-2 text-slate-600 truncate">
+            <span class="w-2 h-2 rounded-full bg-slate-900 shrink-0"></span>
+            <span id="exam-subhead-pkg" class="font-semibold text-slate-900 truncate">SKD CPNS 2026</span>
+            <span class="text-slate-300 hidden sm:inline">/</span>
+            <span id="exam-subhead-subtest" class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold shrink-0">TWK</span>
+            <span class="text-slate-300 hidden md:inline">/</span>
+            <span class="text-slate-600 font-medium hidden md:inline truncate">Peserta: <span id="exam-subhead-name">Peserta</span></span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-500 shrink-0">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-[11px] sm:text-xs text-slate-600 font-medium hidden sm:inline">Sistem Online BKN</span>
+          </div>
+        </div>
+      </section>
 
-        startExamBtn.addEventListener('click', () => {
-          rulesModal.classList.add('hidden');
-          examStarted = true;
-        });
-      }
+      <!-- Mobile Quick Navigation & Sheet Trigger Bar (Visible only on Mobile & Tablet) -->
+      <section class="lg:hidden w-full px-3 sm:px-4 pt-3 pb-1 max-w-7xl mx-auto">
+        <div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-center justify-between gap-2 shadow-sm">
+          <div class="flex items-center gap-2">
+            <span id="exam-mobile-q-num" class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-bold">No. 1</span>
+            <span id="exam-mobile-progress" class="text-xs text-slate-500">Dijawab: <strong class="text-slate-900 font-bold">0</strong>/110</span>
+          </div>
+          <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors" id="openMobileNavBtn" type="button">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="7" rx="1" width="7" x="3" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="3"></rect><rect height="7" rx="1" width="7" x="14" y="14"></rect><rect height="7" rx="1" width="7" x="3" y="14"></rect></svg>
+            <span>Daftar Nomor Soal</span>
+          </button>
+        </div>
+      </section>
 
-      // 2. Options Selection Logic with Touch-friendly styling
-      const optionsContainer = document.getElementById('optionsContainer');
-      const optionItems = optionsContainer.querySelectorAll('.option-item');
-
-      optionItems.forEach(item => {
-        item.addEventListener('click', () => {
-          optionItems.forEach(opt => {
-            opt.classList.remove('border-2', 'border-blue-600', 'bg-blue-50/70');
-            opt.classList.add('border', 'border-slate-200', 'bg-white');
-            
-            const badge = opt.querySelector('.option-badge');
-            badge.classList.remove('bg-blue-600', 'text-white');
-            badge.classList.add('bg-slate-100', 'text-slate-700');
-
-            const dot = opt.querySelector('.option-indicator span');
-            dot.classList.remove('bg-blue-600');
-            dot.classList.add('bg-transparent');
-
-            const indicatorBorder = opt.querySelector('.option-indicator');
-            indicatorBorder.classList.remove('border-2', 'border-blue-600');
-            indicatorBorder.classList.add('border', 'border-slate-300');
-
-            const radio = opt.querySelector('input[type="radio"]');
-            radio.checked = false;
-          });
-
-          // Set active styles (Solid Blue PRD standard)
-          item.classList.remove('border', 'border-slate-200', 'bg-white');
-          item.classList.add('border-2', 'border-blue-600', 'bg-blue-50/70');
-
-          const activeBadge = item.querySelector('.option-badge');
-          activeBadge.classList.remove('bg-slate-100', 'text-slate-700');
-          activeBadge.classList.add('bg-blue-600', 'text-white');
-
-          const activeDot = item.querySelector('.option-indicator span');
-          activeDot.classList.remove('bg-transparent');
-          activeDot.classList.add('bg-blue-600');
-
-          const activeIndicator = item.querySelector('.option-indicator');
-          activeIndicator.classList.remove('border-slate-300');
-          activeIndicator.classList.add('border-2', 'border-blue-600');
-
-          const radio = item.querySelector('input[type="radio"]');
-          radio.checked = true;
-        });
-      });
-
-      // 3. Ragu-ragu (Doubt/Flag) Logic synchronized across Desktop & Mobile dock
-      const flagButtons = document.querySelectorAll('.flagBtn');
-      const flagTexts = document.querySelectorAll('.flagBtnText');
-      const activeCells = document.querySelectorAll('.q-cell[data-q="1"]');
-      let isFlagged = false;
-
-      flagButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          isFlagged = !isFlagged;
-          flagButtons.forEach(b => {
-            if (isFlagged) {
-              b.classList.remove('bg-amber-500', 'hover:bg-amber-600');
-              b.classList.add('bg-slate-900', 'hover:bg-slate-800');
-            } else {
-              b.classList.remove('bg-slate-900', 'hover:bg-slate-800');
-              b.classList.add('bg-amber-500', 'hover:bg-amber-600');
-            }
-          });
-
-          flagTexts.forEach(txt => {
-            txt.textContent = isFlagged ? 'Tandai Yakin' : 'Ragu-Ragu';
-          });
-
-          activeCells.forEach(cell => {
-            if (isFlagged) {
-              cell.classList.remove('bg-slate-100', 'text-slate-900');
-              cell.classList.add('bg-amber-500', 'text-white', 'border-amber-600');
-            } else {
-              cell.classList.remove('bg-amber-500', 'text-white', 'border-amber-600');
-              cell.classList.add('bg-slate-100', 'text-slate-900');
-            }
-          });
-        });
-      });
-
-      // 4. Timer Countdown (Synchronized to mobile header and desktop card)
-      let totalSeconds = 99 * 60 + 10;
-      const desktopTimers = document.querySelectorAll('.examTimerDisplay');
-      const mobileHeaderTimer = document.getElementById('mobileHeaderTimer');
-      const modalTimeDisplay = document.getElementById('modalTimeRemaining');
-
-      setInterval(() => {
-        if (!examStarted) return;
-        if (totalSeconds > 0) {
-          totalSeconds--;
-          const minutes = Math.floor(totalSeconds / 60);
-          const seconds = totalSeconds % 60;
-          const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      <!-- Workspace Container -->
+      <div class="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          desktopTimers.forEach(el => el.textContent = formatted);
-          if (mobileHeaderTimer) mobileHeaderTimer.textContent = formatted;
-          if (modalTimeDisplay) modalTimeDisplay.textContent = `${String(minutes).padStart(3, '0')} Menit ${String(seconds).padStart(2, '0')} Detik`;
-        }
-      }, 1000);
+          <!-- LEFT COLUMN: Desktop Sidebar -->
+          <aside class="hidden lg:flex lg:col-span-4 w-full flex-col gap-4 sticky top-28" id="desktopNavSidebar">
+            <!-- Timer Card Desktop -->
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-md bg-slate-100 text-slate-800 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div>
+                  <span class="block text-[11px] font-bold text-slate-500 tracking-wider uppercase leading-none">Sisa Waktu</span>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs text-slate-500 font-medium">Waktu Berjalan</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-mono text-2xl font-bold tracking-tight text-slate-900 tabular-nums examTimerDisplay">00:00</span>
+              </div>
+            </div>
 
-      // 5. Mobile Drawer / Sheet Navigation Toggle
-      const openMobileNavBtn = document.getElementById('openMobileNavBtn');
-      const closeMobileNavBtn = document.getElementById('closeMobileNavBtn');
-      const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+            <!-- Number Navigation Panel Desktop -->
+            <div class="bg-white border border-slate-200 rounded-lg p-4 flex flex-col gap-4 shadow-sm">
+              <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h2 class="text-sm font-bold text-slate-900">Navigasi Nomor Soal</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">Pilih nomor untuk lompat ke butir soal</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Dijawab</span>
+                  <span id="exam-desktop-progress" class="text-base font-bold text-slate-900 tabular-nums">0 <span class="text-xs font-normal text-slate-500">/ 110</span></span>
+                </div>
+              </div>
 
-      if (openMobileNavBtn && mobileNavBackdrop && closeMobileNavBtn) {
-        openMobileNavBtn.addEventListener('click', () => {
-          mobileNavBackdrop.classList.remove('hidden');
-        });
+              <!-- Question Grid Desktop -->
+              <div id="desktopQuestionGrid" class="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto pr-1"></div>
 
-        closeMobileNavBtn.addEventListener('click', () => {
-          mobileNavBackdrop.classList.add('hidden');
-        });
+              <!-- Color Status Legend -->
+              <div class="pt-3 border-t border-slate-100 flex flex-col gap-2 text-xs text-slate-700">
+                <span class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">Keterangan Status</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-blue-600 shrink-0"></span>
+                    <span>Sudah Dijawab</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-amber-500 shrink-0"></span>
+                    <span>Ragu-Ragu</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 shrink-0"></span>
+                    <span>Belum Dijawab</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded border-2 border-slate-900 bg-slate-100 shrink-0"></span>
+                    <span>Soal Aktif</span>
+                  </div>
+                </div>
+              </div>
 
-        mobileNavBackdrop.addEventListener('click', (e) => {
-          if (e.target === mobileNavBackdrop) {
-            mobileNavBackdrop.classList.add('hidden');
-          }
-        });
+              <!-- Fast Jump Control Input -->
+              <div class="pt-2 flex items-center gap-2">
+                <input id="examJumpInput" class="w-full px-3 py-1.5 text-xs rounded border border-slate-200 focus:outline-none focus:border-slate-900 text-slate-800 bg-slate-50" min="1" placeholder="Lompat no..." type="number">
+                <button id="examJumpBtn" class="px-3 py-1.5 bg-slate-100 text-slate-800 rounded text-xs font-semibold hover:bg-slate-200 transition-colors shrink-0" type="button">Buka</button>
+              </div>
+            </div>
+          </aside>
 
-        // Close on question cell click
-        const sheetCells = mobileNavBackdrop.querySelectorAll('.q-cell');
-        sheetCells.forEach(c => {
-          c.addEventListener('click', () => {
-            mobileNavBackdrop.classList.add('hidden');
-          });
-        });
-      }
+          <!-- RIGHT COLUMN: Main Question Canvas -->
+          <section class="lg:col-span-8 w-full flex flex-col gap-4">
+            <!-- Question Card -->
+            <article class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <!-- Card Header & Metadata -->
+              <div class="px-3.5 sm:px-5 py-3 sm:py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span id="exam-card-q-num" class="px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-bold tracking-tight">Soal No. 1</span>
+                  <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                  <span id="exam-card-subtest" class="px-2 py-0.5 rounded bg-slate-200/80 text-slate-800 text-xs font-semibold">TWK</span>
+                </div>
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 text-xs">
+                  <svg class="w-3.5 h-3.5 text-slate-900 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                  <span id="exam-card-score-info">Bobot Skor: <strong class="text-slate-900">+5</strong> Benar • <strong class="text-slate-900">0</strong> Salah</span>
+                </div>
+              </div>
 
-      // 6. Anti-Cheat: Tombol Resume Ujian (Tanpa window.blur trigger)
-      const antiCheatModal = document.getElementById('antiCheatModal');
-      const resumeExamBtn = document.getElementById('resumeExamBtn');
+              <!-- Question Body -->
+              <div class="p-4 sm:p-6 lg:p-7 flex flex-col gap-4 sm:gap-5">
+                <div id="questionText" class="text-slate-800 text-[15px] sm:text-base leading-relaxed sm:leading-loose space-y-3 whitespace-pre-line font-medium question-text-content">
+                  Memuat butir pertanyaan ujian...
+                </div>
 
-      if (resumeExamBtn && antiCheatModal) {
-        resumeExamBtn.addEventListener('click', () => {
-          antiCheatModal.classList.add('hidden');
-          antiCheatModal.classList.remove('flex');
-        });
-      }
+                <!-- Topic Box -->
+                <div id="exam-topic-box" class="bg-slate-50 border-l-4 border-slate-900 p-3 sm:p-3.5 rounded-r flex items-start gap-2.5 sm:gap-3">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <p id="exam-topic-text" class="text-[11px] sm:text-xs text-slate-600 leading-normal">Topik: Kisi-kisi Resmi BKN</p>
+                </div>
 
-      // 7. Finish Exam Modal
-      const finishBtn = document.getElementById('finishExamHeaderBtn');
-      const finishModal = document.getElementById('finishExamModal');
-      const cancelFinishBtn = document.getElementById('cancelFinishBtn');
-      const confirmFinishBtn = document.getElementById('confirmFinishBtn');
+                <!-- 5 Answer Options (A - E) -->
+                <div aria-label="Pilihan Jawaban Soal" class="flex flex-col gap-3 pt-2" id="optionsContainer" role="radiogroup">
+                  <!-- Pilihan jawaban di-render secara dinamis dari database -->
+                </div>
+              </div>
 
-      if (finishBtn && finishModal) {
-        finishBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          finishModal.classList.remove('hidden');
-        });
-      }
+              <!-- Bottom Action Bar Desktop -->
+              <div class="hidden lg:flex px-6 py-4 bg-slate-50 border-t border-slate-200 items-center justify-between gap-3">
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors disabled:opacity-50" id="prevBtnDesktop" type="button">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                  <span>Sebelumnya</span>
+                </button>
+                <div class="flex items-center gap-3 ml-auto">
+                  <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 text-xs font-semibold tracking-wide transition-colors flagBtn" type="button">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+                    <span class="flagBtnText">Ragu-Ragu</span>
+                  </button>
+                  <button class="inline-flex items-center gap-2 px-6 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-colors nextBtn" type="button">
+                    <span>Selanjutnya</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </button>
+                </div>
+              </div>
+            </article>
 
-      if (cancelFinishBtn && finishModal) {
-        cancelFinishBtn.addEventListener('click', () => {
-          finishModal.classList.add('hidden');
-        });
-      }
+            <!-- Exam Shortcut Info Bar -->
+            <div class="hidden sm:flex flex-wrap items-center justify-between text-slate-500 text-xs px-1">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M6 8h.001"></path><path d="M10 8h.001"></path><path d="M14 8h.001"></path><path d="M18 8h.001"></path><path d="M8 12h.001"></path><path d="M12 12h.001"></path><path d="M16 12h.001"></path><path d="M7 16h10"></path></svg>
+                <span>Shortcut: Tekan <strong class="text-slate-700 font-mono">1-5</strong> untuk Opsi A-E • <strong class="text-slate-700 font-mono">→</strong> Berikutnya • <strong class="text-slate-700 font-mono">←</strong> Sebelumnya • <strong class="text-slate-700 font-mono">R</strong> Ragu</span>
+              </div>
+              <span class="font-mono text-slate-500">Tersinkronisasi Realtime BKN</span>
+            </div>
+          </section>
+        </div>
+      </div>
 
-      if (confirmFinishBtn && finishModal) {
-        confirmFinishBtn.addEventListener('click', () => {
-          finishModal.classList.add('hidden');
-          finishModal.classList.remove('flex');
-          if (typeof window.finishExam === 'function') {
-            window.finishExam(false);
-          }
-        });
-      }
+      <!-- MOBILE/TABLET STICKY BOTTOM DOCK -->
+      <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-lg">
+        <div class="max-w-md mx-auto grid grid-cols-3 gap-2 items-center">
+          <button class="flex items-center justify-center gap-1.5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors disabled:opacity-40" id="prevBtnMobile" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Sebelumnya</span>
+          </button>
+          <button class="flex items-center justify-center gap-1.5 py-2.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-colors flagBtn" id="flagBtnMobile" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+            <span class="flagBtnText">Ragu</span>
+          </button>
+          <button class="flex items-center justify-center gap-1.5 py-2.5 rounded-md bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors nextBtn" id="nextBtnMobile" type="button">
+            <span>Berikutnya</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </nav>
 
-      // 8. Keyboard shortcuts
-      window.addEventListener('keydown', (e) => {
-        if (!examStarted) return;
-        if (e.key >= '1' && e.key <= '5') {
-          const index = parseInt(e.key, 10) - 1;
-          if (optionItems[index]) {
-            optionItems[index].click();
-          }
-        } else if (e.key === 'r' || e.key === 'R') {
-          if (flagButtons[0]) flagButtons[0].click();
-        }
-      });
-    })();
-  </script>
+      <!-- MODAL 1: Mobile Question Drawer / Sheet -->
+      <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center" id="mobileNavBackdrop">
+        <div class="bg-white rounded-t-2xl sm:rounded-xl max-w-lg w-full max-h-[85vh] flex flex-col p-4 shadow-2xl border border-slate-200" id="mobileNavSheet">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Daftar Nomor Soal</h3>
+              <p class="text-xs text-slate-500">Pilih nomor butir soal untuk membuka</p>
+            </div>
+            <button class="p-1 rounded-md text-slate-400 hover:text-slate-700" id="closeMobileNavBtn" type="button">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+            </button>
+          </div>
+          <div id="mobileQuestionGrid" class="grid grid-cols-5 gap-2.5 max-h-[320px] overflow-y-auto p-1 py-3"></div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Selesai memilih? Klik tombol tutup</span>
+            <button class="px-4 py-1.5 rounded-md bg-slate-900 text-white text-xs font-semibold" onclick="document.getElementById('mobileNavBackdrop').classList.add('hidden')" type="button">Tutup</button>
+          </div>
+        </div>
+      </div>
 
+      <!-- MODAL 2: Rules Modal (Tata Tertib Ujian) -->
+      <div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="rulesModal">
+        <div class="bg-white border border-slate-200 rounded-xl max-w-lg w-full p-5 sm:p-6 flex flex-col gap-4 shadow-2xl">
+          <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Tata Tertib &amp; Petunjuk Ujian CAT</h3>
+              <p class="text-xs text-slate-500">Simulasi Sistem CAT CPNS 2026 Standar BKN</p>
+            </div>
+          </div>
+          <div class="text-xs text-slate-600 space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+            <p>1. Ujian dilaksanakan secara online dengan batasan waktu yang berjalan secara otomatis.</p>
+            <p>2. Jawaban Anda tersimpan secara otomatis setiap kali Anda memilih opsi jawaban.</p>
+            <p>3. Peserta dilarang membuka tab lain, berpindah aplikasi, atau meminimalkan jendela ujian.</p>
+            <p>4. Untuk paket Mini TO Diagnostik terdiri dari 20 butir (TWK, TIU, TKP) dengan waktu 20 menit.</p>
+            <p>5. Untuk Paket Penuh SKD terdiri dari 110 butir (35 TWK, 30 TIU, 45 TKP) dengan waktu 100 menit.</p>
+          </div>
+          <label class="flex items-start gap-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer text-xs text-slate-800">
+            <input class="mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900" id="agreeCheckbox" type="checkbox">
+            <span class="font-medium">Saya memahami seluruh tata tertib dan siap memulai simulasi ujian CAT CPNS secara jujur.</span>
+          </label>
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button class="px-4 py-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50" onclick="window.showView('dashboard')" type="button">Kembali ke Dashboard</button>
+            <button class="px-5 py-2 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all disabled:opacity-50" disabled id="startExamBtn" type="button">Mulai Simulasi CAT</button>
+          </div>
+        </div>
+      </div>
 
+      <!-- MODAL 3: Anti-Cheat Warning Modal -->
+      <div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="antiCheatModal">
+        <div class="bg-white border border-red-200 rounded-xl max-w-md w-full p-6 flex flex-col items-center text-center gap-3 shadow-2xl">
+          <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-slate-900">Peringatan Integritas Ujian!</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Sistem mendeteksi bahwa jendela atau tab ujian Anda kehilangan fokus. Seluruh aktivitas terekam di log pengawas CAT.</p>
+          </div>
+          <div class="w-full bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-md text-xs font-semibold">Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!</div>
+          <button class="w-full py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all" id="resumeExamBtn" type="button">Kembali ke Lembar Ujian Sekarang</button>
+        </div>
+      </div>
+
+      <!-- MODAL 4: Finish Exam Confirmation -->
+      <div class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4" id="finishExamModal">
+        <div class="bg-white border border-slate-200 rounded-xl max-w-md w-full p-5 sm:p-6 flex flex-col gap-4 shadow-xl">
+          <div class="flex items-center gap-3 pb-2 border-b border-slate-100">
+            <div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Konfirmasi Selesai Ujian</h3>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin mengakhiri sesi ujian ini? Jawaban Anda akan langsung dikalkulasi sesuai standar CAT BKN.</p>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-800 text-xs space-y-1.5">
+            <div class="flex justify-between">
+              <span>Sisa Waktu Ujian:</span>
+              <span class="font-mono font-bold text-slate-900" id="modalTimeRemaining">000 Menit 00 Detik</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Status Nilai:</span>
+              <span class="text-slate-600 font-medium">Akan langsung dikalkulasi CAT BKN</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-2.5 pt-2">
+            <button class="px-3.5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 text-xs font-medium hover:bg-slate-100 transition-colors" id="cancelFinishBtn" type="button">Batal</button>
+            <button class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors" id="confirmFinishBtn" type="button">Ya, Akhiri Ujian</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="hidden lg:block w-full bg-white border-t border-slate-200 py-3 mt-auto">
+      <div class="w-full px-4 lg:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center gap-3 text-slate-500 text-xs">
+          <span>Badan Kepegawaian Negara (BKN) RI © 2026</span>
+          <span class="hidden sm:inline">•</span>
+          <span class="hidden sm:inline font-mono">Sesi CAT Ujian Terjadwal</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <span>Status Jaringan: Terhubung Stabil (Latency 14ms)</span>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <!-- View 5: Riwayat Try Out & Pembahasan (Halaman 4) -->
@@ -6185,6 +6379,17 @@ Mengerti &amp; Tutup
   // Helper: Validasi Hak Akses Paket Berbayar di Database Supabase
   async function checkUserPackageAccess(packageId) {
     if (!packageId || packageId === 'mini-to' || packageId === 'mini') return true;
+
+    // Admin testing bypass: jika admin sedang login, izinkan akses langsung untuk menguji soal
+    try {
+      if (sessionStorage.getItem('cat_admin_auth') === 'true' || 
+          localStorage.getItem('cat_admin_auth') === 'true' || 
+          sessionStorage.getItem('adminToken') || 
+          window.isAdmin === true) {
+        return true;
+      }
+    } catch (e) {}
+
     if (!state.currentUser) return false;
 
     const u = state.currentUser;
@@ -6199,7 +6404,10 @@ Mengerti &amp; Tutup
       if (!isActive) return false;
       const target = (t.target_paket || '').toLowerCase();
       const isBundle = target.includes('bundle') || target.includes('bndl') || target.includes('all') || target.includes('to-1,to-2,to-3');
-      const isMatch = target.includes(packageId.toLowerCase()) || (packageId === 'to-1' && target.includes('seri 1'));
+      const isMatch = target.includes(packageId.toLowerCase()) || 
+        (packageId === 'to-1' && (target.includes('seri 1') || target.includes('to1'))) ||
+        (packageId === 'to-2' && (target.includes('seri 2') || target.includes('to2'))) ||
+        (packageId === 'to-3' && (target.includes('seri 3') || target.includes('to3')));
       return isBundle || isMatch;
     });
     if (hasLocal) return true;
@@ -6224,7 +6432,10 @@ Mengerti &amp; Tutup
               if (!isActive) return false;
               const target = (t.target_paket || '').toLowerCase();
               const isBundle = target.includes('bundle') || target.includes('bndl') || target.includes('all') || target.includes('to-1,to-2,to-3');
-              const isMatch = target.includes(packageId.toLowerCase()) || (packageId === 'to-1' && target.includes('seri 1'));
+              const isMatch = target.includes(packageId.toLowerCase()) || 
+                (packageId === 'to-1' && (target.includes('seri 1') || target.includes('to1'))) ||
+                (packageId === 'to-2' && (target.includes('seri 2') || target.includes('to2'))) ||
+                (packageId === 'to-3' && (target.includes('seri 3') || target.includes('to3')));
               return isBundle || isMatch;
             });
             if (hasValid) {
@@ -6254,7 +6465,7 @@ Mengerti &amp; Tutup
     return false;
   }
 
-  // Helper: Update Status Kartu Paket Dashboard (Mini TO & Paket Berbayar)
+  // Helper: Update Status Kartu Paket Dashboard (Mini TO, TO Seri 1, Seri 2, Seri 3)
   async function updateDashboardPackageCards() {
     const u = state.currentUser;
     if (!u) return;
@@ -6289,7 +6500,7 @@ Mengerti &amp; Tutup
     if (miniAttempts.length > 0) {
       const latestMini = miniAttempts[0];
       if (miniScoreEl) {
-        miniScoreEl.innerHTML = `<span class="text-on-surface font-mono-timer font-bold">${latestMini.total_skor || 0}</span> <span class="text-secondary text-xs font-normal">/ 550</span>`;
+        miniScoreEl.innerHTML = '<span class="text-on-surface font-mono-timer font-bold">' + (latestMini.total_skor || 0) + '</span> <span class="text-secondary text-xs font-normal">/ 550</span>';
       }
       if (miniActionEl) {
         miniActionEl.className = "pt-4 mt-4 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center gap-2";
@@ -6319,65 +6530,65 @@ Mengerti &amp; Tutup
       }
     }
 
-    // 2. Update Paket Satuan TO Seri 1 (Card 2)
-    const hasTo1Access = await checkUserPackageAccess('to-1');
-    const badgeTo1 = document.getElementById('badge-package-to-1');
-    const statusTo1 = document.getElementById('status-package-to-1');
-    const actionTo1 = document.getElementById('action-package-to-1');
-    const cardTo1 = document.getElementById('card-package-to-1');
-    const readyCountEl = document.getElementById('dash-ready-packages-count');
+    // 2. Update Paket Satuan TO Seri 1, Seri 2, dan Seri 3
+    let readyCount = 1; // Mini TO gratis
+    const paidSeries = [
+      { key: 'to-1', num: '1', title: 'TO Seri 1' },
+      { key: 'to-2', num: '2', title: 'TO Seri 2' },
+      { key: 'to-3', num: '3', title: 'TO Seri 3' }
+    ];
 
-    if (hasTo1Access) {
-      if (badgeTo1) {
-        badgeTo1.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-primary text-on-primary";
-        badgeTo1.textContent = "TERLISENSI / AKTIF";
+    for (const s of paidSeries) {
+      const hasAccess = await checkUserPackageAccess(s.key);
+      const badgeEl = document.getElementById('badge-package-' + s.key);
+      const statusEl = document.getElementById('status-package-' + s.key);
+      const actionEl = document.getElementById('action-package-' + s.key);
+      const cardEl = document.getElementById('card-package-' + s.key);
+
+      if (hasAccess) {
+        readyCount++;
+        if (badgeEl) {
+          badgeEl.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-primary text-on-primary";
+          badgeEl.textContent = "TERLISENSI / AKTIF";
+        }
+        if (statusEl) {
+          statusEl.className = "text-on-surface font-semibold";
+          statusEl.textContent = "Siap Dikerjakan Kapan Saja";
+        }
+        if (cardEl) {
+          cardEl.className = "bg-surface-container-lowest border-2 border-primary rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
+        }
+        if (actionEl) {
+          actionEl.innerHTML = '<button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="window.startExam(\'' + s.key + '\')" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Mulai Ujian CAT (' + s.title + ')</span></button>';
+        }
+      } else {
+        if (badgeEl) {
+          badgeEl.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30";
+          badgeEl.textContent = "TERKUNCI / BELUM AKTIF";
+        }
+        if (statusEl) {
+          statusEl.className = "text-secondary font-medium";
+          statusEl.textContent = "Membutuhkan Token Akses";
+        }
+        if (cardEl) {
+          cardEl.className = "bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
+        }
+        if (actionEl) {
+          actionEl.innerHTML = '<button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal(\'modal-katalog-lengkap\')" type="button"><svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Aktivasi / Beli Token</span></button>';
+        }
       }
-      if (statusTo1) {
-        statusTo1.className = "text-on-surface font-semibold";
-        statusTo1.textContent = "Siap Dikerjakan Kapan Saja";
-      }
-      if (cardTo1) {
-        cardTo1.className = "bg-surface-container-lowest border-2 border-primary rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
-      }
-      if (actionTo1) {
-        actionTo1.innerHTML = `
-          <button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="window.startExam('to-1')" type="button">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Mulai Ujian CAT (110 Soal)</span>
-          </button>
-        `;
-      }
-      if (readyCountEl) readyCountEl.textContent = "2 Paket Siap Akses";
-    } else {
-      if (badgeTo1) {
-        badgeTo1.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30";
-        badgeTo1.textContent = "TERKUNCI / BELUM AKTIF";
-      }
-      if (statusTo1) {
-        statusTo1.className = "text-secondary font-medium";
-        statusTo1.textContent = "Membutuhkan Token Akses";
-      }
-      if (cardTo1) {
-        cardTo1.className = "bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
-      }
-      if (actionTo1) {
-        actionTo1.innerHTML = `
-          <button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
-            <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <span>Aktivasi / Beli Token</span>
-          </button>
-        `;
-      }
-      if (readyCountEl) readyCountEl.textContent = "1 Paket Siap Akses";
     }
+
+    const readyCountEl = document.getElementById('dash-ready-packages-count');
+    if (readyCountEl) readyCountEl.textContent = readyCount + ' Paket Siap Akses';
   }
 
-  // 8. CAT EXAM ENGINE (BKN STANDAR)
+  // 8. CAT EXAM ENGINE (BKN STANDAR TERHUBUNG KE SUPABASE)
   window.startExam = async function(packageId) {
     packageId = packageId || 'mini-to';
     const isMini = (packageId === 'mini-to' || packageId === 'mini');
 
-    // 1. Validasi Hak Akses Paket Berbayar (Proteksi Console & URL)
+    // 1. Validasi Hak Akses Paket Berbayar
     if (!isMini) {
       const hasAccess = await checkUserPackageAccess(packageId);
       if (!hasAccess) {
@@ -6390,7 +6601,12 @@ Mengerti &amp; Tutup
     }
 
     state.exam.packageId = packageId;
-    state.exam.packageName = isMini ? 'Mini Try Out Diagnostik SKD' : `Try Out SKD ${packageId.toUpperCase()}`;
+    state.exam.packageName = isMini ? 'Mini Try Out Diagnostik SKD' : (
+      packageId === 'to-1' || packageId === 'to1' ? 'Try Out SKD Paket Satuan TO Seri 1' :
+      packageId === 'to-2' || packageId === 'to2' ? 'Try Out SKD Paket Satuan TO Seri 2' :
+      packageId === 'to-3' || packageId === 'to3' ? 'Try Out SKD Paket Satuan TO Seri 3' :
+      'Try Out SKD ' + packageId.toUpperCase()
+    );
     state.exam.durationMinutes = isMini ? 20 : 100;
     state.exam.secondsRemaining = state.exam.durationMinutes * 60;
     state.exam.currentIndex = 0;
@@ -6398,43 +6614,79 @@ Mengerti &amp; Tutup
     state.exam.doubts = {};
     state.exam.isFinished = false;
 
-    // 2. Ambil Soal Asli dari Database Supabase Sesuai package_id
-    let rawQ = [];
-    if (window.dbClient && window.dbClient.from) {
+    // 2. Ambil Soal Asli Live dari Database Supabase Sesuai package_id
+    const client = window.dbClient || window.supabaseClient;
+    let allDbQuestions = [];
+    if (client && client.from) {
       try {
-        let query = window.dbClient.from('questions').select('*');
-        if (isMini) {
-          query = query.or('id_paket.eq.mini-to,id_paket.eq.mini,package_id.eq.mini-to,package_id.eq.mini');
-        } else {
-          const altId = packageId.includes('-') ? packageId.replace('-', '') : (packageId.startsWith('to') ? packageId.replace('to', 'to-') : packageId);
-          query = query.or(`id_paket.eq.${packageId},package_id.eq.${packageId},id_paket.eq.${altId},package_id.eq.${altId}`);
-        }
-        const { data: dbQuestions, error: qErr } = await query;
-        if (dbQuestions && dbQuestions.length > 0) {
-          rawQ = dbQuestions;
+        const { data: qs, error: qErr } = await client.from('questions').select('*').order('created_at', { ascending: true });
+        if (!qErr && Array.isArray(qs) && qs.length > 0) {
+          allDbQuestions = qs;
+          state.questions = qs;
+          if (window.state) window.state.questions = qs;
+        } else if (qErr) {
+          console.warn('Fetch questions notice from Supabase:', qErr);
         }
       } catch (err) {
-        console.warn('Fetch exam questions error:', err);
+        console.warn('Fetch exam questions exception:', err);
       }
     }
 
-    if (!rawQ || rawQ.length === 0) {
-      rawQ = (state.questions || []).filter(q => {
-        const p = String(q.id_paket || q.package_id || '').toLowerCase();
-        if (isMini) return p === 'mini-to' || p === 'mini';
-        return p === packageId.toLowerCase() || p === packageId.replace('-', '').toLowerCase() || p === packageId.replace('to', 'to-').toLowerCase();
+    // Fallback: Jika koneksi lambat, cek state.questions atau APP.packages yang sudah dimuat
+    if (allDbQuestions.length === 0 && Array.isArray(state.questions) && state.questions.length > 0) {
+      allDbQuestions = state.questions;
+    }
+    if (allDbQuestions.length === 0 && window.APP && window.APP.packages) {
+      Object.keys(window.APP.packages).forEach(pkgKey => {
+        const p = window.APP.packages[pkgKey];
+        if (p && Array.isArray(p.questions)) {
+          p.questions.forEach(item => {
+            if (item.raw) allDbQuestions.push(item.raw);
+            else allDbQuestions.push({ id_paket: pkgKey, package_id: pkgKey, ...item });
+          });
+        }
       });
     }
 
-    // 3. Jika Jumlah Soal Asli Masih Kosong (0 Soal), Batalkan Masuk ke Lembar Ujian
+    // Helper pencocokan paket fleksibel (mendukung mini, to1, to2, to3, to-1, to-2, to-3, dll)
+    function matchesPackage(q, pkgId) {
+      const target = String(pkgId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const qPkg = String(q.id_paket || q.package_id || q.paket_id || q.paket || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      if (target === 'mini' || target === 'minito') {
+        return qPkg === 'mini' || qPkg === 'minito' || qPkg.includes('mini');
+      }
+      if (target === 'to1' || target === 'seri1') {
+        return qPkg === 'to1' || qPkg === 'seri1' || (qPkg.includes('1') && !qPkg.includes('2') && !qPkg.includes('3'));
+      }
+      if (target === 'to2' || target === 'seri2') {
+        return qPkg === 'to2' || qPkg === 'seri2' || (qPkg.includes('2') && !qPkg.includes('1') && !qPkg.includes('3'));
+      }
+      if (target === 'to3' || target === 'seri3') {
+        return qPkg === 'to3' || qPkg === 'seri3' || (qPkg.includes('3') && !qPkg.includes('1') && !qPkg.includes('2'));
+      }
+      return qPkg === target || qPkg.includes(target);
+    }
+
+    let rawQ = allDbQuestions.filter(q => matchesPackage(q, packageId));
+
+    // Jika filter spesifik belum ada tapi ada soal unassigned di database
+    if ((!rawQ || rawQ.length === 0) && allDbQuestions.length > 0) {
+      const unassigned = allDbQuestions.filter(q => !q.id_paket && !q.package_id);
+      if (unassigned.length > 0) {
+        rawQ = unassigned;
+      }
+    }
+
+    // 3. Jika Jumlah Soal Asli Masih Kosong (0 Soal), Infokan ke Peserta
     if (!rawQ || rawQ.length === 0) {
-      alert('Soal untuk paket ini sedang disiapkan oleh Admin.');
+      alert('Belum ada butir soal untuk ' + state.exam.packageName + ' di database. Silakan tambahkan soal melalui Bank Soal di Panel Admin.');
       return;
     }
 
     // 4. Susun Lembar Soal Ujian Asli Sesuai Komposisi Subtes
     if (isMini) {
-      // Urutan soal deterministik 20 butir pertama (6 TWK, 6 TIU, 8 TKP)
+      // Urutan deterministik 20 butir pertama (6 TWK, 6 TIU, 8 TKP)
       const sortDeterministic = arr => arr.slice().sort((a, b) => {
         const idA = String(a.id_soal || a.id || a.created_at || '');
         const idB = String(b.id_soal || b.id || b.created_at || '');
@@ -6444,11 +6696,12 @@ Mengerti &amp; Tutup
       const twk = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK')).slice(0, 6);
       const tiu = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU')).slice(0, 6);
       const tkp = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP')).slice(0, 8);
+      const others = rawQ.filter(q => !['TWK', 'TIU', 'TKP'].includes((q.subtes || q.subtest || '').toUpperCase()));
 
-      const combined = [...twk, ...tiu, ...tkp];
-      state.exam.questions = combined.length > 0 ? combined : rawQ.slice(0, 20);
+      const combined = [...twk, ...tiu, ...tkp, ...others];
+      state.exam.questions = combined.length > 0 ? combined.slice(0, 20) : rawQ.slice(0, 20);
     } else {
-      // Paket Berbayar SKD 110 Butir: 35 TWK, 30 TIU, 45 TKP
+      // Paket Berbayar SKD 110 Butir: Komposisi 35 TWK, 30 TIU, 45 TKP
       const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
       const twk = shuffle(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK'));
       const tiu = shuffle(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU'));
@@ -6461,11 +6714,23 @@ Mengerti &amp; Tutup
 
     window.showView('exam');
 
+    // Update profil peserta dan nama paket di tampilan ujian
+    const uName = (state.currentUser && (state.currentUser.nama || state.currentUser.full_name)) || 'Peserta';
+    const userNameEl = document.getElementById('exam-user-name');
+    if (userNameEl) userNameEl.textContent = uName;
+    const subheadNameEl = document.getElementById('exam-subhead-name');
+    if (subheadNameEl) subheadNameEl.textContent = uName;
+
+    const pkgTitleEl = document.getElementById('exam-header-package-title');
+    if (pkgTitleEl) pkgTitleEl.textContent = state.exam.packageName;
+    const subheadPkgEl = document.getElementById('exam-subhead-pkg');
+    if (subheadPkgEl) subheadPkgEl.textContent = isMini ? 'Mini TO Diagnostik' : 'SKD CPNS 2026';
+
     // Pastikan sheet navigasi mobile tertutup saat awal
     const mobileBackdrop = document.getElementById('mobileNavBackdrop');
     if (mobileBackdrop) mobileBackdrop.classList.add('hidden');
 
-    // Tampilkan Panduan & Tata Tertib Ujian (rulesModal) terlebih dahulu
+    // Tampilkan Panduan & Tata Tertib Ujian (rulesModal)
     const rulesModal = document.getElementById('rulesModal');
     const agreeCheckbox = document.getElementById('agreeCheckbox');
     const startExamBtn = document.getElementById('startExamBtn');
@@ -6507,13 +6772,19 @@ Mengerti &amp; Tutup
     const updateDisplays = () => {
       const m = Math.floor(state.exam.secondsRemaining / 60);
       const s = state.exam.secondsRemaining % 60;
-      const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      const str = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 
-      const timerEls = document.querySelectorAll('#mobileHeaderTimer, .timerDisplay, [data-exam-timer]');
+      const timerEls = document.querySelectorAll('#mobileHeaderTimer, .examTimerDisplay, .timerDisplay, [data-exam-timer]');
       timerEls.forEach(el => el.textContent = str);
+
+      const modalRemaining = document.getElementById('modalTimeRemaining');
+      if (modalRemaining) {
+        modalRemaining.textContent = String(m).padStart(3, '0') + ' Menit ' + String(s).padStart(2, '0') + ' Detik';
+      }
 
       if (state.exam.secondsRemaining <= 0) {
         clearInterval(state.exam.timerInterval);
+        state.exam.timerInterval = null;
         alert('Waktu ujian telah berakhir!');
         window.finishExam(false);
       } else {
@@ -6526,41 +6797,73 @@ Mengerti &amp; Tutup
   }
 
   function renderCurrentQuestion() {
+    if (!state.exam.questions || state.exam.questions.length === 0) return;
+    const totalQ = state.exam.questions.length;
     const q = state.exam.questions[state.exam.currentIndex];
     if (!q) return;
 
     const qNum = state.exam.currentIndex + 1;
-    const qId = q.id_soal || q.id || `q-${qNum}`;
+    const qId = q.id_soal || q.id || ('q-' + qNum);
+    const subtest = (q.subtes || q.subtest || 'TWK').toUpperCase();
+    const topic = q.topik || q.topic || subtest;
+    const qText = q.pertanyaan || q.question_text || q.question || q.text || '';
 
+    // Nomor Soal & Header Card
+    const cardNumEl = document.getElementById('exam-card-q-num');
+    if (cardNumEl) cardNumEl.textContent = 'Soal No. ' + qNum + ' dari ' + totalQ;
     const qNumEls = document.querySelectorAll('.question-number-display, [data-q-num]');
     qNumEls.forEach(el => el.textContent = qNum);
 
+    // Subtes
+    const cardSubtestEl = document.getElementById('exam-card-subtest');
+    if (cardSubtestEl) cardSubtestEl.textContent = subtest;
+    const subheadSubEl = document.getElementById('exam-subhead-subtest');
+    if (subheadSubEl) subheadSubEl.textContent = subtest;
     const subtestEls = document.querySelectorAll('.subtest-badge, [data-q-subtest]');
-    subtestEls.forEach(el => el.textContent = q.subtes || 'TWK');
+    subtestEls.forEach(el => el.textContent = subtest);
 
-    const textEls = document.querySelectorAll('#questionText, .question-text-content, [data-q-text]');
-    textEls.forEach(el => el.textContent = q.pertanyaan);
+    // Bobot Skor
+    const scoreInfoEl = document.getElementById('exam-card-score-info');
+    if (scoreInfoEl) {
+      if (subtest === 'TKP') {
+        scoreInfoEl.innerHTML = 'Bobot Skor: <strong class="text-slate-900">1 s.d. 5</strong> (Semua Opsi Bernilai)';
+      } else {
+        scoreInfoEl.innerHTML = 'Bobot Skor: <strong class="text-slate-900">+5</strong> Benar • <strong class="text-slate-900">0</strong> Salah';
+      }
+    }
 
+    // Teks Pertanyaan Soal
+    const textEl = document.getElementById('questionText');
+    if (textEl) textEl.textContent = qText;
+    const textEls = document.querySelectorAll('.question-text-content, [data-q-text]');
+    textEls.forEach(el => el.textContent = qText);
+
+    // Kotak Topik & Kisi-kisi
+    const topicTextEl = document.getElementById('exam-topic-text');
+    if (topicTextEl) {
+      topicTextEl.textContent = 'Topik: ' + topic + ' • Standar BKN RI';
+    }
+
+    // Smooth animation reflow
     const qArticle = document.querySelector('#view-exam article');
     if (qArticle) {
       qArticle.classList.remove('animate-smooth-in');
-      void qArticle.offsetWidth; // trigger reflow
+      void qArticle.offsetWidth;
       qArticle.classList.add('animate-smooth-in');
     }
 
+    // Render Opsi Jawaban (A - E)
     const optContainer = document.getElementById('optionsContainer');
     if (optContainer) {
       optContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D', 'E'];
       letters.forEach(letter => {
-        const key = `opsi_${letter.toLowerCase()}`;
-        const optText = q[key] || q[letter.toLowerCase()] || '-';
-        const isSelected = state.exam.answers[qId] === letter;
+        const optText = (typeof getQuestionOptionText === 'function') ? getQuestionOptionText(q, letter) : (q['opsi_' + letter.toLowerCase()] || q['option_' + letter.toLowerCase()] || '-');
+        const isSelected = (state.exam.answers[qId] === letter);
 
         const optDiv = document.createElement('div');
-        optDiv.className = `option-item p-3.5 sm:p-4 rounded-xl cursor-pointer transition flex items-start gap-3 border ${
-          isSelected ? 'border-2 border-blue-600 bg-blue-50/70 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'
-        }`;
+        optDiv.className = 'option-item p-3.5 sm:p-4 rounded-xl cursor-pointer transition flex items-start gap-3 border ' +
+          (isSelected ? 'border-2 border-blue-600 bg-blue-50/70 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300');
 
         optDiv.onclick = function() {
           state.exam.answers[qId] = letter;
@@ -6568,26 +6871,41 @@ Mengerti &amp; Tutup
           renderExamQuestionGrid();
         };
 
-        optDiv.innerHTML = `
-          <div class="option-badge w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-            isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'
-          }">${letter}</div>
-          <div class="text-xs sm:text-sm font-medium leading-relaxed pt-0.5 text-slate-900">${optText}</div>
-        `;
+        optDiv.innerHTML = '<div class="option-badge w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ' +
+          (isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700') + '">' + letter + '</div>' +
+          '<div class="flex-1 text-xs sm:text-sm font-medium leading-relaxed pt-1 text-slate-900">' + optText + '</div>' +
+          '<div class="option-indicator w-5 h-5 rounded-full border ' + (isSelected ? 'border-2 border-blue-600' : 'border-slate-300') + ' shrink-0 flex items-center justify-center mt-1 transition-colors">' +
+          '<span class="w-2.5 h-2.5 rounded-full ' + (isSelected ? 'bg-blue-600' : 'bg-transparent') + '"></span>' +
+          '</div>';
         optContainer.appendChild(optDiv);
       });
     }
 
+    // Status Ragu-Ragu
     const isDoubt = Boolean(state.exam.doubts[qId]);
     const flagBtns = document.querySelectorAll('.flagBtn, #flagBtnMobile');
+    const flagTexts = document.querySelectorAll('.flagBtnText');
     flagBtns.forEach(btn => {
       if (isDoubt) {
-        btn.classList.add('bg-amber-500', 'text-white');
-        btn.classList.remove('bg-slate-900', 'bg-white');
+        btn.classList.add('bg-amber-500', 'text-white', 'border-amber-600');
+        btn.classList.remove('bg-slate-900', 'bg-white', 'border-slate-300');
       } else {
-        btn.classList.remove('bg-amber-500');
+        btn.classList.remove('bg-amber-500', 'border-amber-600');
+        btn.classList.add('border-slate-300', 'bg-white', 'text-slate-700');
       }
     });
+    flagTexts.forEach(t => {
+      t.textContent = isDoubt ? 'Tandai Yakin' : 'Ragu-Ragu';
+    });
+
+    // Update Counter Dijawab
+    const answeredCount = Object.keys(state.exam.answers || {}).filter(k => state.exam.answers[k]).length;
+    const mobileQNum = document.getElementById('exam-mobile-q-num');
+    if (mobileQNum) mobileQNum.textContent = 'No. ' + qNum;
+    const mobileProg = document.getElementById('exam-mobile-progress');
+    if (mobileProg) mobileProg.innerHTML = 'Dijawab: <strong class="text-slate-900 font-bold">' + answeredCount + '</strong>/' + totalQ;
+    const deskProg = document.getElementById('exam-desktop-progress');
+    if (deskProg) deskProg.innerHTML = answeredCount + ' <span class="text-xs font-normal text-slate-500">/ ' + totalQ + '</span>';
 
     wireExamButtons();
   }
@@ -6604,10 +6922,10 @@ Mengerti &amp; Tutup
       };
     });
 
-    const nextBtns = document.querySelectorAll('#nextBtnDesktop, #nextBtnMobile, [data-next-q]');
+    const nextBtns = document.querySelectorAll('#nextBtnDesktop, .nextBtn, #nextBtnMobile, [data-next-q]');
     nextBtns.forEach(b => {
       b.onclick = function() {
-        if (state.exam.currentIndex < state.exam.questions.length - 1) {
+        if (state.exam.currentIndex < (state.exam.questions || []).length - 1) {
           state.exam.currentIndex++;
           renderCurrentQuestion();
           renderExamQuestionGrid();
@@ -6622,16 +6940,36 @@ Mengerti &amp; Tutup
     const flagBtns = document.querySelectorAll('.flagBtn, #flagBtnMobile');
     flagBtns.forEach(b => {
       b.onclick = function() {
+        if (!state.exam.questions || !state.exam.questions[state.exam.currentIndex]) return;
         const q = state.exam.questions[state.exam.currentIndex];
-        if (q) {
-          const qId = q.id_soal || q.id || `q-${state.exam.currentIndex + 1}`;
-          state.exam.doubts[qId] = !state.exam.doubts[qId];
-          renderCurrentQuestion();
-          renderExamQuestionGrid();
-        }
+        const qId = q.id_soal || q.id || ('q-' + (state.exam.currentIndex + 1));
+        state.exam.doubts[qId] = !state.exam.doubts[qId];
+        renderCurrentQuestion();
+        renderExamQuestionGrid();
       };
     });
 
+    // Fast Jump Input & Button
+    const jumpInput = document.getElementById('examJumpInput');
+    const jumpBtn = document.getElementById('examJumpBtn');
+    if (jumpBtn && jumpInput) {
+      jumpBtn.onclick = function() {
+        const val = parseInt(jumpInput.value, 10);
+        if (!isNaN(val) && val >= 1 && val <= (state.exam.questions || []).length) {
+          state.exam.currentIndex = val - 1;
+          renderCurrentQuestion();
+          renderExamQuestionGrid();
+          jumpInput.value = '';
+        }
+      };
+      jumpInput.onkeydown = function(e) {
+        if (e.key === 'Enter') {
+          jumpBtn.click();
+        }
+      };
+    }
+
+    // Tombol Selesai Ujian Header
     const finishBtns = document.querySelectorAll('#finishExamHeaderBtn, [data-finish-exam]');
     finishBtns.forEach(b => {
       b.onclick = function(e) {
@@ -6646,7 +6984,7 @@ Mengerti &amp; Tutup
         const doubts = Object.keys(state.exam.doubts || {}).filter(k => state.exam.doubts[k]).length;
         const descP = finishModal.querySelector('p');
         if (descP) {
-          descP.innerHTML = `Apakah Anda yakin ingin mengakhiri sesi ujian ini? Dari total <strong>${total} butir</strong>, Anda telah menjawab <strong>${answered} butir</strong> dan masih terdapat <strong>${doubts} butir</strong> dengan status ragu-ragu.`;
+          descP.innerHTML = 'Apakah Anda yakin ingin mengakhiri sesi ujian ini? Dari total <strong>' + total + ' butir</strong>, Anda telah menjawab <strong>' + answered + ' butir</strong> dan masih terdapat <strong>' + doubts + ' butir</strong> dengan status ragu-ragu.';
         }
         finishModal.classList.remove('hidden');
         finishModal.classList.add('flex');
@@ -6675,21 +7013,74 @@ Mengerti &amp; Tutup
         window.finishExam(false);
       };
     }
+
+    // Anti-cheat resume
+    const resumeExamBtn = document.getElementById('resumeExamBtn');
+    if (resumeExamBtn) {
+      resumeExamBtn.onclick = function() {
+        const antiCheatModal = document.getElementById('antiCheatModal');
+        if (antiCheatModal) {
+          antiCheatModal.classList.add('hidden');
+          antiCheatModal.classList.remove('flex');
+        }
+      };
+    }
+
+    // Keyboard Shortcuts (1-5, Arrow, R)
+    if (!window._examKeydownAttached) {
+      window._examKeydownAttached = true;
+      window.addEventListener('keydown', function(e) {
+        if (state.activeView !== 'exam' || state.exam.isFinished) return;
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+        if (e.key >= '1' && e.key <= '5') {
+          const idx = parseInt(e.key, 10) - 1;
+          const letters = ['A', 'B', 'C', 'D', 'E'];
+          const targetLetter = letters[idx];
+          const q = state.exam.questions[state.exam.currentIndex];
+          if (q && targetLetter) {
+            const qId = q.id_soal || q.id || ('q-' + (state.exam.currentIndex + 1));
+            state.exam.answers[qId] = targetLetter;
+            renderCurrentQuestion();
+            renderExamQuestionGrid();
+          }
+        } else if (e.key === 'r' || e.key === 'R') {
+          const q = state.exam.questions[state.exam.currentIndex];
+          if (q) {
+            const qId = q.id_soal || q.id || ('q-' + (state.exam.currentIndex + 1));
+            state.exam.doubts[qId] = !state.exam.doubts[qId];
+            renderCurrentQuestion();
+            renderExamQuestionGrid();
+          }
+        } else if (e.key === 'ArrowRight') {
+          if (state.exam.currentIndex < (state.exam.questions || []).length - 1) {
+            state.exam.currentIndex++;
+            renderCurrentQuestion();
+            renderExamQuestionGrid();
+          }
+        } else if (e.key === 'ArrowLeft') {
+          if (state.exam.currentIndex > 0) {
+            state.exam.currentIndex--;
+            renderCurrentQuestion();
+            renderExamQuestionGrid();
+          }
+        }
+      });
+    }
   }
 
   function renderExamQuestionGrid() {
-    // Target secara spesifik grid 5 kolom (menghindari duplikasi dengan tab kategori)
-    const desktopGrid = document.querySelector('#desktopNavSidebar .grid.grid-cols-5');
-    const mobileGrid = document.querySelector('#mobileNavSheet .grid.grid-cols-5');
+    const desktopGrid = document.getElementById('desktopQuestionGrid') || document.querySelector('#desktopNavSidebar .grid.grid-cols-5');
+    const mobileGrid = document.getElementById('mobileQuestionGrid') || document.querySelector('#mobileNavSheet .grid.grid-cols-5');
     const targets = [desktopGrid, mobileGrid].filter(Boolean);
 
     targets.forEach(targetGrid => {
       targetGrid.innerHTML = '';
 
-      state.exam.questions.forEach((q, idx) => {
+      (state.exam.questions || []).forEach((q, idx) => {
         const num = idx + 1;
-        const qId = q.id_soal || q.id || `q-${num}`;
-        const isCurrent = state.exam.currentIndex === idx;
+        const qId = q.id_soal || q.id || ('q-' + num);
+        const isCurrent = (state.exam.currentIndex === idx);
         const isAnswered = Boolean(state.exam.answers[qId]);
         const isDoubt = Boolean(state.exam.doubts[qId]);
 
@@ -6706,7 +7097,7 @@ Mengerti &amp; Tutup
 
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `q-cell w-full aspect-square rounded text-xs font-bold transition flex items-center justify-center border ${bgClass}`;
+        btn.className = 'q-cell w-full aspect-square rounded text-xs font-bold transition flex items-center justify-center border ' + bgClass;
         btn.textContent = num;
         btn.onclick = function() {
           state.exam.currentIndex = idx;
@@ -6771,7 +7162,6 @@ Mengerti &amp; Tutup
     window.violationCount = 0;
     if (antiCheatGraceTimeout) clearTimeout(antiCheatGraceTimeout);
 
-    // Jeda aman 4 detik setelah tombol mulai ujian diklik dan lembar soal selesai dirender
     antiCheatGraceTimeout = setTimeout(() => {
       if (state.activeView === 'exam' && !state.exam.isFinished) {
         window.isExamActive = true;
@@ -6781,7 +7171,6 @@ Mengerti &amp; Tutup
     if (window._cheatListenerAttached) return;
     window._cheatListenerAttached = true;
 
-    // HANYA gunakan document.visibilitychange (document.hidden === true), TANPA window.blur
     document.addEventListener('visibilitychange', function() {
       if (window.isExamActive && document.hidden && state.activeView === 'exam' && !state.exam.isFinished) {
         window.violationCount = (window.violationCount || 0) + 1;
@@ -6789,7 +7178,7 @@ Mengerti &amp; Tutup
         if (modal) {
           const violationText = modal.querySelector('.text-red-700');
           if (violationText) {
-            violationText.textContent = `Pelanggaran: ${window.violationCount} kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!`;
+            violationText.textContent = 'Pelanggaran: ' + window.violationCount + ' kali. Toleransi maksimal: 2 kali sebelum ujian dihentikan paksa!';
           }
           modal.classList.remove('hidden');
           modal.classList.add('flex');
@@ -6815,7 +7204,7 @@ Mengerti &amp; Tutup
     const isMini = (state.exam.packageId === 'mini-to' || state.exam.packageId === 'mini');
 
     state.exam.questions.forEach((q, idx) => {
-      const qId = q.id_soal || q.id || `q-${idx + 1}`;
+      const qId = q.id_soal || q.id || ('q-' + (idx + 1));
       const userAns = (state.exam.answers[qId] || '').trim().toUpperCase();
       const sub = (q.subtes || q.subtest || 'TWK').toUpperCase();
       const keyOrWeight = String(q.correct_answer || q.kunci_jawaban || q.kunci_atau_bobot || 'A');
