@@ -213,6 +213,27 @@
       }
     }
 
+    // Helper to dismiss initial loading screen
+    function hideLoadingScreen() {
+      const loader = document.getElementById('app-init-loader');
+      if (loader && !loader.classList.contains('pointer-events-none')) {
+        loader.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(function() {
+          if (loader && loader.parentNode) loader.remove();
+        }, 300);
+      }
+    }
+    window.hideLoadingScreen = hideLoadingScreen;
+
+    // Helper to display login screen
+    function showLoginScreen() {
+      showView('login');
+      if (typeof window.switchTab === 'function') {
+        window.switchTab('login');
+      }
+    }
+    window.showLoginScreen = showLoginScreen;
+
     // Router Tampilan (Universal View Switcher)
     function showView(viewId) {
       if (typeof window.showView === 'function' && window.showView !== showView) {
@@ -251,6 +272,26 @@
       <span class="text-xs font-semibold text-slate-700 tracking-wide">Memuat Sistem CAT CPNS Pro...</span>
     </div>
   </div>
+  <script>
+    // Failsafe Timer Maksimal 3 Detik: Menjamin tidak pernah stuck pada layar pemuatan
+    setTimeout(function() {
+      var loader = document.getElementById('app-init-loader');
+      if (loader && !loader.classList.contains('pointer-events-none')) {
+        console.warn('[Failsafe 3s] Inisialisasi melebihi 3 detik. Menghilangkan layar pemuatan & membuka Halaman Login.');
+        if (typeof window.hideLoadingScreen === 'function') {
+          window.hideLoadingScreen();
+        } else {
+          loader.classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(function() { if (loader.parentNode) loader.remove(); }, 300);
+        }
+        if (typeof window.showLoginScreen === 'function') {
+          window.showLoginScreen();
+        } else if (typeof window.showView === 'function') {
+          window.showView('login');
+        }
+      }
+    }, 3000);
+  </script>
 
   <!-- View 1: Login (Halaman 1 Pro 1) -->
   <div id="view-login" class="min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
@@ -4935,25 +4976,27 @@ Mengerti &amp; Tutup
 (function() {
   'use strict';
 
-  // 1. SUPABASE CLIENT INITIALIZATION
+  // 1. SUPABASE CLIENT INITIALIZATION (Konsisten & Sinkron di Seluruh File)
   const SUPABASE_URL = 'https://bgatryahknatngslgupn.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_E9i-s-nOmDnnsqY24o53zw_v-Jr-u41';
   
-  let supabase = null;
-  try {
-    if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  let supabaseClient = window.supabaseClient;
+  if (!supabaseClient && window.supabase && typeof window.supabase.createClient === 'function') {
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: true
         }
       });
-      window.supabaseClient = supabase;
+      window.supabaseClient = supabaseClient;
+    } catch (err) {
+      console.warn('Supabase JS init warning:', err);
     }
-  } catch (err) {
-    console.warn('Supabase JS init warning:', err);
   }
+  let supabase = supabaseClient;
+  window.supabaseClient = supabaseClient;
 
   // 2. SOAL UJIAN (HANYA MENGGUNAKAN SOAL ASLI DARI DATABASE SUPABASE)
 
@@ -5138,7 +5181,8 @@ Mengerti &amp; Tutup
   }
 
   function updateParticipantWhatsAppLinks(adminWaNumber) {
-    const phone = (adminWaNumber || state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890').replace(/\D/g, '');
+    const rawPhone = String(adminWaNumber || state.settings.admin_whatsapp || state.settings.WA_ADMIN || '6281234567890');
+    const phone = rawPhone.replace(/\D/g, '') || '6281234567890';
     const user = state.currentUser || {};
     const userIdentifier = user.nama ? `${user.nama} (${user.email || user.no_wa || ''})` : 'Peserta';
 
@@ -7316,70 +7360,74 @@ Mengerti &amp; Tutup
     const uNameEl = document.getElementById('hist-user-name');
     if (uNameEl) uNameEl.textContent = userName;
 
-    if (!latest) {
-      const pNameEl = document.getElementById('hist-package-name');
-      if (pNameEl) pNameEl.textContent = 'Belum Ada Riwayat Ujian';
+    const pNameEl = document.getElementById('hist-package-name');
+    const pgBadge = document.getElementById('hist-pg-badge');
+    const corrEl = document.getElementById('hist-correct-count');
+    const wrongEl = document.getElementById('hist-wrong-count');
+    const totEl = document.getElementById('hist-total-count');
 
-      const pgBadge = document.getElementById('hist-pg-badge');
+    const scoreTwkEl = document.getElementById('hist-score-twk');
+    const maxTwkEl = document.getElementById('hist-max-twk');
+    const statusTwkEl = document.getElementById('hist-status-twk');
+
+    const scoreTiuEl = document.getElementById('hist-score-tiu');
+    const maxTiuEl = document.getElementById('hist-max-tiu');
+    const statusTiuEl = document.getElementById('hist-status-tiu');
+
+    const scoreTkpEl = document.getElementById('hist-score-tkp');
+    const maxTkpEl = document.getElementById('hist-max-tkp');
+    const statusTkpEl = document.getElementById('hist-status-tkp');
+
+    const scoreTotEl = document.getElementById('hist-score-total');
+    const maxTotEl = document.getElementById('hist-max-total');
+    const statusTotEl = document.getElementById('hist-status-total');
+
+    const btnAll = document.getElementById('btn-hist-filter-all');
+    const btnTwk = document.getElementById('btn-hist-filter-twk');
+    const btnTiu = document.getElementById('btn-hist-filter-tiu');
+    const btnTkp = document.getElementById('btn-hist-filter-tkp');
+
+    if (!latest) {
+      if (pNameEl) pNameEl.textContent = 'Belum Ada Riwayat Ujian';
       if (pgBadge) {
         pgBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200';
         pgBadge.innerHTML = `<span class="material-symbols-outlined text-[15px]">info</span>BELUM ADA UJIAN`;
       }
-
-      const corrEl = document.getElementById('hist-correct-count');
       if (corrEl) corrEl.textContent = '0 Soal';
-      const wrongEl = document.getElementById('hist-wrong-count');
       if (wrongEl) wrongEl.textContent = '0 Soal';
-      const totEl = document.getElementById('hist-total-count');
       if (totEl) totEl.textContent = '0 Soal';
 
-      const scoreTwkEl = document.getElementById('hist-score-twk');
       if (scoreTwkEl) scoreTwkEl.textContent = '0';
-      const maxTwkEl = document.getElementById('hist-max-twk');
       if (maxTwkEl) maxTwkEl.textContent = '/ 65';
-      const statusTwkEl = document.getElementById('hist-status-twk');
       if (statusTwkEl) {
         statusTwkEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
         statusTwkEl.textContent = '-';
       }
 
-      const scoreTiuEl = document.getElementById('hist-score-tiu');
       if (scoreTiuEl) scoreTiuEl.textContent = '0';
-      const maxTiuEl = document.getElementById('hist-max-tiu');
       if (maxTiuEl) maxTiuEl.textContent = '/ 80';
-      const statusTiuEl = document.getElementById('hist-status-tiu');
       if (statusTiuEl) {
         statusTiuEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
         statusTiuEl.textContent = '-';
       }
 
-      const scoreTkpEl = document.getElementById('hist-score-tkp');
       if (scoreTkpEl) scoreTkpEl.textContent = '0';
-      const maxTkpEl = document.getElementById('hist-max-tkp');
       if (maxTkpEl) maxTkpEl.textContent = '/ 166';
-      const statusTkpEl = document.getElementById('hist-status-tkp');
       if (statusTkpEl) {
         statusTkpEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
         statusTkpEl.textContent = '-';
       }
 
-      const scoreTotEl = document.getElementById('hist-score-total');
       if (scoreTotEl) scoreTotEl.textContent = '0';
-      const maxTotEl = document.getElementById('hist-max-total');
       if (maxTotEl) maxTotEl.textContent = '/ 550';
-      const statusTotEl = document.getElementById('hist-status-total');
       if (statusTotEl) {
         statusTotEl.className = 'text-[10px] sm:text-[11px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200';
         statusTotEl.textContent = '-';
       }
 
-      const btnAll = document.getElementById('btn-hist-filter-all');
       if (btnAll) btnAll.textContent = 'Semua Soal (0)';
-      const btnTwk = document.getElementById('btn-hist-filter-twk');
       if (btnTwk) btnTwk.textContent = 'TWK (0)';
-      const btnTiu = document.getElementById('btn-hist-filter-tiu');
       if (btnTiu) btnTiu.textContent = 'TIU (0)';
-      const btnTkp = document.getElementById('btn-hist-filter-tkp');
       if (btnTkp) btnTkp.textContent = 'TKP (0)';
 
       updateHistoryFilterButtons();
@@ -7392,16 +7440,10 @@ Mengerti &amp; Tutup
 
     // Update Header / Breadcrumb / User & Package names
     const pkgName = latest.nama_paket || 'Mini Try Out Diagnostik SKD';
-
-    const uNameEl = document.getElementById('hist-user-name');
-    if (uNameEl) uNameEl.textContent = userName;
-
-    const pNameEl = document.getElementById('hist-package-name');
     if (pNameEl) pNameEl.textContent = pkgName;
 
     // Passing Grade status
     const isPass = (latest.status_pg === 'LULUS PG' || latest.status_pg === 'Lulus PG' || latest.status_pg === 'LULUS');
-    const pgBadge = document.getElementById('hist-pg-badge');
     if (pgBadge) {
       pgBadge.className = isPass
         ? 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -7410,21 +7452,15 @@ Mengerti &amp; Tutup
     }
 
     // Counts
-    const corrEl = document.getElementById('hist-correct-count');
     if (corrEl) corrEl.textContent = `${latest.jumlah_benar ?? 16} Soal`;
-    const wrongEl = document.getElementById('hist-wrong-count');
     if (wrongEl) wrongEl.textContent = `${latest.jumlah_salah ?? 4} Soal`;
-    const totEl = document.getElementById('hist-total-count');
     if (totEl) totEl.textContent = `${latest.questions.length} Soal`;
 
     // TWK Box
     const maxTwk = isMini ? 30 : 175;
     const twkPassed = isMini ? (latest.skor_twk >= 15) : (latest.skor_twk >= 65);
-    const scoreTwkEl = document.getElementById('hist-score-twk');
     if (scoreTwkEl) scoreTwkEl.textContent = latest.skor_twk;
-    const maxTwkEl = document.getElementById('hist-max-twk');
     if (maxTwkEl) maxTwkEl.textContent = `/ ${maxTwk}`;
-    const statusTwkEl = document.getElementById('hist-status-twk');
     if (statusTwkEl) {
       statusTwkEl.className = twkPassed ? 'inline-flex items-center gap-1 font-semibold text-emerald-700' : 'inline-flex items-center gap-1 font-semibold text-rose-700';
       statusTwkEl.textContent = twkPassed ? 'Lulus' : 'Belum PG';
@@ -7433,11 +7469,8 @@ Mengerti &amp; Tutup
     // TIU Box
     const maxTiu = isMini ? 30 : 150;
     const tiuPassed = isMini ? (latest.skor_tiu >= 15) : (latest.skor_tiu >= 80);
-    const scoreTiuEl = document.getElementById('hist-score-tiu');
     if (scoreTiuEl) scoreTiuEl.textContent = latest.skor_tiu;
-    const maxTiuEl = document.getElementById('hist-max-tiu');
     if (maxTiuEl) maxTiuEl.textContent = `/ ${maxTiu}`;
-    const statusTiuEl = document.getElementById('hist-status-tiu');
     if (statusTiuEl) {
       statusTiuEl.className = tiuPassed ? 'inline-flex items-center gap-1 font-semibold text-emerald-700' : 'inline-flex items-center gap-1 font-semibold text-rose-700';
       statusTiuEl.textContent = tiuPassed ? 'Lulus' : 'Belum PG';
@@ -7446,11 +7479,8 @@ Mengerti &amp; Tutup
     // TKP Box
     const maxTkp = isMini ? 40 : 225;
     const tkpPassed = isMini ? (latest.skor_tkp >= 28) : (latest.skor_tkp >= 166);
-    const scoreTkpEl = document.getElementById('hist-score-tkp');
     if (scoreTkpEl) scoreTkpEl.textContent = latest.skor_tkp;
-    const maxTkpEl = document.getElementById('hist-max-tkp');
     if (maxTkpEl) maxTkpEl.textContent = `/ ${maxTkp}`;
-    const statusTkpEl = document.getElementById('hist-status-tkp');
     if (statusTkpEl) {
       statusTkpEl.className = tkpPassed ? 'inline-flex items-center gap-1 font-semibold text-emerald-700' : 'inline-flex items-center gap-1 font-semibold text-rose-700';
       statusTkpEl.textContent = tkpPassed ? 'Lulus' : 'Belum PG';
@@ -7458,11 +7488,8 @@ Mengerti &amp; Tutup
 
     // Total Score Box
     const maxTot = isMini ? 100 : 550;
-    const scoreTotEl = document.getElementById('hist-score-total');
     if (scoreTotEl) scoreTotEl.textContent = latest.total_skor;
-    const maxTotEl = document.getElementById('hist-max-total');
     if (maxTotEl) maxTotEl.textContent = `/ ${maxTot}`;
-    const statusTotEl = document.getElementById('hist-status-total');
     if (statusTotEl) {
       statusTotEl.className = isPass
         ? 'text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200'
@@ -7485,13 +7512,9 @@ Mengerti &amp; Tutup
     const tiuQCount = latest.questions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU').length;
     const tkpQCount = latest.questions.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP').length;
 
-    const btnAll = document.getElementById('btn-hist-filter-all');
     if (btnAll) btnAll.textContent = `Semua Soal (${totalQCount})`;
-    const btnTwk = document.getElementById('btn-hist-filter-twk');
     if (btnTwk) btnTwk.textContent = isMini ? `TWK (1-6)` : `TWK (1-${twkQCount})`;
-    const btnTiu = document.getElementById('btn-hist-filter-tiu');
     if (btnTiu) btnTiu.textContent = isMini ? `TIU (7-12)` : `TIU (${twkQCount + 1}-${twkQCount + tiuQCount})`;
-    const btnTkp = document.getElementById('btn-hist-filter-tkp');
     if (btnTkp) btnTkp.textContent = isMini ? `TKP (13-20)` : `TKP (${twkQCount + tiuQCount + 1}-${totalQCount})`;
 
     updateHistoryFilterButtons();
@@ -7765,300 +7788,296 @@ Mengerti &amp; Tutup
 
   // 11. INITIALIZATION & EVENT DELEGATION
   document.addEventListener('DOMContentLoaded', async function() {
-    await syncInitialData();
-
-    // Bind Login & Register forms
-    const vLogin = document.getElementById('view-login');
-    if (vLogin) {
-      const formLogin = vLogin.querySelector('form');
-      if (formLogin) {
-        formLogin.onsubmit = function(e) {
-          e.preventDefault();
-          const iden = document.getElementById('login-identifier')?.value;
-          const pass = document.getElementById('login-password')?.value;
-          handleLoginSubmit(iden, pass);
-        };
-      }
-
-      // Link to admin
-      const adminLinks = vLogin.querySelectorAll('a, button');
-      adminLinks.forEach(l => {
-        if ((l.textContent || '').toLowerCase().includes('masuk sebagai admin')) {
-          l.onclick = function(e) {
-            e.preventDefault();
-            if (typeof window.openAdminLoginModal === 'function') {
-              window.openAdminLoginModal();
-            }
-          };
-        }
-      });
-    }
-
-    const bindRegisterForm = (container) => {
-      if (!container) return;
-      const form = container.tagName === 'FORM' ? container : container.querySelector('form');
-      if (form && !form._boundReg) {
-        form._boundReg = true;
-        form.onsubmit = function(e) {
-          e.preventDefault();
-          const nama = (container.querySelector('#reg-name') || document.getElementById('reg-name'))?.value;
-          const no_wa = (container.querySelector('#reg-wa') || document.getElementById('reg-wa'))?.value;
-          const email = (container.querySelector('#reg-email') || document.getElementById('reg-email'))?.value;
-          const password = (container.querySelector('#reg-password') || document.getElementById('reg-password'))?.value;
-          const jurusan = (container.querySelector('#reg-major') || document.getElementById('reg-major'))?.value;
-          const provinsi = (container.querySelector('#reg-target') || document.getElementById('reg-target'))?.value;
-          handleRegisterSubmit({ nama, no_wa, email, password, jurusan, provinsi });
-        };
-      }
-    };
-
-    bindRegisterForm(document.getElementById('form-register-inner'));
-    bindRegisterForm(document.getElementById('form-register'));
-    bindRegisterForm(document.getElementById('view-register'));
-    updateParticipantWhatsAppLinks();
-
-    // Attach navigation to Dashboard Sidebar
-    const vDash = document.getElementById('view-dashboard');
-    if (vDash) {
-      const navLinks = vDash.querySelectorAll('a, button');
-      navLinks.forEach(l => {
-        const txt = (l.textContent || '').toLowerCase();
-        if (txt.includes('dashboard')) {
-          l.onclick = function(e) {
-            e.preventDefault();
-            if (typeof window.toggleSidebarDrawer === 'function') window.toggleSidebarDrawer(false);
-            window.showView('dashboard');
-          };
-        } else if (txt.includes('riwayat try out') || txt.includes('riwayat')) {
-          l.onclick = function(e) {
-            e.preventDefault();
-            if (typeof window.toggleSidebarDrawer === 'function') window.toggleSidebarDrawer(false);
-            window.showView('history');
-          };
-        } else if (txt.includes('keluar')) {
-          l.onclick = function(e) {
-            e.preventDefault();
-            if (typeof window.handleUserLogout === 'function') {
-              window.handleUserLogout();
-            }
-          };
-        }
-      });
-    }
-
-    // Helper to dismiss initial loading screen
-    function removeInitLoader() {
-      const loader = document.getElementById('app-init-loader');
-      if (loader) {
-        loader.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(() => { if (loader && loader.parentNode) loader.remove(); }, 300);
-      }
-    }
-
-    // URL parameter check for direct admin access (?admin=1 or #admin)
-    const urlParams = new URLSearchParams(window.location.search);
-    const isAdminParam = urlParams.get('mode') === 'admin' || urlParams.get('admin') === '1' || window.location.hash === '#admin';
-
-    // 1. CEK SESI ADMIN (localStorage / sessionStorage) - Persisten Penuh Saat Refresh F5
-    const isAdminAuthed = (localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('cat_admin_authed') === 'true') && 
-                          (sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken'));
-
-    if (isAdminAuthed && !isAdminParam) {
-      const adminTok = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
-      sessionStorage.setItem('adminToken', adminTok);
-      sessionStorage.setItem('cat_admin_authed', 'true');
-      localStorage.setItem('admin_authenticated', 'true');
-      localStorage.setItem('adminToken', adminTok);
-
-      state.currentUser = {
-        id: 'admin-1',
-        nama: 'Administrator Workspace',
-        email: 'admin@catcpns.pro',
-        no_wa: state.settings.admin_whatsapp || state.settings.WA_ADMIN || '081111111111',
-        role: 'admin'
-      };
-
-      window.showView('admin');
-      if (typeof initAdminView === 'function') {
-        await initAdminView();
-      }
-      removeInitLoader();
-      return;
-    }
-
-    if (isAdminParam) {
-      window.showView('login');
-      if (typeof window.switchTab === 'function') window.switchTab('login');
-      if (typeof window.openAdminLoginModal === 'function') {
-        window.openAdminLoginModal();
-      }
-      removeInitLoader();
-      return;
-    }
-
-    // 2. CEK SESI PESERTA VIA SUPABASE AUTH
-    const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
-
-    let participantSessionFound = false;
-    let participantProfileComplete = false;
-
-    // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (nama, phone, target_instansi)
-    async function syncAndCheckUserProfile(u, isGoogle) {
-      if (!u) return { isComplete: false, profile: null };
-
-      let profile = null;
-      const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0];
-
-      if (supabase) {
-        try {
-          // 1. Cek tabel public.users berdasarkan id
-          const { data: profsById } = await supabase.from('users').select('*').eq('id', u.id).limit(1);
-          if (profsById && profsById.length > 0) {
-            profile = profsById[0];
-          } else {
-            // Cek juga berdasarkan email
-            const { data: profsByEmail } = await supabase.from('users').select('*').eq('email', u.email).limit(1);
-            if (profsByEmail && profsByEmail.length > 0) {
-              profile = profsByEmail[0];
-            }
-          }
-
-          // 2. Jika baris belum ada di public.users, segera lakukan upsert awal
-          if (!profile) {
-            const initialUpsert = {
-              id: u.id,
-              email: u.email,
-              full_name: googleFullName,
-              nama: googleFullName,
-              has_password: false,
-              quota: 0,
-              role: 'peserta'
-            };
-            await supabase.from('users').upsert(initialUpsert, { onConflict: 'id' }).catch(() => {});
-            profile = initialUpsert;
-          }
-        } catch (pErr) {
-          console.warn('Sync profile error:', pErr);
-        }
-      }
-
-      const meta = u.user_metadata || {};
-      const pName = profile?.full_name || profile?.nama || meta.full_name || meta.name || googleFullName;
-      const pPhone = profile?.phone || profile?.no_wa || meta.phone || meta.whatsapp || '';
-      const pTarget = profile?.target_instansi || profile?.provinsi || meta.target_instansi || meta.target_formation || '';
-      const pHasPassword = Boolean(profile?.has_password);
-
-      state.currentUser = {
-        id: u.id,
-        nama: pName,
-        full_name: pName,
-        email: u.email,
-        no_wa: pPhone,
-        phone: pPhone,
-        jurusan: profile?.education || profile?.jurusan || 'Umum',
-        provinsi: pTarget,
-        target_instansi: pTarget,
-        has_password: pHasPassword,
-        role: profile?.role || 'peserta',
-        avatar_url: meta.avatar_url || meta.picture || null
-      };
-      localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
-
-      // Jika full_name, phone, dan target_instansi terisi, profil dianggap LENGKAP
-      const isComplete = Boolean(pName && pName.trim() && pPhone && pPhone.trim() && pTarget && pTarget.trim());
-      return { isComplete, profile };
-    }
-
-    if (authClient) {
+    try {
+      // 1. Sinkronisasi Data Awal (Dengan timeout maksimal 2 detik agar tidak menghambat startup)
       try {
-        const { data: sessionData } = await authClient.auth.getSession();
-        const activeAuthUser = sessionData?.session?.user;
-        if (activeAuthUser) {
-          const isGoogleUser = activeAuthUser.app_metadata?.provider === 'google' || 
-                               (activeAuthUser.identities && activeAuthUser.identities.some(id => id.provider === 'google'));
+        await Promise.race([
+          syncInitialData(),
+          new Promise(resolve => setTimeout(resolve, 2000))
+        ]);
+      } catch (syncErr) {
+        console.warn('Initial data sync notice:', syncErr);
+      }
 
-          if (!activeAuthUser.email_confirmed_at && !isGoogleUser) {
-            // Email belum dikonfirmasi: paksa signOut() otomatis dan bersihkan sesi
-            await authClient.auth.signOut().catch(() => {});
-            localStorage.removeItem('cat_user_session');
-            state.currentUser = null;
-            participantSessionFound = false;
-          } else {
-            participantSessionFound = true;
-            const res = await syncAndCheckUserProfile(activeAuthUser, isGoogleUser);
-            participantProfileComplete = res.isComplete;
-
-            // Bersihkan token OAuth dari URL bar jika ada
-            if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
-              window.history.replaceState(null, '', window.location.pathname);
-            }
+      // 2. Bind form Login & Register
+      try {
+        const vLogin = document.getElementById('view-login');
+        if (vLogin) {
+          const formLogin = vLogin.querySelector('form');
+          if (formLogin) {
+            formLogin.onsubmit = function(e) {
+              e.preventDefault();
+              const iden = document.getElementById('login-identifier')?.value;
+              const pass = document.getElementById('login-password')?.value;
+              handleLoginSubmit(iden, pass);
+            };
           }
-        } else {
-          participantSessionFound = false;
+
+          const adminLinks = vLogin.querySelectorAll('a, button');
+          adminLinks.forEach(l => {
+            if ((l.textContent || '').toLowerCase().includes('masuk sebagai admin')) {
+              l.onclick = function(e) {
+                e.preventDefault();
+                if (typeof window.openAdminLoginModal === 'function') {
+                  window.openAdminLoginModal();
+                }
+              };
+            }
+          });
         }
 
-        // Listener jika status login berubah (Google OAuth callback)
-        authClient.auth.onAuthStateChange(async (event, session) => {
-          if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
-            const u = session.user;
-            const isGoogle = u.app_metadata?.provider === 'google' || (u.identities && u.identities.some(id => id.provider === 'google'));
-            if (u.email_confirmed_at || isGoogle) {
-              const res = await syncAndCheckUserProfile(u, isGoogle);
-              if (res.isComplete) {
+        const bindRegisterForm = (container) => {
+          if (!container) return;
+          const form = container.tagName === 'FORM' ? container : container.querySelector('form');
+          if (form && !form._boundReg) {
+            form._boundReg = true;
+            form.onsubmit = function(e) {
+              e.preventDefault();
+              const nama = (container.querySelector('#reg-name') || document.getElementById('reg-name'))?.value;
+              const no_wa = (container.querySelector('#reg-wa') || document.getElementById('reg-wa'))?.value;
+              const email = (container.querySelector('#reg-email') || document.getElementById('reg-email'))?.value;
+              const password = (container.querySelector('#reg-password') || document.getElementById('reg-password'))?.value;
+              const jurusan = (container.querySelector('#reg-major') || document.getElementById('reg-major'))?.value;
+              const provinsi = (container.querySelector('#reg-target') || document.getElementById('reg-target'))?.value;
+              handleRegisterSubmit({ nama, no_wa, email, password, jurusan, provinsi });
+            };
+          }
+        };
+
+        bindRegisterForm(document.getElementById('form-register-inner'));
+        bindRegisterForm(document.getElementById('form-register'));
+        bindRegisterForm(document.getElementById('view-register'));
+        updateParticipantWhatsAppLinks();
+
+        // Attach navigation to Dashboard Sidebar
+        const vDash = document.getElementById('view-dashboard');
+        if (vDash) {
+          const navLinks = vDash.querySelectorAll('a, button');
+          navLinks.forEach(l => {
+            const txt = (l.textContent || '').toLowerCase();
+            if (txt.includes('dashboard')) {
+              l.onclick = function(e) {
+                e.preventDefault();
+                if (typeof window.toggleSidebarDrawer === 'function') window.toggleSidebarDrawer(false);
                 window.showView('dashboard');
-                renderDashboardView();
-              } else {
-                window.showView('login');
-                setTimeout(() => {
-                  const nameInput = document.getElementById('complete-profile-name');
-                  if (nameInput) nameInput.value = state.currentUser?.nama || '';
-                  const waInput = document.getElementById('complete-profile-wa');
-                  if (waInput) waInput.value = state.currentUser?.no_wa || '';
-                  const targetInput = document.getElementById('complete-profile-target');
-                  if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
-                  openModal('modal-complete-profile');
-                }, 200);
+              };
+            } else if (txt.includes('riwayat try out') || txt.includes('riwayat')) {
+              l.onclick = function(e) {
+                e.preventDefault();
+                if (typeof window.toggleSidebarDrawer === 'function') window.toggleSidebarDrawer(false);
+                window.showView('history');
+              };
+            } else if (txt.includes('keluar')) {
+              l.onclick = function(e) {
+                e.preventDefault();
+                if (typeof window.handleUserLogout === 'function') {
+                  window.handleUserLogout();
+                }
+              };
+            }
+          });
+        }
+      } catch (bindErr) {
+        console.warn('UI bind notice:', bindErr);
+      }
+
+      // 3. URL parameter check for direct admin access (?admin=1 or #admin)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdminParam = urlParams.get('mode') === 'admin' || urlParams.get('admin') === '1' || window.location.hash === '#admin';
+
+      // 4. CEK SESI ADMIN (localStorage / sessionStorage) - Persisten Penuh Saat Refresh F5
+      const isAdminAuthed = (localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('cat_admin_authed') === 'true') && 
+                            (sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken'));
+
+      if (isAdminAuthed && !isAdminParam) {
+        const adminTok = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+        sessionStorage.setItem('adminToken', adminTok);
+        sessionStorage.setItem('cat_admin_authed', 'true');
+        localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('adminToken', adminTok);
+
+        state.currentUser = {
+          id: 'admin-1',
+          nama: 'Administrator Workspace',
+          email: 'admin@catcpns.pro',
+          no_wa: state.settings.admin_whatsapp || state.settings.WA_ADMIN || '081111111111',
+          role: 'admin'
+        };
+
+        window.showView('admin');
+        if (typeof initAdminView === 'function') {
+          initAdminView().catch(e => console.warn('initAdminView background notice:', e));
+        }
+        return;
+      }
+
+      if (isAdminParam) {
+        window.showLoginScreen();
+        if (typeof window.openAdminLoginModal === 'function') {
+          window.openAdminLoginModal();
+        }
+        return;
+      }
+
+      // 5. CEK SESI PESERTA VIA SUPABASE AUTH (Instance konsisten)
+      const authClient = window.supabaseClient || supabaseClient || supabase;
+
+      let participantSessionFound = false;
+      let participantProfileComplete = false;
+
+      // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (nama, phone, target_instansi)
+      async function syncAndCheckUserProfile(u, isGoogle) {
+        if (!u) return { isComplete: false, profile: null };
+
+        let profile = null;
+        const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0];
+        const activeClient = window.supabaseClient || supabaseClient || supabase;
+
+        if (activeClient) {
+          try {
+            const { data: profsById } = await activeClient.from('users').select('*').eq('id', u.id).limit(1);
+            if (profsById && profsById.length > 0) {
+              profile = profsById[0];
+            } else {
+              const { data: profsByEmail } = await activeClient.from('users').select('*').eq('email', u.email).limit(1);
+              if (profsByEmail && profsByEmail.length > 0) {
+                profile = profsByEmail[0];
+              }
+            }
+
+            if (!profile) {
+              const initialUpsert = {
+                id: u.id,
+                email: u.email,
+                full_name: googleFullName,
+                nama: googleFullName,
+                has_password: false,
+                quota: 0,
+                role: 'peserta'
+              };
+              await activeClient.from('users').upsert(initialUpsert, { onConflict: 'id' }).catch(() => {});
+              profile = initialUpsert;
+            }
+          } catch (pErr) {
+            console.warn('Sync profile error:', pErr);
+          }
+        }
+
+        const meta = u.user_metadata || {};
+        const pName = profile?.full_name || profile?.nama || meta.full_name || meta.name || googleFullName;
+        const pPhone = profile?.phone || profile?.no_wa || meta.phone || meta.whatsapp || '';
+        const pTarget = profile?.target_instansi || profile?.provinsi || meta.target_instansi || meta.target_formation || '';
+        const pHasPassword = Boolean(profile?.has_password);
+
+        state.currentUser = {
+          id: u.id,
+          nama: pName,
+          full_name: pName,
+          email: u.email,
+          no_wa: pPhone,
+          phone: pPhone,
+          jurusan: profile?.education || profile?.jurusan || 'Umum',
+          provinsi: pTarget,
+          target_instansi: pTarget,
+          has_password: pHasPassword,
+          role: profile?.role || 'peserta',
+          avatar_url: meta.avatar_url || meta.picture || null
+        };
+        localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+
+        const isComplete = Boolean(pName && pName.trim() && pPhone && pPhone.trim() && pTarget && pTarget.trim());
+        return { isComplete, profile };
+      }
+
+      if (authClient && authClient.auth) {
+        try {
+          const { data: sessionData } = await Promise.race([
+            authClient.auth.getSession(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Auth getSession timeout')), 2500))
+          ]);
+
+          const activeAuthUser = sessionData?.session?.user;
+          if (activeAuthUser) {
+            const isGoogleUser = activeAuthUser.app_metadata?.provider === 'google' || 
+                                 (activeAuthUser.identities && activeAuthUser.identities.some(id => id.provider === 'google'));
+
+            if (!activeAuthUser.email_confirmed_at && !isGoogleUser) {
+              await authClient.auth.signOut().catch(() => {});
+              localStorage.removeItem('cat_user_session');
+              state.currentUser = null;
+              participantSessionFound = false;
+            } else {
+              participantSessionFound = true;
+              const res = await syncAndCheckUserProfile(activeAuthUser, isGoogleUser);
+              participantProfileComplete = res.isComplete;
+
+              if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+                window.history.replaceState(null, '', window.location.pathname);
               }
             }
           }
-        });
-      } catch (sessErr) {
-        console.warn('Session verification notice:', sessErr);
-      }
-    }
 
-    // 3. TENTUKAN TAMPILAN BERDASARKAN HASIL PENGECEKAN
-    if (participantSessionFound && state.currentUser) {
-      if (participantProfileComplete) {
-        window.showView('dashboard');
-        renderDashboardView();
+          authClient.auth.onAuthStateChange(async (event, session) => {
+            if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+              const u = session.user;
+              const isGoogle = u.app_metadata?.provider === 'google' || (u.identities && u.identities.some(id => id.provider === 'google'));
+              if (u.email_confirmed_at || isGoogle) {
+                const res = await syncAndCheckUserProfile(u, isGoogle);
+                if (res.isComplete) {
+                  window.showView('dashboard');
+                  renderDashboardView();
+                } else {
+                  window.showView('login');
+                  setTimeout(() => {
+                    const nameInput = document.getElementById('complete-profile-name');
+                    if (nameInput) nameInput.value = state.currentUser?.nama || '';
+                    const waInput = document.getElementById('complete-profile-wa');
+                    if (waInput) waInput.value = state.currentUser?.no_wa || '';
+                    const targetInput = document.getElementById('complete-profile-target');
+                    if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
+                    if (typeof openModal === 'function') openModal('modal-complete-profile');
+                  }, 200);
+                }
+              }
+            }
+          });
+        } catch (sessErr) {
+          console.warn('Session verification notice:', sessErr);
+        }
+      }
+
+      // 6. TENTUKAN TAMPILAN BERDASARKAN HASIL PENGECEKAN
+      if (participantSessionFound && state.currentUser) {
+        if (participantProfileComplete) {
+          window.showView('dashboard');
+          renderDashboardView();
+        } else {
+          window.showView('login');
+          setTimeout(() => {
+            const nameInput = document.getElementById('complete-profile-name');
+            if (nameInput) nameInput.value = state.currentUser?.nama || '';
+            const waInput = document.getElementById('complete-profile-wa');
+            if (waInput) waInput.value = state.currentUser?.no_wa || '';
+            const targetInput = document.getElementById('complete-profile-target');
+            if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
+            if (typeof openModal === 'function') openModal('modal-complete-profile');
+          }, 300);
+        }
       } else {
-        // Profil belum lengkap: buka login dan tampilkan modal Lengkapi Profil
-        window.showView('login');
-        setTimeout(() => {
-          const nameInput = document.getElementById('complete-profile-name');
-          if (nameInput) nameInput.value = state.currentUser?.nama || '';
-          const waInput = document.getElementById('complete-profile-wa');
-          if (waInput) waInput.value = state.currentUser?.no_wa || '';
-          const targetInput = document.getElementById('complete-profile-target');
-          if (targetInput) targetInput.value = state.currentUser?.provinsi || '';
-          openModal('modal-complete-profile');
-        }, 300);
+        window.showLoginScreen();
       }
-    } else {
-      window.showView('login');
-      if (typeof window.switchTab === 'function') {
-        window.switchTab('login');
+
+      // Check URL Hash
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['login', 'register'].includes(hash)) {
+        window.showView(hash);
       }
+    } catch (err) {
+      console.error('Init error:', err);
+      window.showLoginScreen();
+    } finally {
+      window.hideLoadingScreen();
     }
-
-    // Check URL Hash
-    const hash = window.location.hash.replace('#', '');
-    if (hash && ['login', 'register'].includes(hash)) {
-      window.showView(hash);
-    }
-
-    removeInitLoader();
   });
 
 })();
