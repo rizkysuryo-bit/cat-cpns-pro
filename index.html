@@ -200,7 +200,14 @@
     let supabaseClient = null;
     if (window.supabase) {
       try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        });
+        window.supabaseClient = supabaseClient;
       } catch (e) {
         console.warn('Supabase JS Init Warning:', e);
       }
@@ -208,6 +215,9 @@
 
     // Router Tampilan (Universal View Switcher)
     function showView(viewId) {
+      if (typeof window.showView === 'function' && window.showView !== showView) {
+        return window.showView(viewId);
+      }
       const views = ['login', 'register', 'dashboard', 'exam', 'history', 'admin'];
       views.forEach(function(v) {
         const el = document.getElementById('view-' + v);
@@ -227,23 +237,20 @@
 
     window.addEventListener('hashchange', function() {
       const hash = window.location.hash.replace('#', '');
-      if (['login', 'register', 'dashboard', 'exam', 'history', 'admin'].includes(hash)) {
+      if (['login', 'register'].includes(hash)) {
         showView(hash);
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const hash = window.location.hash.replace('#', '');
-      if (['login', 'register', 'dashboard', 'exam', 'history', 'admin'].includes(hash)) {
-        showView(hash);
-      }
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.lucide.createIcons();
       }
     });
   </script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900 antialiased min-h-screen">
+  <!-- Initial App Loading Overlay (Mencegah Layar Melompat Saat Refresh F5) -->
+  <div id="app-init-loader" class="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center transition-opacity duration-300">
+    <div class="flex flex-col items-center gap-3">
+      <div class="w-9 h-9 border-3 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+      <span class="text-xs font-semibold text-slate-700 tracking-wide">Memuat Sistem CAT CPNS Pro...</span>
+    </div>
+  </div>
 
   <!-- View 1: Login (Halaman 1 Pro 1) -->
   <div id="view-login" class="min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
@@ -964,7 +971,7 @@
 <button class="lg:hidden p-2 rounded-lg text-secondary hover:bg-surface-container transition-colors border border-outline-variant/20" onclick="toggleSidebarDrawer(true)" title="Pilihan Menu Cepat">
 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
 </button>
-<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors relative border border-outline-variant/20" onclick="alert('Notifikasi: Paket Try Out Seri 1 Anda aktif dan siap dikerjakan kapan saja.')" type="button">
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors relative border border-outline-variant/20" onclick="alert('Notifikasi: Selamat datang di simulasi CAT CPNS Pro.')" type="button">
 <span class="material-symbols-outlined text-[20px]">notifications</span>
 <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span>
 </button>
@@ -1220,7 +1227,7 @@ Lihat Riwayat &amp; Evaluasi Lengkap
 </div>
 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-secondary-container text-on-secondary-fixed text-label-sm font-semibold border border-outline-variant/30 w-fit">
 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-2 Paket Siap Akses
+<span id="dash-ready-packages-count">1 Paket Siap Akses</span>
 </span>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1242,30 +1249,26 @@ Lihat Riwayat &amp; Evaluasi Lengkap
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-<span>20 Soal HOTS (5 TWK, 5 TIU, 10 TKP)</span>
+<span>20 Soal HOTS (6 TWK, 6 TIU, 8 TKP)</span>
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-<span>Skor Terakhir: <strong class="text-on-surface font-mono-timer">385 / 550</strong></span>
+<span>Skor Terakhir: <strong id="mini-to-last-score" class="text-on-surface font-mono-timer">Belum Dikerjakan</strong></span>
 </div>
 </div>
 </div>
-<div class="pt-4 mt-4 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center gap-2">
-<button class="w-full sm:flex-1 py-2 px-3 bg-surface border border-outline-variant/50 hover:bg-surface-container rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all flex items-center justify-center gap-2" onclick="openEvaluasiModal('Mini Try Out Diagnostik', 385, 75, 115, 158)" type="button">
-<svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-<span>Lihat Pembahasan</span>
-</button>
-<button class="w-full sm:flex-1 py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2" onclick="alert('Memulai Retake Mini Try Out Diagnostik (20 Menit, 20 Soal HOTS)...')" type="button">
+<div id="mini-to-action-container" class="pt-4 mt-4 border-t border-outline-variant/20">
+<button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="window.startExam('mini-to')" type="button">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-<span>Mulai Retake Mini TO</span>
+<span>Mulai Mini TO Gratis</span>
 </button>
 </div>
 </div>
 <!-- Card 2: Paket Satuan TO Seri 1 -->
-<div class="bg-surface-container-lowest border-2 border-primary rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative">
+<div id="card-package-to-1" class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative">
 <div class="flex flex-col gap-3">
 <div class="flex items-center justify-between">
-<span class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-primary text-on-primary">Terlisensi / Aktif</span>
+<span id="badge-package-to-1" class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30">TERKUNCI / BELUM AKTIF</span>
 <span class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">Rp 12.000</span>
 </div>
 <div>
@@ -1279,18 +1282,18 @@ Lihat Riwayat &amp; Evaluasi Lengkap
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-<span>110 Butir Soal CAT BKN: <strong>TWK 30, TIU 35, TKP 45</strong></span>
+<span>110 Butir Soal CAT BKN: <strong>TWK 35, TIU 30, TKP 45</strong></span>
 </div>
 <div class="flex items-center gap-2">
-<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-<span>Status: <strong class="text-on-surface">Siap Dikerjakan Kapan Saja</strong></span>
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Status: <strong id="status-package-to-1" class="text-secondary font-medium">Membutuhkan Token Akses</strong></span>
 </div>
 </div>
 </div>
-<div class="pt-4 mt-4 border-t border-outline-variant/20">
-<button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="alert('Memulai simulasi Ujian CAT CPNS Seri 1 (100 Menit, 110 Butir Soal)... Mode Ujian Dimulai!')" type="button">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-<span>Mulai Ujian CAT (110 Soal)</span>
+<div id="action-package-to-1" class="pt-4 mt-4 border-t border-outline-variant/20">
+<button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
+<svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Aktivasi / Beli Token</span>
 </button>
 </div>
 </div>
@@ -1628,7 +1631,7 @@ Aktivasi
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-<span>20 Soal HOTS (5 TWK, 5 TIU, 10 TKP)</span>
+<span>20 Soal HOTS (6 TWK, 6 TIU, 8 TKP)</span>
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
@@ -1680,11 +1683,11 @@ Lihat Pembahasan
 </a>
 </div>
 </div>
-<!-- Card 3: Seri 1 (Sudah Aktif) -->
+<!-- Card 3: Seri 1 -->
 <div class="bg-surface border border-outline-variant/40 rounded-xl p-4 flex flex-col justify-between shadow-sm">
 <div class="flex flex-col gap-3">
 <div class="flex items-center justify-between">
-<span class="text-[11px] font-semibold uppercase px-2 py-0.5 rounded bg-secondary-container text-on-secondary-fixed">Sudah Aktif</span>
+<span class="text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30">Terkunci</span>
 <span class="font-headline-md text-headline-md font-bold text-on-surface font-mono-timer">Rp 12.000</span>
 </div>
 <div>
@@ -1698,18 +1701,19 @@ Lihat Pembahasan
 </div>
 <div class="flex items-center gap-2">
 <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-<span>110 Soal (30 TWK, 35 TIU, 45 TKP)</span>
+<span>110 Butir Soal CAT BKN: <strong>TWK 35, TIU 30, TKP 45</strong></span>
 </div>
 <div class="flex items-center gap-2">
-<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-<span>Akses: <strong>Siap Dikerjakan</strong></span>
+<svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span>Status: <strong>Memerlukan Token</strong></span>
 </div>
 </div>
 </div>
 <div class="pt-4 mt-4 border-t border-outline-variant/20">
-<button class="w-full py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-label-md text-label-md font-semibold transition-all" onclick="closeModal('modal-katalog-lengkap'); alert('Memulai simulasi Ujian CAT CPNS Seri 1 (100 Menit, 110 Butir Soal)... Mode Ujian Dimulai!');" type="button">
-Mulai Ujian CAT
-</button>
+<a class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-surface border border-outline-variant/50 hover:bg-surface-container rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all" href="javascript:void(0)" onclick="openWhatsAppPurchase('satuan')">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+<span>Beli via WhatsApp</span>
+</a>
 </div>
 </div>
 <!-- Card 4: Seri 2 & 3 -->
@@ -1856,7 +1860,7 @@ Mengerti &amp; Tutup
         skor_twk: twk,
         skor_tiu: tiu,
         skor_tkp: tkp,
-        questions: (typeof DEFAULT_QUESTIONS !== 'undefined') ? DEFAULT_QUESTIONS.slice(0, 20) : [],
+        questions: (state.questions && state.questions.length > 0) ? state.questions.slice(0, 20) : [],
         answers: {}
       };
       window.renderQuestionsToContainer(modalContainer, targetAttempt);
@@ -2185,7 +2189,7 @@ Mengerti &amp; Tutup
   </div>
 
   <!-- View 5: Riwayat Try Out & Pembahasan (Halaman 4) -->
-  <div id="view-history" class="hidden bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><!-- Mobile & Tablet Navigation Drawer (Sidebar) --><aside aria-label="Navigasi Utama" class="fixed left-0 top-0 h-full w-72 lg:w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-200" id="sidebar"><div class="flex flex-col"><div class="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-slate-100"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white text-[19px]">verified</span></div><div class="flex flex-col"><span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface leading-none text-base">CAT CPNS</span><span class="font-label-sm text-secondary leading-none uppercase tracking-wider font-semibold text-[10px] mt-0.5">Pro Exam System</span></div></div><!-- Tombol Tutup Drawer (X) --><button aria-label="Tutup navigasi" class="lg:hidden p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-close-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="p-4"><div class="font-label-sm text-secondary uppercase px-3 py-1 tracking-wider font-semibold text-[11px]">Navigasi Utama</div><nav class="flex flex-col gap-1 mt-1.5"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-slate-500">dashboard</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 transition-all bg-slate-900 text-white font-semibold rounded-lg shadow-sm text-sm" data-path="riwayat-try-out" href="#"><span class="material-symbols-outlined text-[20px] text-white">history_edu</span><span>Riwayat Try Out</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium cursor-pointer" data-path="paket-dan-token" href="javascript:void(0)" onclick="openBeliPaketFromHistory()"><span class="material-symbols-outlined text-[20px] text-slate-500">shopping_bag</span><span>Beli Paket &amp; Token</span></a></nav></div></div><div class="p-4 mx-4 mb-6 rounded-xl bg-slate-50 border border-slate-200"><div class="flex items-center justify-between mb-2"><span class="text-xs text-secondary font-medium">Sisa Token Ujian</span><span id="sidebar-token-count" class="text-xs font-bold text-on-surface">0 Kuota</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div id="sidebar-token-bar" class="bg-slate-900 h-full w-0 rounded-full" style="width: 0%;"></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between"><a class="text-[11px] font-semibold text-slate-900 hover:underline inline-flex items-center gap-1 cursor-pointer" href="javascript:void(0)" onclick="openBeliPaketFromHistory()">Isi Ulang Token <span class="material-symbols-outlined text-[13px]">arrow_forward</span></a></div></div></aside><!-- Backdrop Overlay --><div aria-hidden="true" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="sidebar-backdrop"></div><div class="lg:pl-64 flex flex-col min-h-screen w-full overflow-x-hidden"><!-- Navbar Atas --><header class="sticky top-0 z-30 h-16 bg-surface/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full"><div class="flex items-center gap-3"><!-- Tombol Hamburger Menu (Jelas terlihat di HP & Tablet, hidden di lg desktop) --><button aria-label="Buka navigasi menu" class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 active:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-open-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="flex items-center gap-2"><span class="hidden sm:inline-block font-label-sm text-secondary bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Simulasi Resmi BKN</span><span class="hidden sm:inline-block text-outline-variant font-body-sm text-body-sm">/</span><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate max-w-[190px] sm:max-w-none">SKD Kedinasan &amp; Umum 2024</span></div></div><div class="flex items-center gap-3 sm:gap-4"><nav class="hidden md:flex items-center gap-2"><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="panduan-ujian" href="#">Panduan</a><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="bantuan" href="#">Bantuan</a></nav><div class="flex items-center gap-3 border-l border-slate-200 pl-3 sm:pl-4"><div class="flex flex-col text-right hidden sm:flex"><span class="text-xs font-semibold text-on-surface leading-tight">Rian Pratama</span><span class="text-[11px] text-secondary leading-tight">Peserta Reguler</span></div><div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">RP</div></div></div></header><main class="relative bg-surface w-full flex-1"><div class="flex flex-col w-full"><div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8"><!-- 1. Header Halaman / Breadcrumb & Action Buttons --><header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6"><div class="flex flex-col gap-1"><nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label-sm text-secondary text-xs"><a class="hover:text-primary transition-colors font-medium" href="#">Riwayat Try Out</a><span class="text-slate-300">/</span><span class="text-on-surface font-medium truncate max-w-[240px] sm:max-w-md">Detail &amp; Pembahasan: Mini Try Out (20 Soal)</span></nav><h1 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight mt-0.5">Riwayat Try Out</h1><p class="text-xs sm:text-sm text-secondary">Daftar riwayat simulasi ujian, evaluasi skor, dan arsip pembahasan CAT SKD.</p></div><div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full lg:w-auto"><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Cetak Rekap (PDF)</span></button><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Kembali ke Riwayat</span></button><a class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" href="#"><svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dashboard</span></a></div></header><!-- Bilah Riwayat Ujian / Switch View --><div class="flex flex-col gap-2.5"><div class="flex items-center justify-between"><span class="font-semibold text-on-surface uppercase tracking-wider text-xs">Pilih Sesi Ujian:</span><span class="text-xs text-secondary font-medium">2 Simulasi Terdaftar</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"><!-- Kartu Riwayat 1 (Aktif / Sedang Dibuka) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 shadow-sm relative"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Sedang Dibuka</span><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Skor: 359 (Lulus PG)</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Mini Try Out Diagnostik Gratis (20 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>24 Okt 2026, 10:45 WIB</span><span>•</span><span>Durasi: 18m 40d</span></div></div><div class="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><!-- Kartu Riwayat 2 (Tersedia / Siap Dikerjakan) --><div class="bg-surface-container-lowest border border-slate-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:border-slate-300 transition-all"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">Belum Selesai</span><span class="text-[11px] font-medium text-slate-500">110 Soal SKD Penuh</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Simulasi SKD Paket TO Seri 1 (110 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>Siap Dikerjakan</span><span>•</span><span>Waktu: 100 Menit</span></div></div><button class="shrink-0 text-xs font-semibold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors whitespace-nowrap min-h-[36px]" type="button">Mulai Ujian</button></div></div></div><!-- 2. Kartu Ringkasan Skor --><section class="bg-surface-container-lowest border border-slate-200 rounded-xl p-4 sm:p-6 lg:p-7 flex flex-col gap-5 sm:gap-6 shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4"><div class="flex flex-col gap-1.5"><div class="flex flex-wrap items-center gap-2"><span id="hist-pg-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>LULUS PASSING GRADE</span><span class="text-[11px] text-secondary font-medium px-2 py-0.5 bg-slate-100 rounded border border-slate-200">KepmenPANRB No. 651/2023</span></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-secondary pt-0.5"><span>Nama: <strong id="hist-user-name" class="text-on-surface font-semibold">Rian Pratama</strong></span><span>•</span><span>Paket: <strong id="hist-package-name" class="text-on-surface font-semibold">Mini Try Out Diagnostik Gratis (20 Soal)</strong></span></div></div><div class="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 sm:px-4 sm:py-2.5 rounded-lg border border-slate-200"><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Benar</span><span id="hist-correct-count" class="font-bold text-emerald-600 text-xs sm:text-sm">16 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Salah/Kurang</span><span id="hist-wrong-count" class="font-bold text-rose-600 text-xs sm:text-sm">4 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Total Butir</span><span id="hist-total-count" class="font-bold text-on-surface text-xs sm:text-sm">20 Soal</span></div></div></div><!-- Grid 4 Kotak Metrik Nilai --><div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"><!-- Kotak 1: TWK --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TWK</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 65</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Wawasan Kebangsaan</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-twk" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">80</span><span id="hist-max-twk" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-twk" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 2: TIU --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TIU</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 80</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Inteligensia Umum</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tiu" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">95</span><span id="hist-max-tiu" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tiu" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 3: TKP --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TKP</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 166</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Karakteristik Pribadi</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tkp" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">184</span><span id="hist-max-tkp" class="text-[10px] sm:text-xs text-secondary font-medium">/ 40</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tkp" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+18</span></div></div><!-- Kotak 4: Total Skor SKD (Utama) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between shadow-sm"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-bold text-slate-900 truncate">Total SKD</span><span class="bg-slate-900 text-white font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium">RESMI</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Nilai Kumulatif</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">359</span><span id="hist-max-total" class="text-[10px] sm:text-xs text-secondary font-medium">/ 100</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between"><span class="text-[11px] sm:text-xs font-bold text-slate-900">Ambang Batas</span><span id="hist-status-total" class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Aman</span></div></div></div></section><!-- 3. Banner Penawaran Paket Bundle --><section class="border-2 border-slate-900 bg-surface-container-lowest p-4 sm:p-7 rounded-xl relative overflow-hidden shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6"><div class="flex flex-col gap-2 max-w-2xl"><div class="inline-flex items-center gap-1.5 self-start"><span class="bg-slate-900 text-white text-[10px] sm:text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded">PENAWARAN SPESIAL PESERTA MINI TRY OUT</span></div><h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Buka Seluruh Pembahasan &amp; Akses Paket Bundle 3x Try Out (330 Soal HOTS)</h2><p class="text-xs sm:text-sm text-secondary leading-relaxed">Tingkatkan kesiapan SKD CPNS 2026 Anda dengan bank soal standar kisi-kisi terbaru BKN, analisis performa mendalam, dan pembahasan lengkap setiap butir soal tanpa terkunci.</p></div><div class="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between shrink-0 gap-3 sm:gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto"><div class="flex flex-col lg:text-right"><div class="flex items-center lg:justify-end gap-2"><span class="text-xs line-through text-slate-400 font-medium">Rp 75.000</span><span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Hemat 60%</span></div><div class="text-2xl font-extrabold text-slate-900 tracking-tight">Hanya Rp 30.000</div><span class="text-[11px] text-secondary">Akses 3 paket penuh (TO Seri 1, 2, &amp; 3)</span></div><a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm rounded-lg active:translate-y-px transition-all min-h-[44px] shadow-sm" href="https://wa.me/?text=Halo%20Admin,%20saya%20ingin%20mengaktifkan%20Paket%20Bundle%203x%20Try%20Out%20CPNS%20seharga%20Rp%2030.000" id="hist-banner-wa-link" rel="noopener noreferrer" target="_blank"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Beli Paket Bundle via WhatsApp</span></a></div></div></section><!-- 4. Navigasi Tab / Filter Pembahasan Soal --><div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-3"><div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none" id="subtest-filter-group"><button id="btn-hist-filter-all" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white shadow-sm whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('ALL')">Semua Soal (20)</button><button id="btn-hist-filter-twk" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TWK')">TWK (1-6)</button><button id="btn-hist-filter-tiu" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TIU')">TIU (7-12)</button><button id="btn-hist-filter-tkp" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TKP')">TKP (13-20)</button></div><div class="flex items-center gap-2 justify-between sm:justify-start shrink-0"><span class="text-xs text-secondary font-medium">Status:</span><div class="inline-flex rounded-lg border border-slate-200 bg-surface-container-lowest p-0.5 text-xs"><button id="btn-hist-status-all" class="px-2.5 py-1 font-semibold bg-slate-100 text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('ALL')">Semua</button><button id="btn-hist-status-correct" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('CORRECT')">Benar</button><button id="btn-hist-status-wrong" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('WRONG')">Salah</button></div></div></div><!-- 5. Daftar Evaluasi & Pembahasan Soal --><div id="history-evaluation-container" class="flex flex-col gap-5 sm:gap-6"></div></div></div></div></main></div><!-- Vanilla JavaScript untuk Toggle Drawer & Backdrop --><script>
+  <div id="view-history" class="hidden bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><!-- Mobile & Tablet Navigation Drawer (Sidebar) --><aside aria-label="Navigasi Utama" class="fixed left-0 top-0 h-full w-72 lg:w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-2xl lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-slate-200" id="sidebar"><div class="flex flex-col"><div class="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-slate-100"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white text-[19px]">verified</span></div><div class="flex flex-col"><span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface leading-none text-base">CAT CPNS</span><span class="font-label-sm text-secondary leading-none uppercase tracking-wider font-semibold text-[10px] mt-0.5">Pro Exam System</span></div></div><!-- Tombol Tutup Drawer (X) --><button aria-label="Tutup navigasi" class="lg:hidden p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-close-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="p-4"><div class="font-label-sm text-secondary uppercase px-3 py-1 tracking-wider font-semibold text-[11px]">Navigasi Utama</div><nav class="flex flex-col gap-1 mt-1.5"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px] text-slate-500">dashboard</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 transition-all bg-slate-900 text-white font-semibold rounded-lg shadow-sm text-sm" data-path="riwayat-try-out" href="#"><span class="material-symbols-outlined text-[20px] text-white">history_edu</span><span>Riwayat Try Out</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-secondary hover:bg-slate-100 hover:text-on-surface transition-all text-sm font-medium cursor-pointer" data-path="paket-dan-token" href="javascript:void(0)" onclick="openBeliPaketFromHistory()"><span class="material-symbols-outlined text-[20px] text-slate-500">shopping_bag</span><span>Beli Paket &amp; Token</span></a></nav></div></div><div class="p-4 mx-4 mb-6 rounded-xl bg-slate-50 border border-slate-200"><div class="flex items-center justify-between mb-2"><span class="text-xs text-secondary font-medium">Sisa Token Ujian</span><span id="sidebar-token-count" class="text-xs font-bold text-on-surface">0 Kuota</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div id="sidebar-token-bar" class="bg-slate-900 h-full w-0 rounded-full" style="width: 0%;"></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between"><a class="text-[11px] font-semibold text-slate-900 hover:underline inline-flex items-center gap-1 cursor-pointer" href="javascript:void(0)" onclick="openBeliPaketFromHistory()">Isi Ulang Token <span class="material-symbols-outlined text-[13px]">arrow_forward</span></a></div></div></aside><!-- Backdrop Overlay --><div aria-hidden="true" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="sidebar-backdrop"></div><div class="lg:pl-64 flex flex-col min-h-screen w-full overflow-x-hidden"><!-- Navbar Atas --><header class="sticky top-0 z-30 h-16 bg-surface/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full"><div class="flex items-center gap-3"><!-- Tombol Hamburger Menu (Jelas terlihat di HP & Tablet, hidden di lg desktop) --><button aria-label="Buka navigasi menu" class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 active:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400" id="btn-open-sidebar" type="button"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="flex items-center gap-2"><span class="hidden sm:inline-block font-label-sm text-secondary bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Simulasi Resmi BKN</span><span class="hidden sm:inline-block text-outline-variant font-body-sm text-body-sm">/</span><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate max-w-[190px] sm:max-w-none">SKD Kedinasan &amp; Umum 2024</span></div></div><div class="flex items-center gap-3 sm:gap-4"><nav class="hidden md:flex items-center gap-2"><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="panduan-ujian" href="#">Panduan</a><a class="px-2.5 py-1 rounded-lg text-secondary hover:text-on-surface transition-colors font-body-sm text-body-sm font-medium" data-path="bantuan" href="#">Bantuan</a></nav><div class="flex items-center gap-3 border-l border-slate-200 pl-3 sm:pl-4"><div class="flex flex-col text-right hidden sm:flex"><span id="hist-header-user-name" class="text-xs font-semibold text-on-surface leading-tight">Peserta</span><span class="text-[11px] text-secondary leading-tight">Peserta CAT CPNS</span></div><div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"><span class="material-symbols-outlined text-[18px]">person</span></div></div></div></header><main class="relative bg-surface w-full flex-1"><div class="flex flex-col w-full"><div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8"><!-- 1. Header Halaman / Breadcrumb & Action Buttons --><header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6"><div class="flex flex-col gap-1"><nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label-sm text-secondary text-xs"><a class="hover:text-primary transition-colors font-medium" href="#">Riwayat Try Out</a><span class="text-slate-300">/</span><span class="text-on-surface font-medium truncate max-w-[240px] sm:max-w-md">Detail &amp; Pembahasan: Mini Try Out (20 Soal)</span></nav><h1 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight mt-0.5">Riwayat Try Out</h1><p class="text-xs sm:text-sm text-secondary">Daftar riwayat simulasi ujian, evaluasi skor, dan arsip pembahasan CAT SKD.</p></div><div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full lg:w-auto"><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Cetak Rekap (PDF)</span></button><button class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface text-xs sm:text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" type="button"><svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Kembali ke Riwayat</span></button><a class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 active:translate-y-px transition-all shrink-0 min-h-[42px] whitespace-nowrap shadow-sm" href="#"><svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Dashboard</span></a></div></header><!-- Bilah Riwayat Ujian / Switch View --><div class="flex flex-col gap-2.5"><div class="flex items-center justify-between"><span class="font-semibold text-on-surface uppercase tracking-wider text-xs">Pilih Sesi Ujian:</span><span class="text-xs text-secondary font-medium">2 Simulasi Terdaftar</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"><!-- Kartu Riwayat 1 (Aktif / Sedang Dibuka) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 shadow-sm relative"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Sedang Dibuka</span><span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"><svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Skor: 359 (Lulus PG)</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Mini Try Out Diagnostik Gratis (20 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>24 Okt 2026, 10:45 WIB</span><span>•</span><span>Durasi: 18m 40d</span></div></div><div class="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 text-white"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></div><!-- Kartu Riwayat 2 (Tersedia / Siap Dikerjakan) --><div class="bg-surface-container-lowest border border-slate-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 hover:border-slate-300 transition-all"><div class="flex flex-col gap-1.5 min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">Belum Selesai</span><span class="text-[11px] font-medium text-slate-500">110 Soal SKD Penuh</span></div><h3 class="font-semibold text-slate-900 text-sm leading-snug truncate">Simulasi SKD Paket TO Seri 1 (110 Soal)</h3><div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary"><span>Siap Dikerjakan</span><span>•</span><span>Waktu: 100 Menit</span></div></div><button class="shrink-0 text-xs font-semibold px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors whitespace-nowrap min-h-[36px]" type="button">Mulai Ujian</button></div></div></div><!-- 2. Kartu Ringkasan Skor --><section class="bg-surface-container-lowest border border-slate-200 rounded-xl p-4 sm:p-6 lg:p-7 flex flex-col gap-5 sm:gap-6 shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4"><div class="flex flex-col gap-1.5"><div class="flex flex-wrap items-center gap-2"><span id="hist-pg-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>LULUS PASSING GRADE</span><span class="text-[11px] text-secondary font-medium px-2 py-0.5 bg-slate-100 rounded border border-slate-200">KepmenPANRB No. 651/2023</span></div><div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-secondary pt-0.5"><span>Nama: <strong id="hist-user-name" class="text-on-surface font-semibold">Peserta</strong></span><span>•</span><span>Paket: <strong id="hist-package-name" class="text-on-surface font-semibold">Mini Try Out Diagnostik Gratis (20 Soal)</strong></span></div></div><div class="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 sm:px-4 sm:py-2.5 rounded-lg border border-slate-200"><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Benar</span><span id="hist-correct-count" class="font-bold text-emerald-600 text-xs sm:text-sm">16 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Salah/Kurang</span><span id="hist-wrong-count" class="font-bold text-rose-600 text-xs sm:text-sm">4 Soal</span></div><div class="hidden sm:block w-px h-6 bg-slate-200"></div><div class="text-center px-1 sm:px-2"><span class="block text-[11px] sm:text-xs text-secondary">Total Butir</span><span id="hist-total-count" class="font-bold text-on-surface text-xs sm:text-sm">20 Soal</span></div></div></div><!-- Grid 4 Kotak Metrik Nilai --><div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"><!-- Kotak 1: TWK --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TWK</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 65</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Wawasan Kebangsaan</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-twk" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">80</span><span id="hist-max-twk" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-twk" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 2: TIU --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TIU</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 80</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Inteligensia Umum</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tiu" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">95</span><span id="hist-max-tiu" class="text-[10px] sm:text-xs text-secondary font-medium">/ 30</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tiu" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+15</span></div></div><!-- Kotak 3: TKP --><div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-medium truncate">TKP</span><span class="font-mono text-[10px] sm:text-[11px] text-slate-500">Min. 166</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Karakteristik Pribadi</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-tkp" class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">184</span><span id="hist-max-tkp" class="text-[10px] sm:text-xs text-secondary font-medium">/ 40</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-[11px]"><span id="hist-status-tkp" class="inline-flex items-center gap-1 font-semibold text-emerald-700"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Lulus</span><span class="text-slate-400 font-medium text-[10px] sm:text-[11px]">+18</span></div></div><!-- Kotak 4: Total Skor SKD (Utama) --><div class="bg-surface-container-lowest border-2 border-slate-900 rounded-lg p-3.5 sm:p-5 flex flex-col justify-between shadow-sm"><div class="flex flex-col gap-1"><div class="flex items-center justify-between text-xs text-secondary"><span class="font-bold text-slate-900 truncate">Total SKD</span><span class="bg-slate-900 text-white font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-medium">RESMI</span></div><div class="text-[11px] sm:text-xs font-medium text-slate-500">Nilai Kumulatif</div><div class="flex items-baseline gap-1 mt-1"><span id="hist-score-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">359</span><span id="hist-max-total" class="text-[10px] sm:text-xs text-secondary font-medium">/ 100</span></div></div><div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between"><span class="text-[11px] sm:text-xs font-bold text-slate-900">Ambang Batas</span><span id="hist-status-total" class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Aman</span></div></div></div></section><!-- 3. Banner Penawaran Paket Bundle --><section class="border-2 border-slate-900 bg-surface-container-lowest p-4 sm:p-7 rounded-xl relative overflow-hidden shadow-sm"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6"><div class="flex flex-col gap-2 max-w-2xl"><div class="inline-flex items-center gap-1.5 self-start"><span class="bg-slate-900 text-white text-[10px] sm:text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded">PENAWARAN SPESIAL PESERTA MINI TRY OUT</span></div><h2 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">Buka Seluruh Pembahasan &amp; Akses Paket Bundle 3x Try Out (330 Soal HOTS)</h2><p class="text-xs sm:text-sm text-secondary leading-relaxed">Tingkatkan kesiapan SKD CPNS 2026 Anda dengan bank soal standar kisi-kisi terbaru BKN, analisis performa mendalam, dan pembahasan lengkap setiap butir soal tanpa terkunci.</p></div><div class="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between shrink-0 gap-3 sm:gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto"><div class="flex flex-col lg:text-right"><div class="flex items-center lg:justify-end gap-2"><span class="text-xs line-through text-slate-400 font-medium">Rp 75.000</span><span class="text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Hemat 60%</span></div><div class="text-2xl font-extrabold text-slate-900 tracking-tight">Hanya Rp 30.000</div><span class="text-[11px] text-secondary">Akses 3 paket penuh (TO Seri 1, 2, &amp; 3)</span></div><a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm rounded-lg active:translate-y-px transition-all min-h-[44px] shadow-sm" href="https://wa.me/?text=Halo%20Admin,%20saya%20ingin%20mengaktifkan%20Paket%20Bundle%203x%20Try%20Out%20CPNS%20seharga%20Rp%2030.000" id="hist-banner-wa-link" rel="noopener noreferrer" target="_blank"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Beli Paket Bundle via WhatsApp</span></a></div></div></section><!-- 4. Navigasi Tab / Filter Pembahasan Soal --><div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 pb-3"><div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto scrollbar-none" id="subtest-filter-group"><button id="btn-hist-filter-all" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white shadow-sm whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('ALL')">Semua Soal (20)</button><button id="btn-hist-filter-twk" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TWK')">TWK (1-6)</button><button id="btn-hist-filter-tiu" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TIU')">TIU (7-12)</button><button id="btn-hist-filter-tkp" class="hist-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors whitespace-nowrap min-h-[34px]" type="button" onclick="filterHistoryQuestions('TKP')">TKP (13-20)</button></div><div class="flex items-center gap-2 justify-between sm:justify-start shrink-0"><span class="text-xs text-secondary font-medium">Status:</span><div class="inline-flex rounded-lg border border-slate-200 bg-surface-container-lowest p-0.5 text-xs"><button id="btn-hist-status-all" class="px-2.5 py-1 font-semibold bg-slate-100 text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('ALL')">Semua</button><button id="btn-hist-status-correct" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('CORRECT')">Benar</button><button id="btn-hist-status-wrong" class="px-2.5 py-1 font-medium text-secondary hover:text-on-surface rounded-md min-h-[30px]" type="button" onclick="filterHistoryStatus('WRONG')">Salah</button></div></div></div><!-- 5. Daftar Evaluasi & Pembahasan Soal --><div id="history-evaluation-container" class="flex flex-col gap-5 sm:gap-6"></div></div></div></div></main></div><!-- Vanilla JavaScript untuk Toggle Drawer & Backdrop --><script>
   (function() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
@@ -2286,7 +2290,7 @@ Mengerti &amp; Tutup
         <button id="nav-pengguna" onclick="switchAdminTab('pengguna')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-left">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span class="flex-1">Database Pengguna</span>
-          <span class="text-xs text-slate-400 font-normal">248</span>
+          <span id="admin-sidebar-user-count" class="text-xs text-slate-400 font-normal">0</span>
         </button>
 
         <!-- 4. Manajemen Token & WA -->
@@ -2357,14 +2361,14 @@ Mengerti &amp; Tutup
               <span class="text-slate-400">Baru</span>
             </div>
             <div class="p-2 rounded bg-slate-50 space-y-0.5">
-              <p class="font-semibold text-slate-900">Pembayaran Terverifikasi</p>
-              <p class="text-slate-500">Rian Pratama membeli Bundle 3 TO.</p>
-              <span class="text-[10px] text-slate-400">10 mnt lalu</span>
+              <p class="font-semibold text-slate-900">Sistem CAT CPNS Siap</p>
+              <p class="text-slate-500">Database Supabase terhubung dalam mode produksi live.</p>
+              <span class="text-[10px] text-slate-400">Aktif</span>
             </div>
             <div class="p-2 rounded bg-slate-50 space-y-0.5">
-              <p class="font-semibold text-slate-900">AI Soal Ditambahkan</p>
-              <p class="text-slate-500">3 Soal TIU berhasil digenerate ke TO Seri 2.</p>
-              <span class="text-[10px] text-slate-400">30 mnt lalu</span>
+              <p class="font-semibold text-slate-900">AI Bank Soal Gemini</p>
+              <p class="text-slate-500">Integrasi Gemini AI &amp; import Word/Excel aktif.</p>
+              <span class="text-[10px] text-slate-400">Siap</span>
             </div>
           </div>
         </div>
@@ -2591,20 +2595,20 @@ Mengerti &amp; Tutup
             <h3 class="text-sm font-bold text-slate-900">Log Aktivitas Terakhir</h3>
             <div class="space-y-2 text-xs">
               <div class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-                <div class="w-6 h-6 rounded bg-slate-200 flex items-center justify-center font-bold text-[10px]">WA</div>
+                <div class="w-6 h-6 rounded bg-slate-200 flex items-center justify-center font-bold text-[10px]">SYS</div>
                 <div class="flex-1">
-                  <p class="font-semibold text-slate-900">Pengiriman Token WhatsApp Sukses</p>
-                  <p class="text-slate-500">Kode <code class="font-mono text-slate-800">CPNS-BNDL-7890</code> dikirim ke Rian Pratama.</p>
+                  <p class="font-semibold text-slate-900">Sistem Produksi Live Aktif</p>
+                  <p class="text-slate-500">Database Supabase terintegrasi penuh: bank soal, pengguna, dan token.</p>
                 </div>
-                <span class="text-[10px] text-slate-400">12 mnt lalu</span>
+                <span class="text-[10px] text-slate-400">Live</span>
               </div>
               <div class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2.5">
                 <div class="w-6 h-6 rounded bg-slate-200 flex items-center justify-center font-bold text-[10px]">AI</div>
                 <div class="flex-1">
-                  <p class="font-semibold text-slate-900">Gemini AI Menghasilkan 3 Butir Soal</p>
-                  <p class="text-slate-500">Topik Silogisme TIU ditambahkan ke draf paket TO Seri 2.</p>
+                  <p class="font-semibold text-slate-900">Generator Soal Gemini Siap</p>
+                  <p class="text-slate-500">Penyusunan butir soal HOTS TWK, TIU, dan TKP berstandar resmi BKN.</p>
                 </div>
-                <span class="text-[10px] text-slate-400">45 mnt lalu</span>
+                <span class="text-[10px] text-slate-400">Siap</span>
               </div>
             </div>
           </div>
@@ -2809,10 +2813,16 @@ Mengerti &amp; Tutup
                 <option value="TKP">TKP</option>
               </select>
             </div>
-            <button type="button" onclick="openQuestionModal('add')" class="h-9 px-3 rounded-lg bg-slate-100 text-slate-800 hover:bg-slate-200 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>Tambah Soal Manual</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openQuestionModal('add')" class="h-9 px-3 rounded-lg bg-slate-100 text-slate-800 hover:bg-slate-200 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Tambah Soal Manual</span>
+              </button>
+              <button type="button" onclick="deleteAllQuestionsInCurrentPackage()" class="h-9 px-3 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors" title="Hapus semua soal di paket aktif">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Hapus Semua Soal Paket Ini</span>
+              </button>
+            </div>
           </div>
 
           <div id="questions-list-wrapper" class="divide-y divide-slate-100">
@@ -3242,8 +3252,8 @@ Mengerti &amp; Tutup
       </div>
       <div class="p-4 space-y-3 text-xs">
         <div class="p-2.5 rounded bg-slate-50 border border-slate-100 flex justify-between">
-          <div><span class="text-slate-400">Penerima:</span> <strong id="wa-preview-name" class="text-slate-900">Rian Pratama</strong></div>
-          <div><span class="text-slate-400">WA:</span> <span id="wa-preview-phone" class="font-mono text-slate-700">081234567890</span></div>
+          <div><span class="text-slate-400">Penerima:</span> <strong id="wa-preview-name" class="text-slate-900">-</strong></div>
+          <div><span class="text-slate-400">WA:</span> <span id="wa-preview-phone" class="font-mono text-slate-700">-</span></div>
         </div>
         <div>
           <label class="block font-semibold text-slate-500 uppercase text-[10px] mb-1">Isi Pesan Otomatis:</label>
@@ -3277,112 +3287,44 @@ Mengerti &amp; Tutup
           name: 'Mini TO Diagnostik Gratis',
           badge: 'Simulasi Cepat 20 Butir',
           total: 20,
-          current: 20,
-          twk: { current: 6, total: 6 },
-          tiu: { current: 6, total: 6 },
-          tkp: { current: 8, total: 8 },
-          questions: [
-            {
-              id: 'SOAL-TWK-M01',
-              subtest: 'TWK',
-              topic: 'Bhinneka Tunggal Ika',
-              key: 'C (+5 Poin)',
-              text: 'Prinsip kesetaraan hukum dan integrasi sosial dalam kehidupan multikultural bangsa Indonesia merupakan wujud pengamalan nilai konsensus kebangsaan pada tataran...',
-              difficulty: 'HOTS Tinggi'
-            },
-            {
-              id: 'SOAL-TIU-M02',
-              subtest: 'TIU',
-              topic: 'Deret Angka Bertingkat',
-              key: 'B (+5 Poin)',
-              text: 'Tentukan dua angka lanjutan dari barisan aritmetika bertingkat berikut: 3, 7, 15, 31, 63, ...',
-              difficulty: 'Sedang'
-            }
-          ]
+          current: 0,
+          twk: { current: 0, total: 6 },
+          tiu: { current: 0, total: 6 },
+          tkp: { current: 0, total: 8 },
+          questions: []
         },
         to1: {
           id: 'to1',
           name: 'Simulasi SKD TO Seri 1',
           badge: 'SKD Lengkap BKN',
           total: 110,
-          current: 110,
-          twk: { current: 35, total: 35 },
-          tiu: { current: 30, total: 30 },
-          tkp: { current: 45, total: 45 },
-          questions: [
-            {
-              id: 'SOAL-TWK-001',
-              subtest: 'TWK',
-              topic: 'Perumusan Pancasila',
-              key: 'A (+5 Poin)',
-              text: 'Dalam sidang BPUPKI tanggal 1 Juni 1945, gagasan dasar negara yang disampaikan Ir. Soekarno menekankan asas gotong royong sebagai intisari filosofis untuk mengatasi...',
-              difficulty: 'HOTS Tinggi'
-            },
-            {
-              id: 'SOAL-TIU-042',
-              subtest: 'TIU',
-              topic: 'Analogi Logika Hubungan',
-              key: 'C (+5 Poin)',
-              text: 'BUNGA : BUKET = KATA : ... Manakah analogi kata padanan struktur bentuk yang paling selaras?',
-              difficulty: 'Sedang'
-            }
-          ]
+          current: 0,
+          twk: { current: 0, total: 35 },
+          tiu: { current: 0, total: 30 },
+          tkp: { current: 0, total: 45 },
+          questions: []
         },
         to2: {
           id: 'to2',
           name: 'Simulasi SKD TO Seri 2',
           badge: 'SKD Lengkap Terjadwal',
           total: 110,
-          current: 85,
-          twk: { current: 30, total: 35 },
-          tiu: { current: 25, total: 30 },
-          tkp: { current: 30, total: 45 },
-          questions: [
-            {
-              id: 'SOAL-TWK-2026-081',
-              subtest: 'TWK',
-              topic: 'Nasionalisme & Konstitusi',
-              key: 'D (+5 Poin)',
-              text: 'Berdasarkan amandemen Undang-Undang Dasar 1945 pasal 24C, Mahkamah Konstitusi memiliki kewenangan memutus sengketa kewenangan lembaga negara yang kewenangannya diberikan oleh UUD. Dalam konteks pencegahan disintegrasi vertikal, fungsi utama judicial review mencerminkan pilar kebangsaan pada tingkat...',
-              difficulty: 'HOTS Tinggi'
-            },
-            {
-              id: 'SOAL-TIU-2026-114',
-              subtest: 'TIU',
-              topic: 'Silogisme Kompleks',
-              key: 'A (+5 Poin)',
-              text: 'Semua peserta pelatihan dasar CPNS memiliki akun modul mandiri. Sebagian peserta yang memiliki akun modul mandiri telah menyelesaikan penugasan aktualisasi sebelum tenggat waktu. Tidak ada peserta yang belum mengunggah rancangan aktualisasi yang diperkenankan mengikuti evaluasi akhir. Kesimpulan yang sah secara kaidah logika silogisme adalah...',
-              difficulty: 'HOTS Sangat Tinggi'
-            },
-            {
-              id: 'SOAL-TKP-2026-092',
-              subtest: 'TKP',
-              topic: 'Pelayanan Publik & Inklusivitas',
-              key: 'Skala 1 - 5 (Skor 5: Opsi E)',
-              text: 'Seorang warga lansia penyandang disabilitas tiba di loket pelayanan administrasi kependudukan tepat pada saat jam istirahat dinas baru saja dimulai. Warga tersebut datang dari desa terpencil menggunakan angkutan umum sewaan. Sementara rekan staf loket lainnya sudah bergegas keluar untuk santap siang, sikap integritas pelayanan yang paling tepat Anda ambil adalah...',
-              difficulty: 'Standar BKN'
-            }
-          ]
+          current: 0,
+          twk: { current: 0, total: 35 },
+          tiu: { current: 0, total: 30 },
+          tkp: { current: 0, total: 45 },
+          questions: []
         },
         to3: {
           id: 'to3',
           name: 'Simulasi SKD TO Seri 3',
           badge: 'Tahap Pengisian Soal',
           total: 110,
-          current: 40,
-          twk: { current: 15, total: 35 },
-          tiu: { current: 10, total: 30 },
-          tkp: { current: 15, total: 45 },
-          questions: [
-            {
-              id: 'SOAL-TWK-301',
-              subtest: 'TWK',
-              topic: 'Bela Negara Kontemporer',
-              key: 'C (+5 Poin)',
-              text: 'Tantangan bela negara di era transformasi digital diwujudkan melalui penguatan literasi siber dan ketahanan narasi kebangsaan terhadap penyebaran doktrin radikalisme...',
-              difficulty: 'HOTS Tinggi'
-            }
-          ]
+          current: 0,
+          twk: { current: 0, total: 35 },
+          tiu: { current: 0, total: 30 },
+          tkp: { current: 0, total: 45 },
+          questions: []
         }
       },
       users: [],
@@ -3524,18 +3466,128 @@ Mengerti &amp; Tutup
       }
     }
 
+    // --- LOAD QUESTIONS FROM SUPABASE (100% LIVE DATABASE) ---
+    async function loadQuestionsFromSupabase() {
+      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+      
+      let questionRows = null;
+
+      // 1. Coba ambil via endpoint /api/admin-data jika token admin tersedia (bypass RLS)
+      if (adminToken) {
+        try {
+          const res = await fetch('/api/admin-data', {
+            headers: { 'Authorization': `Bearer ${adminToken}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.ok && Array.isArray(data.questions)) {
+              questionRows = data.questions;
+            }
+          }
+        } catch (apiErr) {
+          console.warn('API load questions notice:', apiErr);
+        }
+      }
+
+      // 2. Query langsung Supabase Client
+      if (!questionRows && dbClient) {
+        try {
+          const { data, error } = await dbClient.from('questions').select('*').order('created_at', { ascending: false });
+          if (!error && Array.isArray(data)) {
+            questionRows = data;
+          }
+        } catch (dbErr) {
+          console.warn('Direct Supabase load questions notice:', dbErr);
+        }
+      }
+
+      if (!questionRows) questionRows = [];
+
+      // Update state.questions for exam engine
+      if (window.state) {
+        window.state.questions = questionRows;
+      }
+
+      // Reset paket lokal
+      ['mini', 'to1', 'to2', 'to3'].forEach(k => {
+        if (APP.packages && APP.packages[k]) {
+          APP.packages[k].questions = [];
+        }
+      });
+
+      // Distribusikan ke APP.packages
+      questionRows.forEach((q, idx) => {
+        const rawPkg = String(q.id_paket || q.package_id || '').toLowerCase().trim();
+        let targetKey = null;
+        if (rawPkg === 'mini' || rawPkg === 'mini-to') targetKey = 'mini';
+        else if (rawPkg === 'to1' || rawPkg === 'to-1') targetKey = 'to1';
+        else if (rawPkg === 'to2' || rawPkg === 'to-2') targetKey = 'to2';
+        else if (rawPkg === 'to3' || rawPkg === 'to-3') targetKey = 'to3';
+        else {
+          if (rawPkg.includes('mini')) targetKey = 'mini';
+          else if (rawPkg.includes('1')) targetKey = 'to1';
+          else if (rawPkg.includes('2')) targetKey = 'to2';
+          else if (rawPkg.includes('3')) targetKey = 'to3';
+        }
+
+        if (targetKey && APP.packages && APP.packages[targetKey]) {
+          const sub = (q.subtest || q.subtes || 'TWK').toUpperCase();
+          const topic = q.topic || q.topik || sub;
+          const key = q.correct_answer || q.kunci_jawaban || q.kunci_atau_bobot || 'A';
+          const text = q.question_text || q.pertanyaan || q.question || q.text || '';
+          const diff = q.difficulty || q.tingkat_kesulitan || 'Standar BKN';
+          const id = q.id || q.id_soal || `SOAL-${sub}-${idx+1}`;
+
+          APP.packages[targetKey].questions.push({
+            id: String(id),
+            subtest: sub,
+            topic: topic,
+            key: key,
+            text: text,
+            difficulty: diff,
+            raw: q
+          });
+        }
+      });
+
+      // Hitung ulang kuota semua paket
+      ['mini', 'to1', 'to2', 'to3'].forEach(k => {
+        if (APP.packages && APP.packages[k]) {
+          recalculatePackageQuota(APP.packages[k]);
+        }
+      });
+
+      if (typeof updatePackageView === 'function') updatePackageView();
+      if (typeof renderQuestions === 'function') renderQuestions();
+      if (typeof updateAdminBubbleMetrics === 'function') updateAdminBubbleMetrics();
+    }
+    window.loadQuestionsFromSupabase = loadQuestionsFromSupabase;
+
     // --- RENDER QUESTIONS LIST ---
     function renderQuestions() {
       const pkg = APP.packages[APP.selectedPackage];
       const wrapper = document.getElementById('questions-list-wrapper');
       if (!pkg || !wrapper) return;
 
+      if (!pkg.questions || pkg.questions.length === 0) {
+        wrapper.innerHTML = `
+          <div class="p-8 text-center text-slate-400 text-xs">
+            Belum ada soal di paket ini. Tambahkan soal melalui AI, Import Word/Excel, atau Input Manual.
+          </div>
+        `;
+        return;
+      }
+
       const query = (document.getElementById('search-q')?.value || '').toLowerCase();
       const filter = document.getElementById('filter-subtest')?.value || 'ALL';
 
       const filtered = pkg.questions.filter(q => {
-        const matchSub = filter === 'ALL' || q.subtest === filter;
-        const matchQ = q.text.toLowerCase().includes(query) || q.topic.toLowerCase().includes(query) || q.id.toLowerCase().includes(query);
+        const matchSub = filter === 'ALL' || (q.subtest || '').toUpperCase() === filter.toUpperCase();
+        const textVal = (q.text || '').toLowerCase();
+        const topicVal = (q.topic || '').toLowerCase();
+        const idVal = String(q.id || '').toLowerCase();
+        const matchQ = textVal.includes(query) || topicVal.includes(query) || idVal.includes(query);
         return matchSub && matchQ;
       });
 
@@ -3552,20 +3604,20 @@ Mengerti &amp; Tutup
         <div class="p-4 space-y-2 hover:bg-slate-50 transition-colors">
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800">${q.subtest} - ${q.topic}</span>
-              <span class="font-mono text-[10px] text-slate-400">${q.id}</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800">${escapeHtml(q.subtest)} - ${escapeHtml(q.topic)}</span>
+              <span class="font-mono text-[10px] text-slate-400">${escapeHtml(q.id)}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold text-slate-700">${q.key}</span>
-              <button type="button" onclick="editQuestion('${q.id}')" class="px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 text-[11px] font-semibold">Edit</button>
-              <button type="button" onclick="deleteQuestion('${q.id}')" class="px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 text-[11px] font-semibold">Hapus</button>
+              <span class="text-xs font-semibold text-slate-700">${escapeHtml(q.key)}</span>
+              <button type="button" onclick="editQuestion('${escapeHtml(q.id)}')" class="px-2 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 text-[11px] font-semibold">Edit</button>
+              <button type="button" onclick="deleteQuestion('${escapeHtml(q.id)}')" class="px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 text-[11px] font-semibold">Hapus</button>
             </div>
           </div>
-          <p class="text-xs text-slate-800 leading-relaxed">${q.text}</p>
+          <p class="text-xs text-slate-800 leading-relaxed">${escapeHtml(q.text)}</p>
           <div class="flex items-center gap-3 text-[10px] text-slate-400">
             <span>Opsi: 5 (A - E)</span>
             <span>&bull;</span>
-            <span>Kesulitan: ${q.difficulty || 'Standar BKN'}</span>
+            <span>Kesulitan: ${escapeHtml(q.difficulty || 'Standar BKN')}</span>
           </div>
         </div>
       `).join('');
@@ -3585,6 +3637,58 @@ Mengerti &amp; Tutup
     // --- AI GENERATION MODAL & ACTIONS ---
     window.currentAiDraftQuestions = [];
 
+    // --- MAPPER & NORMALISASI DRAF SOAL AI GEMINI ---
+    function mapAiQuestionItem(q, defaultSub, defaultTop, defaultDiff) {
+      const sub = (q.subtest || q.subtes || defaultSub || 'TIU').toUpperCase();
+      const top = q.topic || q.topik || defaultTop || 'HOTS Standar BKN';
+      const diff = q.difficulty || q.tingkat_kesulitan || defaultDiff || 'HOTS Standar BKN 2026';
+      const text = q.question || q.pertanyaan || q.question_text || q.text || '';
+
+      let oA = '', oB = '', oC = '', oD = '', oE = '';
+      if (q.options && typeof q.options === 'object') {
+        if (Array.isArray(q.options)) {
+          oA = q.options[0] || '';
+          oB = q.options[1] || '';
+          oC = q.options[2] || '';
+          oD = q.options[3] || '';
+          oE = q.options[4] || '';
+        } else {
+          oA = q.options.A || q.options.a || '';
+          oB = q.options.B || q.options.b || '';
+          oC = q.options.C || q.options.c || '';
+          oD = q.options.D || q.options.d || '';
+          oE = q.options.E || q.options.e || '';
+        }
+      }
+      oA = oA || q.option_a || q.opsi_a || '';
+      oB = oB || q.option_b || q.opsi_b || '';
+      oC = oC || q.option_c || q.opsi_c || '';
+      oD = oD || q.option_d || q.opsi_d || '';
+      oE = oE || q.option_e || q.opsi_e || '';
+
+      const key = (q.correct_answer || q.kunci || q.kunci_jawaban || q.answer || 'A').toUpperCase().trim();
+      let scores = q.scores || q.bobot || null;
+      if (sub === 'TKP' && !scores) {
+        scores = { A: 5, B: 4, C: 3, D: 2, E: 1 };
+      }
+      const exp = q.explanation || q.pembahasan || '';
+
+      return {
+        subtest: sub,
+        topic: top,
+        difficulty: diff,
+        question_text: text,
+        option_a: oA,
+        option_b: oB,
+        option_c: oC,
+        option_d: oD,
+        option_e: oE,
+        correct_answer: key,
+        scores: scores,
+        explanation: exp
+      };
+    }
+
     function renderAiDraftQuestions(questions) {
       const listContainer = document.getElementById('ai-draft-questions-list');
       if (!listContainer) return;
@@ -3599,57 +3703,70 @@ Mengerti &amp; Tutup
       }
 
       listContainer.innerHTML = questions.map((q, idx) => {
-        const sub = q.subtest || q.subtes || 'TIU';
-        const top = q.topic || q.topik || 'HOTS Standar BKN';
-        const diff = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
-        const key = q.correct_answer || q.kunci_atau_bobot || 'A';
-        const text = q.question_text || q.pertanyaan || '';
-        const exp = q.explanation || q.pembahasan || '-';
-        const optA = q.option_a || q.opsi_a || '';
-        const optB = q.option_b || q.opsi_b || '';
-        const optC = q.option_c || q.opsi_c || '';
-        const optD = q.option_d || q.opsi_d || '';
-        const optE = q.option_e || q.opsi_e || '';
-
-        const isKey = (letter) => {
-          const k = String(key).trim().toUpperCase();
-          if (k.length === 1) return k === letter;
-          if (k.startsWith(letter + ' ') || k === letter) return true;
-          if (k.includes(letter + ':5')) return true;
-          return false;
-        };
+        const sub = q.subtest || 'TIU';
+        const top = q.topic || 'HOTS Standar BKN';
+        const diff = q.difficulty || 'HOTS Standar BKN 2026';
+        const text = q.question_text || '';
+        const oA = q.option_a || '';
+        const oB = q.option_b || '';
+        const oC = q.option_c || '';
+        const oD = q.option_d || '';
+        const oE = q.option_e || '';
+        const key = q.correct_answer || 'A';
+        const exp = q.explanation || '';
 
         return `
-          <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 space-y-2.5">
-            <div class="flex items-center justify-between">
+          <div class="p-4 rounded-lg border border-slate-200 bg-slate-50/70 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">${escapeHtml(sub)}</span>
                 <span class="text-[11px] font-semibold text-slate-700">${escapeHtml(top)}</span>
                 <span class="text-[10px] text-slate-400">&bull; ${escapeHtml(diff)}</span>
               </div>
-              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Kunci: ${escapeHtml(key)}</span>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Butir Soal #${idx + 1}:</label>
-              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-800 leading-relaxed text-xs">
-                ${escapeHtml(text)}
+              <div class="flex items-center gap-1.5">
+                <label class="text-[10px] font-bold text-slate-700">Kunci Jawaban:</label>
+                <select id="ai-draft-key-${idx}" class="h-6 bg-white border border-slate-300 rounded px-1.5 text-xs font-bold text-emerald-700">
+                  <option value="A" ${key === 'A' ? 'selected' : ''}>Opsi A</option>
+                  <option value="B" ${key === 'B' ? 'selected' : ''}>Opsi B</option>
+                  <option value="C" ${key === 'C' ? 'selected' : ''}>Opsi C</option>
+                  <option value="D" ${key === 'D' ? 'selected' : ''}>Opsi D</option>
+                  <option value="E" ${key === 'E' ? 'selected' : ''}>Opsi E</option>
+                </select>
               </div>
             </div>
+
             <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pilihan Jawaban:</label>
-              <div class="mt-1 space-y-1 text-slate-700 text-xs">
-                <div class="p-1.5 rounded ${isKey('A') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>A.</strong> ${escapeHtml(optA)}</div>
-                <div class="p-1.5 rounded ${isKey('B') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>B.</strong> ${escapeHtml(optB)}</div>
-                <div class="p-1.5 rounded ${isKey('C') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>C.</strong> ${escapeHtml(optC)}</div>
-                <div class="p-1.5 rounded ${isKey('D') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>D.</strong> ${escapeHtml(optD)}</div>
-                <div class="p-1.5 rounded ${isKey('E') ? 'bg-emerald-50 border border-emerald-300 font-semibold text-emerald-900' : 'bg-white border border-slate-100'}"><strong>E.</strong> ${escapeHtml(optE)}</div>
+              <label class="block font-semibold text-slate-600 uppercase text-[10px] mb-1">Teks Pertanyaan #${idx + 1}:</label>
+              <textarea id="ai-draft-text-${idx}" rows="3" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 leading-relaxed focus:outline-none focus:border-slate-800">${escapeHtml(text)}</textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block font-semibold text-slate-600 uppercase text-[10px]">Pilihan Jawaban (A - E):</label>
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 font-bold text-slate-500 text-center">A.</span>
+                <input id="ai-draft-opt-a-${idx}" type="text" value="${escapeHtml(oA)}" class="flex-1 h-7 bg-white border border-slate-200 rounded px-2 text-xs text-slate-800 focus:outline-none focus:border-slate-800"/>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 font-bold text-slate-500 text-center">B.</span>
+                <input id="ai-draft-opt-b-${idx}" type="text" value="${escapeHtml(oB)}" class="flex-1 h-7 bg-white border border-slate-200 rounded px-2 text-xs text-slate-800 focus:outline-none focus:border-slate-800"/>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 font-bold text-slate-500 text-center">C.</span>
+                <input id="ai-draft-opt-c-${idx}" type="text" value="${escapeHtml(oC)}" class="flex-1 h-7 bg-white border border-slate-200 rounded px-2 text-xs text-slate-800 focus:outline-none focus:border-slate-800"/>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 font-bold text-slate-500 text-center">D.</span>
+                <input id="ai-draft-opt-d-${idx}" type="text" value="${escapeHtml(oD)}" class="flex-1 h-7 bg-white border border-slate-200 rounded px-2 text-xs text-slate-800 focus:outline-none focus:border-slate-800"/>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 font-bold text-slate-500 text-center">E.</span>
+                <input id="ai-draft-opt-e-${idx}" type="text" value="${escapeHtml(oE)}" class="flex-1 h-7 bg-white border border-slate-200 rounded px-2 text-xs text-slate-800 focus:outline-none focus:border-slate-800"/>
               </div>
             </div>
+
             <div>
-              <label class="block font-semibold text-slate-500 uppercase text-[10px]">Pembahasan &amp; Kaidah Logika:</label>
-              <div class="mt-1 p-2.5 rounded bg-white border border-slate-200 text-slate-600 leading-relaxed text-[11px]">
-                ${escapeHtml(exp)}
-              </div>
+              <label class="block font-semibold text-slate-600 uppercase text-[10px] mb-1">Pembahasan &amp; Kaidah Logika:</label>
+              <textarea id="ai-draft-exp-${idx}" rows="2" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 leading-relaxed focus:outline-none focus:border-slate-800">${escapeHtml(exp)}</textarea>
             </div>
           </div>
         `;
@@ -3679,7 +3796,7 @@ Mengerti &amp; Tutup
           <div class="text-center py-12 space-y-3">
             <div class="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p class="text-xs font-semibold text-slate-800">Sedang menyusun soal HOTS dengan Gemini AI...</p>
-            <p class="text-[11px] text-slate-400">Menghubungkan ke Gemini 2.5 Flash sesuai parameter: ${escapeHtml(subtest)} &bull; ${escapeHtml(topic)}</p>
+            <p class="text-[11px] text-slate-400">Menghubungkan ke Gemini Flash: ${escapeHtml(subtest)} &bull; ${escapeHtml(topic)}</p>
           </div>
         `;
       }
@@ -3690,7 +3807,7 @@ Mengerti &amp; Tutup
       }
 
       try {
-        const adminToken = sessionStorage.getItem('adminToken') || '';
+        const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || '';
         const res = await fetch('/api/generate-soal', {
           method: 'POST',
           headers: {
@@ -3711,10 +3828,11 @@ Mengerti &amp; Tutup
         }
 
         const resData = await res.json();
-        const generated = resData.questions || (Array.isArray(resData) ? resData : []);
-        if (Array.isArray(generated) && generated.length > 0) {
-          window.currentAiDraftQuestions = generated;
-          renderAiDraftQuestions(generated);
+        const rawList = resData.questions || (Array.isArray(resData) ? resData : []);
+        if (Array.isArray(rawList) && rawList.length > 0) {
+          const normalized = rawList.map(item => mapAiQuestionItem(item, subtest, topic, difficulty));
+          window.currentAiDraftQuestions = normalized;
+          renderAiDraftQuestions(normalized);
           if (saveBtn) saveBtn.disabled = false;
         } else {
           throw new Error('Format respon AI tidak valid atau daftar soal kosong.');
@@ -3747,7 +3865,7 @@ Mengerti &amp; Tutup
         saveBtn.disabled = true;
         saveBtn.innerHTML = `
           <svg class="w-3.5 h-3.5 animate-spin inline mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span>Menyimpan ke Paket...</span>
+          <span>Menyimpan ke Supabase...</span>
         `;
       }
 
@@ -3758,19 +3876,20 @@ Mengerti &amp; Tutup
       else if (curPkgKey === 'to2') dbPkgId = 'to-2';
       else if (curPkgKey === 'to3') dbPkgId = 'to-3';
 
-      const rows = window.currentAiDraftQuestions.map(q => {
-        const sub = q.subtest || q.subtes || 'TIU';
-        const top = q.topic || q.topik || 'HOTS BKN 2026';
-        const txt = q.question_text || q.pertanyaan || '';
-        const oA = q.option_a || q.opsi_a || '';
-        const oB = q.option_b || q.opsi_b || '';
-        const oC = q.option_c || q.opsi_c || '';
-        const oD = q.option_d || q.opsi_d || '';
-        const oE = q.option_e || q.opsi_e || '';
-        const ans = q.correct_answer || q.kunci_atau_bobot || 'A';
-        const exp = q.explanation || q.pembahasan || '';
-        const pts = q.points || (sub === 'TKP' ? 5 : 5);
-        const dif = q.difficulty || q.tingkat_kesulitan || 'HOTS Standar BKN 2026';
+      const rows = window.currentAiDraftQuestions.map((draftQ, idx) => {
+        const textVal = document.getElementById(`ai-draft-text-${idx}`)?.value || draftQ.question_text;
+        const optAVal = document.getElementById(`ai-draft-opt-a-${idx}`)?.value || draftQ.option_a;
+        const optBVal = document.getElementById(`ai-draft-opt-b-${idx}`)?.value || draftQ.option_b;
+        const optCVal = document.getElementById(`ai-draft-opt-c-${idx}`)?.value || draftQ.option_c;
+        const optDVal = document.getElementById(`ai-draft-opt-d-${idx}`)?.value || draftQ.option_d;
+        const optEVal = document.getElementById(`ai-draft-opt-e-${idx}`)?.value || draftQ.option_e;
+        const keyVal = document.getElementById(`ai-draft-key-${idx}`)?.value || draftQ.correct_answer;
+        const expVal = document.getElementById(`ai-draft-exp-${idx}`)?.value || draftQ.explanation;
+
+        const sub = draftQ.subtest || 'TIU';
+        const top = draftQ.topic || 'HOTS BKN 2026';
+        const dif = draftQ.difficulty || 'Standar BKN';
+        const scoresObj = draftQ.scores || (sub === 'TKP' ? { A: 5, B: 4, C: 3, D: 2, E: 1 } : null);
 
         return {
           package_id: dbPkgId,
@@ -3779,23 +3898,33 @@ Mengerti &amp; Tutup
           subtes: sub,
           topic: top,
           topik: top,
-          question_text: txt,
-          pertanyaan: txt,
-          option_a: oA,
-          opsi_a: oA,
-          option_b: oB,
-          opsi_b: oB,
-          option_c: oC,
-          opsi_c: oC,
-          option_d: oD,
-          opsi_d: oD,
-          option_e: oE,
-          opsi_e: oE,
-          correct_answer: ans,
-          kunci_atau_bobot: ans,
-          explanation: exp,
-          pembahasan: exp,
-          points: pts,
+          question: textVal,
+          pertanyaan: textVal,
+          question_text: textVal,
+          options: {
+            A: optAVal,
+            B: optBVal,
+            C: optCVal,
+            D: optDVal,
+            E: optEVal
+          },
+          option_a: optAVal,
+          opsi_a: optAVal,
+          option_b: optBVal,
+          opsi_b: optBVal,
+          option_c: optCVal,
+          opsi_c: optCVal,
+          option_d: optDVal,
+          opsi_d: optDVal,
+          option_e: optEVal,
+          opsi_e: optEVal,
+          correct_answer: keyVal,
+          kunci_jawaban: keyVal,
+          kunci_atau_bobot: (sub === 'TKP' && scoresObj) ? (typeof scoresObj === 'string' ? scoresObj : JSON.stringify(scoresObj)) : keyVal,
+          scores: scoresObj,
+          explanation: expVal,
+          pembahasan: expVal,
+          points: (sub === 'TKP' ? 5 : 5),
           difficulty: dif
         };
       });
@@ -3803,30 +3932,31 @@ Mengerti &amp; Tutup
       const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
       if (dbClient) {
         try {
-          await dbClient.from('questions').insert(rows);
+          const { error } = await dbClient.from('questions').insert(rows);
+          if (error) {
+            console.error('Supabase question insert error:', error);
+            alert('Gagal menyimpan soal ke Supabase: ' + (error.message || JSON.stringify(error)));
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+            }
+            return;
+          }
         } catch (e) {
-          console.warn('Supabase question insert warning:', e);
+          console.error('Supabase question insert exception:', e);
+          alert('Gagal menyimpan soal ke Supabase: ' + (e.message || e));
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+          }
+          return;
         }
       }
 
-      // Add to local state & APP.packages
-      if (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) {
-        const pkg = window.APP.packages[curPkgKey];
-        rows.forEach((r, i) => {
-          pkg.questions.unshift({
-            id: `SOAL-${r.subtest}-AI-${Date.now()}-${i}`,
-            subtest: r.subtest,
-            topic: r.topic,
-            key: r.correct_answer,
-            text: r.question_text,
-            difficulty: r.difficulty
-          });
-        });
-        pkg.current = Math.min(pkg.total, pkg.current + rows.length);
+      // Reload live from Supabase
+      if (typeof window.loadQuestionsFromSupabase === 'function') {
+        await window.loadQuestionsFromSupabase();
       }
-
-      if (typeof window.updatePackageView === 'function') window.updatePackageView();
-      if (typeof window.renderQuestions === 'function') window.renderQuestions();
 
       const modal = document.getElementById('modal-ai-draft');
       if (modal) {
@@ -3839,9 +3969,10 @@ Mengerti &amp; Tutup
         saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
       }
 
+      window.currentAiDraftQuestions = [];
       const pkgName = (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) ? window.APP.packages[curPkgKey].name : 'Paket Aktif';
       if (typeof showToast === 'function') {
-        showToast(`${rows.length} butir soal AI berhasil disimpan ke ${pkgName}.`, 'success');
+        showToast(`${rows.length} butir soal AI berhasil disimpan ke database (${pkgName}).`, 'success');
       }
     }
     window.confirmSaveAIDraft = confirmSaveAIDraft;
@@ -4275,35 +4406,31 @@ Mengerti &amp; Tutup
       const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
       if (dbClient) {
         try {
-          await dbClient.from('questions').insert(rows);
+          const { error } = await dbClient.from('questions').insert(rows);
+          if (error) {
+            console.error('Supabase questions insert error:', error);
+            alert('Gagal mengimpor soal ke database Supabase: ' + (error.message || JSON.stringify(error)));
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+            }
+            return;
+          }
         } catch (e) {
-          console.warn('Supabase questions insert error:', e);
+          console.error('Supabase questions insert exception:', e);
+          alert('Gagal mengimpor soal ke database Supabase: ' + (e.message || e));
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<span>Simpan ke Paket Ini</span>`;
+          }
+          return;
         }
       }
 
-      // Add to local state APP.packages incrementally without overwriting
-      if (window.APP && window.APP.packages && window.APP.packages[curPkgKey]) {
-        const pkg = window.APP.packages[curPkgKey];
-        rows.forEach((r, idx) => {
-          pkg.questions.unshift({
-            id: `SOAL-${r.subtest}-IMP-${Date.now()}-${idx}`,
-            subtest: r.subtest,
-            topic: r.topic,
-            key: r.correct_answer,
-            text: r.question_text,
-            difficulty: r.difficulty
-          });
-        });
-        recalculatePackageQuota(pkg);
+      // Reload live from Supabase
+      if (typeof window.loadQuestionsFromSupabase === 'function') {
+        await window.loadQuestionsFromSupabase();
       }
-
-      // Also sync to window.state.questions for exam engine
-      if (window.state && Array.isArray(window.state.questions)) {
-        window.state.questions.unshift(...rows);
-      }
-
-      if (typeof window.updatePackageView === 'function') window.updatePackageView();
-      if (typeof window.renderQuestions === 'function') window.renderQuestions();
 
       closeModal('modal-import-draft');
 
@@ -4335,13 +4462,30 @@ Mengerti &amp; Tutup
         const pkg = APP.packages[APP.selectedPackage];
         const q = pkg.questions.find(item => item.id === qId);
         if (q) {
-          document.getElementById('modal-q-subtest').value = q.subtest;
-          document.getElementById('modal-q-topic').value = q.topic;
-          document.getElementById('modal-q-text').value = q.text;
+          document.getElementById('modal-q-subtest').value = q.subtest || 'TWK';
+          document.getElementById('modal-q-topic').value = q.topic || '';
+          document.getElementById('modal-q-text').value = q.text || '';
+          if (q.raw) {
+            document.getElementById('modal-opt-a').value = q.raw.option_a || q.raw.opsi_a || '';
+            document.getElementById('modal-opt-b').value = q.raw.option_b || q.raw.opsi_b || '';
+            document.getElementById('modal-opt-c').value = q.raw.option_c || q.raw.opsi_c || '';
+            document.getElementById('modal-opt-d').value = q.raw.option_d || q.raw.opsi_d || '';
+            document.getElementById('modal-opt-e').value = q.raw.option_e || q.raw.opsi_e || '';
+            const rawKey = q.raw.correct_answer || q.raw.kunci_jawaban || 'A';
+            document.getElementById('modal-q-key').value = rawKey.charAt(0).toUpperCase();
+            document.getElementById('modal-q-diff').value = q.raw.difficulty || 'Standar BKN';
+          }
         }
       } else {
         document.getElementById('modal-q-topic').value = '';
         document.getElementById('modal-q-text').value = '';
+        document.getElementById('modal-opt-a').value = '';
+        document.getElementById('modal-opt-b').value = '';
+        document.getElementById('modal-opt-c').value = '';
+        document.getElementById('modal-opt-d').value = '';
+        document.getElementById('modal-opt-e').value = '';
+        document.getElementById('modal-q-key').value = 'A';
+        document.getElementById('modal-q-diff').value = 'Standar BKN';
       }
       openModal('modal-q-editor');
     }
@@ -4350,51 +4494,193 @@ Mengerti &amp; Tutup
       openQuestionModal('edit', qId);
     }
 
-    function deleteQuestion(qId) {
-      if (confirm('Apakah Anda yakin ingin menghapus butir soal ini?')) {
-        const pkg = APP.packages[APP.selectedPackage];
+    async function deleteQuestion(qId) {
+      if (!confirm('Apakah Anda yakin ingin menghapus butir soal ini secara permanen dari database Supabase?')) {
+        return;
+      }
+
+      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      if (dbClient) {
+        try {
+          let { error } = await dbClient.from('questions').delete().eq('id', qId);
+          if (error) {
+            const res2 = await dbClient.from('questions').delete().eq('id_soal', qId);
+            if (res2.error) {
+              console.error('Delete question error:', error, res2.error);
+              alert('Gagal menghapus soal dari database: ' + (error.message || res2.error.message));
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Delete question exception:', err);
+          alert('Gagal menghapus soal dari database: ' + (err.message || err));
+          return;
+        }
+      }
+
+      const pkg = APP.packages[APP.selectedPackage];
+      if (pkg) {
         pkg.questions = pkg.questions.filter(q => q.id !== qId);
-        pkg.current = Math.max(0, pkg.current - 1);
+        recalculatePackageQuota(pkg);
+      }
+
+      if (typeof window.loadQuestionsFromSupabase === 'function') {
+        await window.loadQuestionsFromSupabase();
+      } else {
         updatePackageView();
         renderQuestions();
-        showToast('Soal berhasil dihapus.', 'info');
+      }
+
+      if (typeof showToast === 'function') {
+        showToast('Soal berhasil dihapus permanen dari database.', 'info');
       }
     }
+    window.deleteQuestion = deleteQuestion;
 
-    function handleSaveManualQuestion(e) {
+    async function deleteAllQuestionsInCurrentPackage() {
+      const curPkgKey = APP.selectedPackage;
+      const pkg = APP.packages[curPkgKey];
+      if (!pkg) return;
+      const pkgName = pkg.name;
+
+      if (!confirm(`PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA SOAL (${pkg.questions.length} butir) pada ${pkgName} secara permanen dari database Supabase?`)) {
+        return;
+      }
+
+      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      if (dbClient) {
+        try {
+          const altKey = (curPkgKey === 'mini') ? 'mini-to' : (curPkgKey === 'to1' ? 'to-1' : (curPkgKey === 'to2' ? 'to-2' : 'to-3'));
+          const { error } = await dbClient.from('questions').delete().or(`id_paket.eq.${curPkgKey},package_id.eq.${curPkgKey},id_paket.eq.${altKey},package_id.eq.${altKey}`);
+          if (error) {
+            console.error('Delete all questions error:', error);
+            alert('Gagal menghapus semua soal: ' + (error.message || JSON.stringify(error)));
+            return;
+          }
+        } catch (err) {
+          console.error('Delete all questions exception:', err);
+          alert('Gagal menghapus semua soal: ' + (err.message || err));
+          return;
+        }
+      }
+
+      pkg.questions = [];
+      recalculatePackageQuota(pkg);
+      if (typeof window.loadQuestionsFromSupabase === 'function') {
+        await window.loadQuestionsFromSupabase();
+      } else {
+        updatePackageView();
+        renderQuestions();
+      }
+      if (typeof showToast === 'function') {
+        showToast(`Seluruh soal pada ${pkgName} berhasil dihapus permanen.`, 'info');
+      }
+    }
+    window.deleteAllQuestionsInCurrentPackage = deleteAllQuestionsInCurrentPackage;
+
+    async function handleSaveManualQuestion(e) {
       e.preventDefault();
       const qId = document.getElementById('edit-q-id').value;
-      const pkg = APP.packages[APP.selectedPackage];
+      const curPkgKey = APP.selectedPackage;
+      let dbPkgId = curPkgKey;
+      if (curPkgKey === 'mini') dbPkgId = 'mini-to';
+      else if (curPkgKey === 'to1') dbPkgId = 'to-1';
+      else if (curPkgKey === 'to2') dbPkgId = 'to-2';
+      else if (curPkgKey === 'to3') dbPkgId = 'to-3';
+
       const subtest = document.getElementById('modal-q-subtest').value;
       const topic = document.getElementById('modal-q-topic').value;
       const text = document.getElementById('modal-q-text').value;
+      const optA = document.getElementById('modal-opt-a').value;
+      const optB = document.getElementById('modal-opt-b').value;
+      const optC = document.getElementById('modal-opt-c').value;
+      const optD = document.getElementById('modal-opt-d').value;
+      const optE = document.getElementById('modal-opt-e').value;
+      const keyVal = document.getElementById('modal-q-key').value;
+      const diff = document.getElementById('modal-q-diff').value;
 
-      if (qId) {
-        const item = pkg.questions.find(q => q.id === qId);
-        if (item) {
-          item.subtest = subtest;
-          item.topic = topic;
-          item.text = text;
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Menyimpan...';
+      }
+
+      const rowData = {
+        package_id: dbPkgId,
+        id_paket: dbPkgId,
+        subtest: subtest,
+        subtes: subtest,
+        topic: topic,
+        topik: topic,
+        question: text,
+        pertanyaan: text,
+        question_text: text,
+        options: {
+          A: optA,
+          B: optB,
+          C: optC,
+          D: optD,
+          E: optE
+        },
+        option_a: optA,
+        opsi_a: optA,
+        option_b: optB,
+        opsi_b: optB,
+        option_c: optC,
+        opsi_c: optC,
+        option_d: optD,
+        opsi_d: optD,
+        option_e: optE,
+        opsi_e: optE,
+        correct_answer: keyVal,
+        kunci_jawaban: keyVal,
+        kunci_atau_bobot: (subtest === 'TKP' ? 'A:5,B:4,C:3,D:2,E:1' : keyVal),
+        scores: subtest === 'TKP' ? { A: 5, B: 4, C: 3, D: 2, E: 1 } : null,
+        difficulty: diff,
+        points: 5,
+        explanation: 'Pembahasan manual admin.',
+        pembahasan: 'Pembahasan manual admin.'
+      };
+
+      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+
+      if (dbClient) {
+        try {
+          if (qId) {
+            let { error } = await dbClient.from('questions').update(rowData).eq('id', qId);
+            if (error) {
+              const res2 = await dbClient.from('questions').update(rowData).eq('id_soal', qId);
+              if (res2.error) throw res2.error;
+            }
+          } else {
+            const { error } = await dbClient.from('questions').insert([rowData]);
+            if (error) throw error;
+          }
+        } catch (err) {
+          console.error('Error saving manual question:', err);
+          alert('Gagal menyimpan soal ke database Supabase: ' + (err.message || JSON.stringify(err)));
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Simpan Soal';
+          }
+          return;
         }
-        showToast('Perubahan butir soal tersimpan.', 'success');
-      } else {
-        const newQ = {
-          id: `SOAL-${subtest}-MAN-${Math.floor(100 + Math.random() * 900)}`,
-          subtest: subtest,
-          topic: topic,
-          key: 'A (+5 Poin)',
-          text: text,
-          difficulty: 'Standar BKN'
-        };
-        pkg.questions.unshift(newQ);
-        pkg.current = Math.min(pkg.total, pkg.current + 1);
-        showToast('Soal baru berhasil ditambahkan.', 'success');
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Simpan Soal';
       }
 
       closeModal('modal-q-editor');
-      updatePackageView();
-      renderQuestions();
+      if (typeof window.loadQuestionsFromSupabase === 'function') {
+        await window.loadQuestionsFromSupabase();
+      }
+      if (typeof showToast === 'function') {
+        showToast(qId ? 'Perubahan butir soal berhasil disimpan.' : 'Soal baru berhasil disimpan ke database.', 'success');
+      }
     }
+    window.handleSaveManualQuestion = handleSaveManualQuestion;
 
     // --- USER TABLE & ACTIONS ---
     function renderUserTable() {
@@ -4656,36 +4942,20 @@ Mengerti &amp; Tutup
   let supabase = null;
   try {
     if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      });
       window.supabaseClient = supabase;
     }
   } catch (err) {
     console.warn('Supabase JS init warning:', err);
   }
 
-  // 2. SEED DEFAULT MINI QUESTIONS (20 Butir Standar BKN: 6 TWK, 6 TIU, 8 TKP)
-  const DEFAULT_QUESTIONS = [
-    { id_soal: 'mini-1', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Berdasarkan Pasal 1 ayat (2) UUD NRI 1945 setelah amandemen, kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar. Konsekuensi langsung dari ketentuan ini terhadap sistem ketatanegaraan Indonesia adalah...', opsi_a: 'MPR tidak lagi menjadi lembaga tertinggi pemegang mandat kedaulatan tak terbatas', opsi_b: 'Presiden memiliki kekuasaan mutlak dalam pembentukan undang-undang', opsi_c: 'DPR dapat memberhentikan Presiden tanpa persetujuan Mahkamah Konstitusi', opsi_d: 'Pemerintah daerah berhak menyusun konstitusi tersendiri', opsi_e: 'Kekuasaan yudikatif berada di bawah kontrol kementerian hukum', kunci_atau_bobot: 'A', pembahasan: 'Amandemen UUD 1945 mengubah supremasi MPR menjadi supremasi konstitusi. Kedaulatan rakyat dijalankan menurut UUD, sehingga MPR berstatus setara dengan lembaga negara lainnya.' },
-    { id_soal: 'mini-2', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Seorang ASN menolak permintaan atasannya untuk mempercepat pencairan anggaran proyek tanpa kelengkapan berkas verifikasi sah, meskipun diancam akan dimutasi. Sikap ASN tersebut mencerminkan nilai integritas...', opsi_a: 'Kedisiplinan formal', opsi_b: 'Keberanian menegakkan akuntabilitas dan kejujuran', opsi_c: 'Loyalitas personal terhadap institusi', opsi_d: 'Kepatuhan hierarkis', opsi_e: 'Efisiensi birokrasi', kunci_atau_bobot: 'B', pembahasan: 'Integritas ASN menuntut keberanian moral untuk menolak tindakan maladministrasi atau koruptif demi menjaga akuntabilitas keuangan negara.' },
-    { id_soal: 'mini-3', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Upaya bela negara dalam era globalisasi dan digitalisasi tidak lagi sebatas memanggul senjata fisik, melainkan melalui ketahanan informasi, seperti...', opsi_a: 'Menyebarkan seluruh data rahasia instansi demi asas transparansi publik', opsi_b: 'Membeli produk impor sebanyak mungkin untuk menunjukkan daya beli bangsa', opsi_c: 'Menyaring dan memerangi disinformasi serta hoaks yang memecah belah persatuan bangsa', opsi_d: 'Membatasi akses internet secara menyeluruh bagi generasi muda', opsi_e: 'Menolak segala bentuk kerjasama teknologi dari negara luar', kunci_atau_bobot: 'C', pembahasan: 'Bela negara non-militer di era siber diwujudkan lewat literasi digital, mencegah polarisasi, dan menjaga keutuhan NKRI dari ancaman propaganda siber.' },
-    { id_soal: 'mini-4', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Semboyan Bhinneka Tunggal Ika yang tertuang dalam lambang negara Garuda Pancasila bersumber dari kitab Sutasoma karangan Mpu Tantular. Esensi persatuan dalam konteks keberagaman modern adalah...', opsi_a: 'Menyeragamkan seluruh adat istiadat menjadi satu kebudayaan tunggal', opsi_b: 'Mengakui dan menghargai heterogenitas dalam ikatan kebangsaan yang adil dan setara', opsi_c: 'Mengutamakan kepentingan mayoritas di atas perlindungan hak-hak minoritas', opsi_d: 'Membentuk persekutuan berdasarkan kesamaan etnis daerah semata', opsi_e: 'Menghapuskan bahasa daerah agar hanya menggunakan bahasa persatuan', kunci_atau_bobot: 'B', pembahasan: 'Bhinneka Tunggal Ika menghendaki persatuan tanpa menghapus keberagaman (unity in diversity) berlandaskan keadilan konstitusional.' },
-    { id_soal: 'mini-5', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Hubungan timbal balik antara sila pertama "Ketuhanan Yang Maha Esa" dan sila kedua "Kemanusiaan yang Adil dan Beradab" menegaskan bahwa...', opsi_a: 'Kewajiban beribadah mengabaikan hak-hak asasi sesama manusia', opsi_b: 'Keimanan kepada Tuhan diwujudkan melalui perlakuan memanusiakan manusia secara adil dan beradab', opsi_c: 'Negara hanya memfasilitasi kelompok agama terbesar dalam pembagian bantuan', opsi_d: 'Kemanusiaan lebih tinggi kedudukannya daripada nilai ketuhanan', opsi_e: 'Hukum moral keagamaan bertentangan dengan hukum positif negara', kunci_atau_bobot: 'B', pembahasan: 'Sila-sila Pancasila merupakan kesatuan organik hierarkis. Nilai ketuhanan menjiwai perlakuan adil dan penuh peradaban terhadap sesama manusia.' },
-    { id_soal: 'mini-6', id_paket: 'mini-to', subtes: 'TWK', pertanyaan: 'Peristiwa Sumpah Pemuda 28 Oktober 1928 merupakan kristalisasi semangat kebangsaan yang meleburkan sekat kedaerahan menjadi satu identitas nasional. Sikap aparatur sipil negara yang paling mencerminkan implementasi nilai historis tersebut adalah...', opsi_a: 'Mengutamakan pelayanan publik kepada pemohon yang berasal dari suku yang sama', opsi_b: 'Menjaga netralitas, menjunjung tinggi persatuan bangsa, dan tidak diskriminatif dalam melayani masyarakat', opsi_c: 'Menuntut perlakuan istimewa berdasarkan asal daerah kelahirannya', opsi_d: 'Membatasi interaksi formal hanya dengan rekan kerja sedaerah', opsi_e: 'Menolak penugasan dinas di wilayah pelosok atau luar pulau', kunci_atau_bobot: 'B', pembahasan: 'Sumpah Pemuda menggarisbawahi persatuan Indonesia tanpa sekat primordialisme. ASN wajib berperan sebagai perekat pemersatu bangsa dan melayani secara adil.' },
-    { id_soal: 'mini-7', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'BUNGA : BUKET = KATA : ... Manakah analogi padanan hubungan kata yang paling setara?', opsi_a: 'PARAGRAF', opsi_b: 'HURUF', opsi_c: 'KAMUS', opsi_d: 'SUARA', opsi_e: 'PENA', kunci_atau_bobot: 'A', pembahasan: 'Rangkaian bunga terhimpun membentuk buket, sebagaimana rangkaian kata terhimpun menyusun paragraf.' },
-    { id_soal: 'mini-8', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'Jika semua diplomat menguasai lebih dari satu bahasa asing, dan sebagian sarjana hubungan internasional adalah diplomat, maka kesimpulan yang paling sah adalah...', opsi_a: 'Semua sarjana hubungan internasional menguasai lebih dari satu bahasa asing', opsi_b: 'Sebagian sarjana hubungan internasional menguasai lebih dari satu bahasa asing', opsi_c: 'Semua yang menguasai bahasa asing adalah sarjana hubungan internasional', opsi_d: 'Sebagian diplomat bukan sarjana hubungan internasional', opsi_e: 'Tidak ada sarjana hubungan internasional yang menjadi diplomat', kunci_atau_bobot: 'B', pembahasan: 'Silogisme partikular: Premis 1 (Universal), Premis 2 (Partikular). Kesimpulan wajib bersifat partikular.' },
-    { id_soal: 'mini-9', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'Tentukan angka lanjutan dari deret berikut: 4, 7, 12, 19, 28, ...', opsi_a: '37', opsi_b: '39', opsi_c: '41', opsi_d: '43', opsi_e: '45', kunci_atau_bobot: 'B', pembahasan: 'Pola selisih: +3, +5, +7, +9, selisih berikutnya +11. 28 + 11 = 39.' },
-    { id_soal: 'mini-10', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'Sebuah proyek renovasi gedung kantor direncanakan selesai dalam waktu 30 hari oleh 15 orang pekerja. Setelah 10 hari pengerjaan, proyek terhenti selama 5 hari karena cuaca ekstrem. Agar proyek tetap selesai tepat waktu, berapa jumlah tambahan pekerja yang diperlukan?', opsi_a: '3 orang', opsi_b: '5 orang', opsi_c: '7 orang', opsi_d: '9 orang', opsi_e: '10 orang', kunci_atau_bobot: 'B', pembahasan: 'Sisa beban kerja: 20 hari x 15 pekerja = 300 orang-hari. Sisa waktu: 15 hari. Pekerja dibutuhkan: 300 / 15 = 20 pekerja. Tambahan pekerja: 20 - 15 = 5 orang.' },
-    { id_soal: 'mini-11', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'Nilai dari 45% dari 1.800 dikurangi 25% dari 1.200 adalah...', opsi_a: '480', opsi_b: '510', opsi_c: '540', opsi_d: '570', opsi_e: '610', kunci_atau_bobot: 'B', pembahasan: '45% x 1800 = 810. 25% x 1200 = 300. 810 - 300 = 510.' },
-    { id_soal: 'mini-12', id_paket: 'mini-to', subtes: 'TIU', pertanyaan: 'Dalam antrean loket pelayanan terpadu, Rian berdiri di depan Siti namun di belakang Budi. Dina berdiri tepat di belakang Siti. Siapakah yang berdiri pada posisi antrean paling depan?', opsi_a: 'Rian', opsi_b: 'Siti', opsi_c: 'Budi', opsi_d: 'Dina', opsi_e: 'Tidak dapat ditentukan', kunci_atau_bobot: 'C', pembahasan: 'Urutan antrean dari terdepan: Budi -> Rian -> Siti -> Dina. Jadi, orang yang berdiri paling depan adalah Budi.' },
-    { id_soal: 'mini-13', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Anda diminta pimpinan untuk menggantikan rekan kerja mempresentasikan laporan strategis instansi dalam waktu persiapan hanya 30 menit karena rekan tersebut mendadak sakit. Sikap Anda...', opsi_a: 'Menolak karena waktu persiapan terlalu sempit dan berisiko salah', opsi_b: 'Menerima tugas tersebut, segera mempelajari poin-poin utama materi, berkoordinasi singkat dengan tim pendukung, dan tampil percaya diri', opsi_c: 'Menerima tetapi meminta pimpinan menurunkan ekspektasi', opsi_d: 'Meminta rekan lain yang lebih senior untuk menggantikannya', opsi_e: 'Menerima dan membaca slide presentasi apa adanya tanpa penjelasan', kunci_atau_bobot: 'A:1,B:5,C:3,D:2,E:2', pembahasan: 'Skala Bobot: Opsi B (5) menunjukkan profesionalisme, adaptabilitas tinggi, dan keberanian mengambil tanggung jawab darurat.' },
-    { id_soal: 'mini-14', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Ketika loket pelayanan instansi Anda telah memasuki jam tutup resmi, seorang warga lansia datang terengah-engah dari desa terpencil menempuh perjalanan jauh untuk mengurus dokumen pensiun. Tindakan Anda...', opsi_a: 'Menolak dan menyuruhnya pulang karena sistem antrean sudah ditutup', opsi_b: 'Menyambutnya ramah, memeriksa kelengkapan berkas, melayani prosesnya hingga selesai, dan mengedukasi layanan daring untuk ke depan', opsi_c: 'Meminta uang jasa lembur kepada warga tersebut', opsi_d: 'Menyuruh warga tersebut menunggu satpam besok pagi', opsi_e: 'Menerima berkasnya tetapi tidak berjanji kapan diproses', kunci_atau_bobot: 'A:2,B:5,C:1,D:1,E:3', pembahasan: 'Skala Bobot: Opsi B (5) mencerminkan orientasi pelayanan publik prima dan empati kemanusiaan ASN.' },
-    { id_soal: 'mini-15', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Instansi Anda mulai menerapkan sistem aplikasi terintegrasi baru yang menggantikan pencatatan manual. Sebagian besar pegawai senior mengeluh dan enggan menggunakannya. Sikap Anda...', opsi_a: 'Ikut mengeluh karena aplikasi baru menambah beban', opsi_b: 'Mempelajari sistem baru secara mendalam dan aktif membantu mendampingi rekan kerja lain yang mengalami kendala teknis', opsi_c: 'Menggunakan sistem baru hanya ketika diawasi pimpinan', opsi_d: 'Membiarkan rekan kerja menggunakan cara lama asalkan pekerjaan beres', opsi_e: 'Mengusulkan pembatalan sistem aplikasi baru', kunci_atau_bobot: 'A:1,B:5,C:2,D:3,E:1', pembahasan: 'Skala Bobot: Opsi B (5) mencerminkan kemauan belajar berkelanjutan dan peran motor penggerak transformasi digital.' },
-    { id_soal: 'mini-16', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Dalam sebuah diskusi penyusunan SOP layanan, rekan satu divisi menyampaikan opini yang bertolak belakang dengan gagasan Anda dan terkesan meremehkan. Sikap Anda...', opsi_a: 'Marah dan langsung walk-out dari ruangan rapat', opsi_b: 'Tetap tenang, menyimak argumen dasarnya secara objektif, lalu memberikan tanggapan logis berbasis data dan regulasi', opsi_c: 'Mengabaikan seluruh masukannya saat finalisasi laporan akhir', opsi_d: 'Menyerang balik karakter pribadinya di hadapan atasan', opsi_e: 'Pasrah dan tidak lagi memberikan kontribusi', kunci_atau_bobot: 'A:1,B:5,C:2,D:1,E:2', pembahasan: 'Skala Bobot: Opsi B (5) mencerminkan kematangan emosi, jejaring kerja profesional, dan komunikasi asertif.' },
-    { id_soal: 'mini-17', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Di grup pesan instan kantor, seorang pegawai membagikan konten wacana yang mengarah pada ujaran kebencian terhadap simbol negara dan ideologi Pancasila. Sikap Anda...', opsi_a: 'Ikut membagikan konten tersebut ke akun pribadi', opsi_b: 'Mengingatkan secara santun namun tegas bahwa grup kantor bukan tempat propaganda, serta melaporkan konten radikalisme tersebut kepada penanggung jawab disiplin', opsi_c: 'Menyukai dan memberi emotikon apresiasi', opsi_d: 'Membiarkan saja karena merasa bukan urusan saya', opsi_e: 'Mendebatnya dengan kata-kata kasar', kunci_atau_bobot: 'A:1,B:5,C:1,D:2,E:2', pembahasan: 'Skala Bobot: Opsi B (5) menunjukkan integritas, loyalitas NKRI, dan pencegahan radikalisme ASN.' },
-    { id_soal: 'mini-18', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Anda mendapati aplikasi antrean publik mendadak down di pagi hari saat ratusan warga sedang menunggu. Tindakan prioritas Anda...', opsi_a: 'Menutup loket dan meminta warga pulang', opsi_b: 'Berinisiatif segera membagikan nomor antrean manual sementara sambil menghubungi tim IT, serta memberi penjelasan ramah agar warga tetap tenang', opsi_c: 'Berpura-pura tidak tahu dan beristirahat', opsi_d: 'Menyalahkan divisi IT di depan publik', opsi_e: 'Menunggu arahan atasan tanpa inisiatif apapun', kunci_atau_bobot: 'A:1,B:5,C:1,D:1,E:2', pembahasan: 'Skala Bobot: Opsi B (5) menunjukkan kepemimpinan situasional, problem solving cepat, dan ketenangan prima.' },
-    { id_soal: 'mini-19', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Anda ditugaskan dalam kelompok kerja lintas instansi yang anggotanya memiliki latar belakang suku, budaya, dan gaya komunikasi yang berbeda. Cara Anda membangun kekompakan tim...', opsi_a: 'Hanya bekerja dengan anggota yang satu daerah asal', opsi_b: 'Membangun komunikasi inklusif, menghormati keragaman pandangan, dan menyepakati target kerja bersama secara transparan', opsi_c: 'Memaksakan cara kerja pribadi pada semua anggota', opsi_d: 'Menghindari pertemuan tim dan bekerja mandiri', opsi_e: 'Meminta pimpinan merombak susunan kelompok', kunci_atau_bobot: 'A:1,B:5,C:2,D:2,E:1', pembahasan: 'Skala Bobot: Opsi B (5) mewujudkan dimensi Sosial Budaya dan perekat pemersatu bangsa.' },
-    { id_soal: 'mini-20', id_paket: 'mini-to', subtes: 'TKP', pertanyaan: 'Ketika target capaian unit kerja Anda dinaikkan 40% dari tahun sebelumnya dengan jumlah personel tetap, langkah yang Anda tempuh...', opsi_a: 'Menolak target tersebut karena dinilai tidak realistis', opsi_b: 'Melakukan evaluasi alur kerja, mengotomasi proses berulang dengan teknologi, dan membagi tugas secara optimal bersama tim', opsi_c: 'Bekerja santai seperti biasa tanpa memedulikan target baru', opsi_d: 'Meminta rekan kerja lembur setiap hari tanpa kompensasi', opsi_e: 'Mengajukan pengunduran diri dari unit kerja', kunci_atau_bobot: 'A:1,B:5,C:1,D:2,E:1', pembahasan: 'Skala Bobot: Opsi B (5) menunjukkan orientasi hasil, efisiensi kerja tinggi, dan daya inovasi.' }
-  ];
+  // 2. SOAL UJIAN (HANYA MENGGUNAKAN SOAL ASLI DARI DATABASE SUPABASE)
 
   // 3. APPLICATION STATE
   const state = {
@@ -4770,7 +5040,7 @@ Mengerti &amp; Tutup
         if (qs && qs.length > 0) {
           state.questions = qs;
         } else {
-          state.questions = DEFAULT_QUESTIONS;
+          state.questions = [];
         }
 
         if (state.currentUser) {
@@ -4789,20 +5059,23 @@ Mengerti &amp; Tutup
         console.warn('Supabase sync notice:', err);
       }
     } else {
-      state.questions = DEFAULT_QUESTIONS;
+      state.questions = [];
     }
   }
 
   // 5. UNIVERSAL VIEW NAVIGATION
   window.showView = function(viewId) {
     if (viewId === 'admin') {
-      const authed = sessionStorage.getItem('cat_admin_authed');
-      const token = sessionStorage.getItem('adminToken');
-      if (authed !== 'true' || !token) {
+      const authed = (localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('cat_admin_authed') === 'true');
+      const token = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+      if (!authed || !token) {
         viewId = 'login';
         if (typeof window.openAdminLoginModal === 'function') {
           window.openAdminLoginModal();
         }
+      } else {
+        if (!sessionStorage.getItem('cat_admin_authed')) sessionStorage.setItem('cat_admin_authed', 'true');
+        if (!sessionStorage.getItem('adminToken')) sessionStorage.setItem('adminToken', token);
       }
     }
 
@@ -5034,11 +5307,13 @@ Mengerti &amp; Tutup
       if (res.ok && data.ok && data.adminToken) {
         sessionStorage.setItem('adminToken', data.adminToken);
         sessionStorage.setItem('cat_admin_authed', 'true');
+        localStorage.setItem('admin_authenticated', 'true');
+        localStorage.setItem('adminToken', data.adminToken);
         state.currentUser = {
           id: 'admin-1',
           nama: 'Administrator Workspace',
           email: 'admin@catcpns.pro',
-          no_wa: '081111111111',
+          no_wa: state.settings.admin_whatsapp || state.settings.WA_ADMIN || '081111111111',
           role: 'admin'
         };
         localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
@@ -5087,11 +5362,13 @@ Mengerti &amp; Tutup
         if (res.ok && data.ok && data.adminToken) {
           sessionStorage.setItem('adminToken', data.adminToken);
           sessionStorage.setItem('cat_admin_authed', 'true');
+          localStorage.setItem('admin_authenticated', 'true');
+          localStorage.setItem('adminToken', data.adminToken);
           state.currentUser = {
             id: 'admin-1',
             nama: 'Administrator Workspace',
             email: 'admin@catcpns.pro',
-            no_wa: '081111111111',
+            no_wa: state.settings.admin_whatsapp || state.settings.WA_ADMIN || '081111111111',
             role: 'admin'
           };
           localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
@@ -5472,6 +5749,8 @@ Mengerti &amp; Tutup
 
     localStorage.removeItem('cat_user_session');
     localStorage.removeItem('cat_admin_authed');
+    localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('adminToken');
     localStorage.removeItem('cat_attempts');
     sessionStorage.removeItem('cat_admin_authed');
     sessionStorage.removeItem('adminToken');
@@ -5582,8 +5861,8 @@ Mengerti &amp; Tutup
       });
     }
 
-    // Wire Start Exam buttons on cards
-    wireDashboardExamButtons();
+    // Wire Start Exam buttons on cards & update access status
+    updateDashboardPackageCards();
   }
 
   window.handleTokenActivation = async function() {
@@ -5646,6 +5925,7 @@ Mengerti &amp; Tutup
     input.value = '';
     alert(`Token berhasil diaktifkan! Seluruh paket try out telah terbuka penuh.`);
     renderDashboardView();
+    updateDashboardPackageCards();
   };
 
   function wireDashboardExamButtons() {
@@ -5827,10 +6107,214 @@ Mengerti &amp; Tutup
     }
   }
 
+  // Helper: Validasi Hak Akses Paket Berbayar di Database Supabase
+  async function checkUserPackageAccess(packageId) {
+    if (!packageId || packageId === 'mini-to' || packageId === 'mini') return true;
+    if (!state.currentUser) return false;
+
+    const u = state.currentUser;
+    const userEmail = (u.email || '').toLowerCase().trim();
+    const userWa = (u.no_wa || u.phone || '').replace(/\D/g, '');
+    const userId = u.id || '';
+
+    // 1. Cek token lokal pada state.tokens
+    const hasLocal = (state.tokens || []).some(t => {
+      const st = (t.status_token || t.status || '').toLowerCase();
+      const isActive = (st === 'aktif' || st === 'terpakai');
+      if (!isActive) return false;
+      const target = (t.target_paket || '').toLowerCase();
+      const isBundle = target.includes('bundle') || target.includes('bndl') || target.includes('all') || target.includes('to-1,to-2,to-3');
+      const isMatch = target.includes(packageId.toLowerCase()) || (packageId === 'to-1' && target.includes('seri 1'));
+      return isBundle || isMatch;
+    });
+    if (hasLocal) return true;
+
+    // 2. Verifikasi langsung ke database Supabase (tabel tokens & user_packages)
+    if (supabase) {
+      try {
+        let filters = [];
+        if (userEmail) filters.push(`pemilik_email.eq.${userEmail}`);
+        if (userWa) filters.push(`pemilik_wa.ilike.%${userWa}%`);
+        if (userId) filters.push(`user_id.eq.${userId}`);
+
+        if (filters.length > 0) {
+          const { data: dbToks } = await supabase.from('tokens')
+            .select('*')
+            .or(filters.join(','));
+
+          if (dbToks && dbToks.length > 0) {
+            const hasValid = dbToks.some(t => {
+              const st = (t.status_token || t.status || '').toLowerCase();
+              const isActive = (st === 'aktif' || st === 'terpakai');
+              if (!isActive) return false;
+              const target = (t.target_paket || '').toLowerCase();
+              const isBundle = target.includes('bundle') || target.includes('bndl') || target.includes('all') || target.includes('to-1,to-2,to-3');
+              const isMatch = target.includes(packageId.toLowerCase()) || (packageId === 'to-1' && target.includes('seri 1'));
+              return isBundle || isMatch;
+            });
+            if (hasValid) {
+              state.tokens = dbToks;
+              return true;
+            }
+          }
+        }
+
+        if (userId) {
+          const { data: userPkgs } = await supabase.from('user_packages')
+            .select('*')
+            .eq('user_id', userId);
+          if (userPkgs && userPkgs.length > 0) {
+            const hasPkg = userPkgs.some(p => {
+              const pid = (p.package_id || p.id_paket || '').toLowerCase();
+              return pid === packageId.toLowerCase() || pid.includes('bundle') || pid.includes('all');
+            });
+            if (hasPkg) return true;
+          }
+        }
+      } catch (err) {
+        console.warn('Verifikasi akses paket database warning:', err);
+      }
+    }
+
+    return false;
+  }
+
+  // Helper: Update Status Kartu Paket Dashboard (Mini TO & Paket Berbayar)
+  async function updateDashboardPackageCards() {
+    const u = state.currentUser;
+    if (!u) return;
+
+    // 1. Update Mini Try Out Diagnostik Card (Card 1)
+    let miniAttempts = (state.attempts || []).filter(a => {
+      const pid = (a.id_paket || a.package_id || '').toLowerCase();
+      const pName = (a.package_name || a.nama_paket || '').toLowerCase();
+      return pid === 'mini-to' || pid === 'mini' || pName.includes('mini');
+    });
+
+    if (miniAttempts.length === 0 && supabase) {
+      try {
+        const { data: dbAtts } = await supabase.from('attempts')
+          .select('*')
+          .eq('user_email', u.email)
+          .order('created_at', { ascending: false });
+        if (dbAtts && dbAtts.length > 0) {
+          state.attempts = dbAtts;
+          miniAttempts = dbAtts.filter(a => {
+            const pid = (a.id_paket || a.package_id || '').toLowerCase();
+            const pName = (a.package_name || a.nama_paket || '').toLowerCase();
+            return pid === 'mini-to' || pid === 'mini' || pName.includes('mini');
+          });
+        }
+      } catch (e) {}
+    }
+
+    const miniScoreEl = document.getElementById('mini-to-last-score');
+    const miniActionEl = document.getElementById('mini-to-action-container');
+
+    if (miniAttempts.length > 0) {
+      const latestMini = miniAttempts[0];
+      if (miniScoreEl) {
+        miniScoreEl.innerHTML = `<span class="text-on-surface font-mono-timer font-bold">${latestMini.total_skor || 0}</span> <span class="text-secondary text-xs font-normal">/ 550</span>`;
+      }
+      if (miniActionEl) {
+        miniActionEl.className = "pt-4 mt-4 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center gap-2";
+        miniActionEl.innerHTML = `
+          <button class="w-full sm:flex-1 py-2 px-3 bg-surface border border-outline-variant/50 hover:bg-surface-container rounded-lg font-label-md text-label-md text-on-surface font-semibold transition-all flex items-center justify-center gap-2" onclick="openEvaluasiModal('${escapeHtml(latestMini.package_name || 'Mini Try Out Diagnostik')}', ${latestMini.total_skor || 0}, ${latestMini.skor_twk || 0}, ${latestMini.skor_tiu || 0}, ${latestMini.skor_tkp || 0})" type="button">
+            <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>Lihat Pembahasan</span>
+          </button>
+          <button class="w-full sm:flex-1 py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2" onclick="window.startExam('mini-to')" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Mulai Retake Mini TO</span>
+          </button>
+        `;
+      }
+    } else {
+      if (miniScoreEl) {
+        miniScoreEl.textContent = "Belum Dikerjakan";
+      }
+      if (miniActionEl) {
+        miniActionEl.className = "pt-4 mt-4 border-t border-outline-variant/20";
+        miniActionEl.innerHTML = `
+          <button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="window.startExam('mini-to')" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Mulai Mini TO Gratis</span>
+          </button>
+        `;
+      }
+    }
+
+    // 2. Update Paket Satuan TO Seri 1 (Card 2)
+    const hasTo1Access = await checkUserPackageAccess('to-1');
+    const badgeTo1 = document.getElementById('badge-package-to-1');
+    const statusTo1 = document.getElementById('status-package-to-1');
+    const actionTo1 = document.getElementById('action-package-to-1');
+    const cardTo1 = document.getElementById('card-package-to-1');
+    const readyCountEl = document.getElementById('dash-ready-packages-count');
+
+    if (hasTo1Access) {
+      if (badgeTo1) {
+        badgeTo1.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-primary text-on-primary";
+        badgeTo1.textContent = "TERLISENSI / AKTIF";
+      }
+      if (statusTo1) {
+        statusTo1.className = "text-on-surface font-semibold";
+        statusTo1.textContent = "Siap Dikerjakan Kapan Saja";
+      }
+      if (cardTo1) {
+        cardTo1.className = "bg-surface-container-lowest border-2 border-primary rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
+      }
+      if (actionTo1) {
+        actionTo1.innerHTML = `
+          <button class="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 active:translate-y-px rounded-lg font-label-md text-label-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2" onclick="window.startExam('to-1')" type="button">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Mulai Ujian CAT (110 Soal)</span>
+          </button>
+        `;
+      }
+      if (readyCountEl) readyCountEl.textContent = "2 Paket Siap Akses";
+    } else {
+      if (badgeTo1) {
+        badgeTo1.className = "text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded bg-surface-container text-secondary border border-outline-variant/30";
+        badgeTo1.textContent = "TERKUNCI / BELUM AKTIF";
+      }
+      if (statusTo1) {
+        statusTo1.className = "text-secondary font-medium";
+        statusTo1.textContent = "Membutuhkan Token Akses";
+      }
+      if (cardTo1) {
+        cardTo1.className = "bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-lg flex flex-col justify-between shadow-sm relative";
+      }
+      if (actionTo1) {
+        actionTo1.innerHTML = `
+          <button class="w-full py-2.5 px-4 bg-surface border border-outline-variant/50 hover:bg-surface-container active:translate-y-px rounded-lg font-label-md text-label-md font-semibold text-on-surface transition-all shadow-sm flex items-center justify-center gap-2" onclick="openModal('modal-katalog-lengkap')" type="button">
+            <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Aktivasi / Beli Token</span>
+          </button>
+        `;
+      }
+      if (readyCountEl) readyCountEl.textContent = "1 Paket Siap Akses";
+    }
+  }
+
   // 8. CAT EXAM ENGINE (BKN STANDAR)
   window.startExam = async function(packageId) {
-    state.exam.packageId = packageId;
+    packageId = packageId || 'mini-to';
     const isMini = (packageId === 'mini-to' || packageId === 'mini');
+
+    // 1. Validasi Hak Akses Paket Berbayar (Proteksi Console & URL)
+    if (!isMini) {
+      const hasAccess = await checkUserPackageAccess(packageId);
+      if (!hasAccess) {
+        alert('Paket ini terkunci. Anda membutuhkan Token Akses untuk memulai simulasi CAT CPNS ini.');
+        if (typeof window.openModal === 'function') {
+          window.openModal('modal-katalog-lengkap');
+        }
+        return;
+      }
+    }
+
+    state.exam.packageId = packageId;
     state.exam.packageName = isMini ? 'Mini Try Out Diagnostik SKD' : `Try Out SKD ${packageId.toUpperCase()}`;
     state.exam.durationMinutes = isMini ? 20 : 100;
     state.exam.secondsRemaining = state.exam.durationMinutes * 60;
@@ -5839,33 +6323,55 @@ Mengerti &amp; Tutup
     state.exam.doubts = {};
     state.exam.isFinished = false;
 
-    let rawQ = state.questions.filter(q => q.id_paket === packageId || (isMini && (q.id_paket === 'mini-to' || q.id_paket === 'mini')));
-    if (!rawQ || rawQ.length === 0) {
-      rawQ = DEFAULT_QUESTIONS;
+    // 2. Ambil Soal Asli dari Database Supabase Sesuai package_id
+    let rawQ = [];
+    if (supabase) {
+      try {
+        let query = supabase.from('questions').select('*');
+        if (isMini) {
+          query = query.or('id_paket.eq.mini-to,id_paket.eq.mini,package_id.eq.mini-to,package_id.eq.mini');
+        } else {
+          const altId = packageId.includes('-') ? packageId.replace('-', '') : (packageId.startsWith('to') ? packageId.replace('to', 'to-') : packageId);
+          query = query.or(`id_paket.eq.${packageId},package_id.eq.${packageId},id_paket.eq.${altId},package_id.eq.${altId}`);
+        }
+        const { data: dbQuestions, error: qErr } = await query;
+        if (dbQuestions && dbQuestions.length > 0) {
+          rawQ = dbQuestions;
+        }
+      } catch (err) {
+        console.warn('Fetch exam questions error:', err);
+      }
     }
 
+    if (!rawQ || rawQ.length === 0) {
+      rawQ = (state.questions || []).filter(q => {
+        const p = String(q.id_paket || q.package_id || '').toLowerCase();
+        if (isMini) return p === 'mini-to' || p === 'mini';
+        return p === packageId.toLowerCase() || p === packageId.replace('-', '').toLowerCase() || p === packageId.replace('to', 'to-').toLowerCase();
+      });
+    }
+
+    // 3. Jika Jumlah Soal Asli Masih Kosong (0 Soal), Batalkan Masuk ke Lembar Ujian
+    if (!rawQ || rawQ.length === 0) {
+      alert('Soal untuk paket ini sedang disiapkan oleh Admin.');
+      return;
+    }
+
+    // 4. Susun Lembar Soal Ujian Asli Sesuai Komposisi Subtes
     if (isMini) {
-      // ATURAN KHUSUS MINI TRY OUT:
-      // Mengambil urutan soal deterministik 20 butir pertama (ORDER BY id ASC / created_at awal tanpa pengacakan soal maupun opsi A-E):
-      // 6 TWK pertama, 6 TIU pertama, dan 8 TKP pertama.
+      // Urutan soal deterministik 20 butir pertama (6 TWK, 6 TIU, 8 TKP)
       const sortDeterministic = arr => arr.slice().sort((a, b) => {
         const idA = String(a.id_soal || a.id || a.created_at || '');
         const idB = String(b.id_soal || b.id || b.created_at || '');
         return idA.localeCompare(idB, undefined, { numeric: true, sensitivity: 'base' });
       });
 
-      const twkAll = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK'));
-      const tiuAll = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU'));
-      const tkpAll = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP'));
+      const twk = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TWK')).slice(0, 6);
+      const tiu = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TIU')).slice(0, 6);
+      const tkp = sortDeterministic(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP')).slice(0, 8);
 
-      const twk = twkAll.slice(0, 6);
-      const tiu = tiuAll.slice(0, 6);
-      const tkp = tkpAll.slice(0, 8);
-
-      state.exam.questions = [...twk, ...tiu, ...tkp];
-      if (state.exam.questions.length < 20) {
-        state.exam.questions = DEFAULT_QUESTIONS.slice(0, 20);
-      }
+      const combined = [...twk, ...tiu, ...tkp];
+      state.exam.questions = combined.length > 0 ? combined : rawQ.slice(0, 20);
     } else {
       // Paket Berbayar SKD 110 Butir: 35 TWK, 30 TIU, 45 TKP
       const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
@@ -5874,8 +6380,8 @@ Mengerti &amp; Tutup
       const tkp = shuffle(rawQ.filter(q => (q.subtes || q.subtest || '').toUpperCase() === 'TKP'));
       const others = shuffle(rawQ.filter(q => !['TWK', 'TIU', 'TKP'].includes((q.subtes || q.subtest || '').toUpperCase())));
 
-      state.exam.questions = [...twk.slice(0, 35), ...tiu.slice(0, 30), ...tkp.slice(0, 45), ...others];
-      if (state.exam.questions.length === 0) state.exam.questions = DEFAULT_QUESTIONS;
+      const combined = [...twk.slice(0, 35), ...tiu.slice(0, 30), ...tkp.slice(0, 45), ...others];
+      state.exam.questions = combined.length > 0 ? combined : rawQ;
     }
 
     window.showView('exam');
@@ -6497,43 +7003,32 @@ Mengerti &amp; Tutup
   };
 
   function getLatestHistoryAttempt() {
-    let latest = state.attempts && state.attempts.length > 0 ? state.attempts[0] : null;
-    if (!latest) {
-      latest = {
-        nama_paket: 'Mini Try Out Diagnostik Gratis (20 Soal)',
-        id_paket: 'mini',
-        total_skor: 359,
-        skor_twk: 80,
-        skor_tiu: 95,
-        skor_tkp: 184,
-        status_pg: 'LULUS PG',
-        jumlah_benar: 16,
-        jumlah_salah: 4,
-        questions: DEFAULT_QUESTIONS.slice(0, 20),
-        answers: {
-          'mini-1': 'B', 'mini-2': 'A', 'mini-3': 'B', 'mini-4': 'A', 'mini-5': 'B', 'mini-6': 'B',
-          'mini-7': 'B', 'mini-8': 'A', 'mini-9': 'C', 'mini-10': 'B', 'mini-11': 'B', 'mini-12': 'C',
-          'mini-13': 'A', 'mini-14': 'A', 'mini-15': 'A', 'mini-16': 'A', 'mini-17': 'A', 'mini-18': 'A', 'mini-19': 'A', 'mini-20': 'A'
-        }
-      };
-    } else if (!latest.questions || latest.questions.length === 0) {
-      latest.questions = DEFAULT_QUESTIONS.slice(0, 20);
-      latest.answers = latest.answers || {};
+    if (state.attempts && state.attempts.length > 0) {
+      return state.attempts[0];
     }
-    return latest;
+    return null;
   }
 
   function renderCurrentHistoryQuestions() {
     const latest = getLatestHistoryAttempt();
+    const container = document.getElementById('history-evaluation-container');
+    if (!container) return;
+
+    if (!latest || !latest.questions || latest.questions.length === 0) {
+      container.innerHTML = `
+        <div class="p-8 text-center bg-surface-container-lowest border border-slate-200 rounded-xl text-slate-500 text-sm">
+          Belum ada riwayat pengerjaan ujian. Silakan selesaikan ujian Mini Try Out terlebih dahulu.
+        </div>
+      `;
+      return;
+    }
+
     const isMini = (latest.id_paket === 'mini' || latest.id_paket === 'mini-to' || (latest.questions && latest.questions.length <= 20));
     const paid = hasPaidToken() || (!isMini && latest.id_paket && latest.id_paket !== 'mini' && latest.id_paket !== 'mini-to');
     const waNum = (state.settings && (state.settings.admin_whatsapp || state.settings.WA_ADMIN)) || '6281234567890';
     const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent('Halo Admin, saya ingin mengaktifkan Paket Bundle 3x Try Out CPNS (Rp 30.000) dan membuka seluruh pembahasan soal.')}`;
     
-    const container = document.getElementById('history-evaluation-container');
-    if (container) {
-      window.renderQuestionsToContainer(container, latest, isMini, paid, waUrl, currentHistSubtest, currentHistStatus);
-    }
+    window.renderQuestionsToContainer(container, latest, isMini, paid, waUrl, currentHistSubtest, currentHistStatus);
   }
 
   window.renderQuestionsToContainer = function(container, attempt, isMini, isPaid, waUrl, subFilter = 'ALL', statFilter = 'ALL') {
@@ -6816,11 +7311,86 @@ Mengerti &amp; Tutup
     if (!vHist) return;
 
     const latest = getLatestHistoryAttempt();
+    const userName = state.currentUser?.nama || state.currentUser?.full_name || (latest && latest.user_name) || 'Peserta';
+
+    const uNameEl = document.getElementById('hist-user-name');
+    if (uNameEl) uNameEl.textContent = userName;
+
+    if (!latest) {
+      const pNameEl = document.getElementById('hist-package-name');
+      if (pNameEl) pNameEl.textContent = 'Belum Ada Riwayat Ujian';
+
+      const pgBadge = document.getElementById('hist-pg-badge');
+      if (pgBadge) {
+        pgBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200';
+        pgBadge.innerHTML = `<span class="material-symbols-outlined text-[15px]">info</span>BELUM ADA UJIAN`;
+      }
+
+      const corrEl = document.getElementById('hist-correct-count');
+      if (corrEl) corrEl.textContent = '0 Soal';
+      const wrongEl = document.getElementById('hist-wrong-count');
+      if (wrongEl) wrongEl.textContent = '0 Soal';
+      const totEl = document.getElementById('hist-total-count');
+      if (totEl) totEl.textContent = '0 Soal';
+
+      const scoreTwkEl = document.getElementById('hist-score-twk');
+      if (scoreTwkEl) scoreTwkEl.textContent = '0';
+      const maxTwkEl = document.getElementById('hist-max-twk');
+      if (maxTwkEl) maxTwkEl.textContent = '/ 65';
+      const statusTwkEl = document.getElementById('hist-status-twk');
+      if (statusTwkEl) {
+        statusTwkEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
+        statusTwkEl.textContent = '-';
+      }
+
+      const scoreTiuEl = document.getElementById('hist-score-tiu');
+      if (scoreTiuEl) scoreTiuEl.textContent = '0';
+      const maxTiuEl = document.getElementById('hist-max-tiu');
+      if (maxTiuEl) maxTiuEl.textContent = '/ 80';
+      const statusTiuEl = document.getElementById('hist-status-tiu');
+      if (statusTiuEl) {
+        statusTiuEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
+        statusTiuEl.textContent = '-';
+      }
+
+      const scoreTkpEl = document.getElementById('hist-score-tkp');
+      if (scoreTkpEl) scoreTkpEl.textContent = '0';
+      const maxTkpEl = document.getElementById('hist-max-tkp');
+      if (maxTkpEl) maxTkpEl.textContent = '/ 166';
+      const statusTkpEl = document.getElementById('hist-status-tkp');
+      if (statusTkpEl) {
+        statusTkpEl.className = 'inline-flex items-center gap-1 font-semibold text-slate-500';
+        statusTkpEl.textContent = '-';
+      }
+
+      const scoreTotEl = document.getElementById('hist-score-total');
+      if (scoreTotEl) scoreTotEl.textContent = '0';
+      const maxTotEl = document.getElementById('hist-max-total');
+      if (maxTotEl) maxTotEl.textContent = '/ 550';
+      const statusTotEl = document.getElementById('hist-status-total');
+      if (statusTotEl) {
+        statusTotEl.className = 'text-[10px] sm:text-[11px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200';
+        statusTotEl.textContent = '-';
+      }
+
+      const btnAll = document.getElementById('btn-hist-filter-all');
+      if (btnAll) btnAll.textContent = 'Semua Soal (0)';
+      const btnTwk = document.getElementById('btn-hist-filter-twk');
+      if (btnTwk) btnTwk.textContent = 'TWK (0)';
+      const btnTiu = document.getElementById('btn-hist-filter-tiu');
+      if (btnTiu) btnTiu.textContent = 'TIU (0)';
+      const btnTkp = document.getElementById('btn-hist-filter-tkp');
+      if (btnTkp) btnTkp.textContent = 'TKP (0)';
+
+      updateHistoryFilterButtons();
+      renderCurrentHistoryQuestions();
+      return;
+    }
+
     const isMini = (latest.id_paket === 'mini' || latest.id_paket === 'mini-to' || (latest.questions && latest.questions.length <= 20));
     const paid = hasPaidToken() || (!isMini && latest.id_paket && latest.id_paket !== 'mini' && latest.id_paket !== 'mini-to');
 
     // Update Header / Breadcrumb / User & Package names
-    const userName = state.currentUser?.nama || latest.user_name || 'Rian Pratama';
     const pkgName = latest.nama_paket || 'Mini Try Out Diagnostik SKD';
 
     const uNameEl = document.getElementById('hist-user-name');
@@ -7276,17 +7846,63 @@ Mengerti &amp; Tutup
       });
     }
 
+    // Helper to dismiss initial loading screen
+    function removeInitLoader() {
+      const loader = document.getElementById('app-init-loader');
+      if (loader) {
+        loader.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => { if (loader && loader.parentNode) loader.remove(); }, 300);
+      }
+    }
+
     // URL parameter check for direct admin access (?admin=1 or #admin)
     const urlParams = new URLSearchParams(window.location.search);
     const isAdminParam = urlParams.get('mode') === 'admin' || urlParams.get('admin') === '1' || window.location.hash === '#admin';
 
-    // Verify Supabase Auth Session
+    // 1. CEK SESI ADMIN (localStorage / sessionStorage) - Persisten Penuh Saat Refresh F5
+    const isAdminAuthed = (localStorage.getItem('admin_authenticated') === 'true' || sessionStorage.getItem('cat_admin_authed') === 'true') && 
+                          (sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken'));
+
+    if (isAdminAuthed && !isAdminParam) {
+      const adminTok = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
+      sessionStorage.setItem('adminToken', adminTok);
+      sessionStorage.setItem('cat_admin_authed', 'true');
+      localStorage.setItem('admin_authenticated', 'true');
+      localStorage.setItem('adminToken', adminTok);
+
+      state.currentUser = {
+        id: 'admin-1',
+        nama: 'Administrator Workspace',
+        email: 'admin@catcpns.pro',
+        no_wa: state.settings.admin_whatsapp || state.settings.WA_ADMIN || '081111111111',
+        role: 'admin'
+      };
+
+      window.showView('admin');
+      if (typeof initAdminView === 'function') {
+        await initAdminView();
+      }
+      removeInitLoader();
+      return;
+    }
+
+    if (isAdminParam) {
+      window.showView('login');
+      if (typeof window.switchTab === 'function') window.switchTab('login');
+      if (typeof window.openAdminLoginModal === 'function') {
+        window.openAdminLoginModal();
+      }
+      removeInitLoader();
+      return;
+    }
+
+    // 2. CEK SESI PESERTA VIA SUPABASE AUTH
     const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
 
-    let hasConfirmedSession = false;
-    let isProfileComplete = false;
+    let participantSessionFound = false;
+    let participantProfileComplete = false;
 
-    // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (phone, target_instansi, has_password === true)
+    // Helper: Sinkronisasi ke public.users & cek kelengkapan profil peserta (nama, phone, target_instansi)
     async function syncAndCheckUserProfile(u, isGoogle) {
       if (!u) return { isComplete: false, profile: null };
 
@@ -7348,7 +7964,8 @@ Mengerti &amp; Tutup
       };
       localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
 
-      const isComplete = Boolean(pPhone && pPhone.trim() && pTarget && pTarget.trim() && pHasPassword === true);
+      // Jika full_name, phone, dan target_instansi terisi, profil dianggap LENGKAP
+      const isComplete = Boolean(pName && pName.trim() && pPhone && pPhone.trim() && pTarget && pTarget.trim());
       return { isComplete, profile };
     }
 
@@ -7365,11 +7982,11 @@ Mengerti &amp; Tutup
             await authClient.auth.signOut().catch(() => {});
             localStorage.removeItem('cat_user_session');
             state.currentUser = null;
-            hasConfirmedSession = false;
+            participantSessionFound = false;
           } else {
-            hasConfirmedSession = true;
+            participantSessionFound = true;
             const res = await syncAndCheckUserProfile(activeAuthUser, isGoogleUser);
-            isProfileComplete = res.isComplete;
+            participantProfileComplete = res.isComplete;
 
             // Bersihkan token OAuth dari URL bar jika ada
             if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
@@ -7377,11 +7994,7 @@ Mengerti &amp; Tutup
             }
           }
         } else {
-          // Tidak ada sesi aktif di Supabase auth
-          if (!sessionStorage.getItem('cat_admin_authed') || !sessionStorage.getItem('adminToken')) {
-            localStorage.removeItem('cat_user_session');
-            state.currentUser = null;
-          }
+          participantSessionFound = false;
         }
 
         // Listener jika status login berubah (Google OAuth callback)
@@ -7395,7 +8008,6 @@ Mengerti &amp; Tutup
                 window.showView('dashboard');
                 renderDashboardView();
               } else {
-                // Tahan tampilan Dashboard Peserta dan langsung tampilkan modal Lengkapi Profil
                 window.showView('login');
                 setTimeout(() => {
                   const nameInput = document.getElementById('complete-profile-name');
@@ -7415,19 +8027,13 @@ Mengerti &amp; Tutup
       }
     }
 
-    // Direct to view with safe checking
-    if (isAdminParam) {
-      window.showView('login');
-      if (typeof window.switchTab === 'function') window.switchTab('login');
-      if (typeof window.openAdminLoginModal === 'function') {
-        window.openAdminLoginModal();
-      }
-    } else if (state.currentUser && hasConfirmedSession) {
-      if (isProfileComplete) {
+    // 3. TENTUKAN TAMPILAN BERDASARKAN HASIL PENGECEKAN
+    if (participantSessionFound && state.currentUser) {
+      if (participantProfileComplete) {
         window.showView('dashboard');
         renderDashboardView();
       } else {
-        // TAHAN tampilan Dashboard Peserta dan langsung tampilkan modal Lengkapi Profil
+        // Profil belum lengkap: buka login dan tampilkan modal Lengkapi Profil
         window.showView('login');
         setTimeout(() => {
           const nameInput = document.getElementById('complete-profile-name');
@@ -7439,8 +8045,6 @@ Mengerti &amp; Tutup
           openModal('modal-complete-profile');
         }, 300);
       }
-    } else if (state.currentUser && state.currentUser.role === 'admin' && sessionStorage.getItem('cat_admin_authed') === 'true' && sessionStorage.getItem('adminToken')) {
-      window.showView('admin');
     } else {
       window.showView('login');
       if (typeof window.switchTab === 'function') {
@@ -7453,6 +8057,8 @@ Mengerti &amp; Tutup
     if (hash && ['login', 'register'].includes(hash)) {
       window.showView(hash);
     }
+
+    removeInitLoader();
   });
 
 })();

@@ -76,7 +76,7 @@ module.exports = async function handler(req, res) {
       fetch(`${supabaseUrl}/rest/v1/users?select=*&order=created_at.desc`, { headers: defaultHeaders }),
       fetch(`${supabaseUrl}/rest/v1/tokens?select=*&order=created_at.desc`, { headers: defaultHeaders }),
       fetch(`${supabaseUrl}/rest/v1/attempts?select=*&order=created_at.desc`, { headers: defaultHeaders }),
-      fetch(`${supabaseUrl}/rest/v1/questions?select=id`, { headers: defaultHeaders })
+      fetch(`${supabaseUrl}/rest/v1/questions?select=*&order=created_at.desc`, { headers: defaultHeaders })
     ]);
 
     const users = usersRes.ok ? await usersRes.json() : [];
@@ -89,6 +89,7 @@ module.exports = async function handler(req, res) {
       users: Array.isArray(users) ? users : [],
       tokens: Array.isArray(tokens) ? tokens : [],
       attempts: Array.isArray(attempts) ? attempts : [],
+      questions: Array.isArray(questions) ? questions : [],
       totalQuestions: Array.isArray(questions) ? questions.length : 0
     });
   } catch (error) {
