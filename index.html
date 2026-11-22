@@ -198,7 +198,7 @@
     const SUPABASE_URL = 'https://bgatryahknatngslgupn.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_E9i-s-nOmDnnsqY24o53zw_v-Jr-u41';
     let supabaseClient = null;
-    if (window.supabase) {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
       try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
           auth: {
@@ -208,10 +208,14 @@
           }
         });
         window.supabaseClient = supabaseClient;
+        window.dbClient = supabaseClient;
       } catch (e) {
         console.warn('Supabase JS Init Warning:', e);
       }
     }
+    window.supabaseClient = supabaseClient;
+    window.dbClient = supabaseClient;
+    const dbClient = supabaseClient;
 
     // Helper to dismiss initial loading screen
     function hideLoadingScreen() {
@@ -3318,6 +3322,10 @@ Mengerti &amp; Tutup
   <!-- JAVASCRIPT STATE & APPLICATION CONTROLLER                       -->
   <!-- ============================================================== -->
   <script>
+    // Inisialisasi Supabase Database Client Terpusat
+    const dbClient = window.dbClient || window.supabaseClient;
+    window.dbClient = dbClient;
+
     // State Store
     const APP = {
       activeTab: 'dashboard',
@@ -3371,6 +3379,7 @@ Mengerti &amp; Tutup
       users: [],
       tokens: []
     };
+    window.APP = APP;
 
     // --- TAB SWITCHING LOGIC ---
     function switchAdminTab(tabKey) {
@@ -3412,9 +3421,17 @@ Mengerti &amp; Tutup
         updatePackageView();
         renderQuestions();
       } else if (tabKey === 'pengguna') {
-        renderUserTable();
+        if (typeof window.loadAdminData === 'function') {
+          window.loadAdminData().catch(e => console.warn(e));
+        } else {
+          renderUserTable();
+        }
       } else if (tabKey === 'token') {
-        renderTokenTable();
+        if (typeof window.loadAdminData === 'function') {
+          window.loadAdminData().catch(e => console.warn(e));
+        } else {
+          renderTokenTable();
+        }
       }
     }
     window.switchAdminTab = switchAdminTab;
@@ -3509,7 +3526,7 @@ Mengerti &amp; Tutup
 
     // --- LOAD QUESTIONS FROM SUPABASE (100% LIVE DATABASE) ---
     async function loadQuestionsFromSupabase() {
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
       const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
       
       let questionRows = null;
@@ -3970,7 +3987,7 @@ Mengerti &amp; Tutup
         };
       });
 
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
       if (dbClient) {
         try {
           const { error } = await dbClient.from('questions').insert(rows);
@@ -4444,7 +4461,7 @@ Mengerti &amp; Tutup
       });
 
       // Save to Supabase questions if available
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
       if (dbClient) {
         try {
           const { error } = await dbClient.from('questions').insert(rows);
@@ -4540,7 +4557,7 @@ Mengerti &amp; Tutup
         return;
       }
 
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
       if (dbClient) {
         try {
           let { error } = await dbClient.from('questions').delete().eq('id', qId);
@@ -4588,7 +4605,7 @@ Mengerti &amp; Tutup
         return;
       }
 
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
       if (dbClient) {
         try {
           const altKey = (curPkgKey === 'mini') ? 'mini-to' : (curPkgKey === 'to1' ? 'to-1' : (curPkgKey === 'to2' ? 'to-2' : 'to-3'));
@@ -4683,7 +4700,7 @@ Mengerti &amp; Tutup
         pembahasan: 'Pembahasan manual admin.'
       };
 
-      const dbClient = (typeof supabase !== 'undefined' && supabase) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
 
       if (dbClient) {
         try {
@@ -4997,6 +5014,8 @@ Mengerti &amp; Tutup
   }
   let supabase = supabaseClient;
   window.supabaseClient = supabaseClient;
+  window.dbClient = supabaseClient;
+  const dbClient = supabaseClient;
 
   // 2. SOAL UJIAN (HANYA MENGGUNAKAN SOAL ASLI DARI DATABASE SUPABASE)
 
@@ -5684,15 +5703,16 @@ Mengerti &amp; Tutup
     const alertEl = document.getElementById('complete-profile-alert');
     const btnSubmit = document.getElementById('btn-save-profile-complete');
 
-    if (!name || !wa || !target || !password) {
+    // 1. Validasi bahwa Nama Lengkap, Nomor WhatsApp, dan Instansi tidak kosong
+    if (!name || !wa || !target) {
       if (alertEl) {
-        alertEl.textContent = 'Harap lengkapi semua kolom: Nama Lengkap, Nomor WhatsApp, Instansi Tujuan, dan Kata Sandi.';
+        alertEl.textContent = 'Harap lengkapi semua kolom: Nama Lengkap, Nomor WhatsApp, dan Instansi Tujuan.';
         alertEl.classList.remove('hidden');
       }
       return;
     }
 
-    if (password.length < 6) {
+    if (password && password.length < 6) {
       if (alertEl) {
         alertEl.textContent = 'Kata sandi minimal 6 karakter.';
         alertEl.classList.remove('hidden');
@@ -5707,24 +5727,25 @@ Mengerti &amp; Tutup
     }
 
     try {
-      const authClient = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : ((typeof window.supabaseClient !== 'undefined' && window.supabaseClient && window.supabaseClient.auth) ? window.supabaseClient : null);
+      const dbClient = window.dbClient || window.supabaseClient;
+      const currentUser = state.currentUser || {};
 
-      // 1. Panggil await supabase.auth.updateUser({ password }) agar peserta bisa login via email & password
-      if (authClient) {
-        const { error: pwdErr } = await authClient.auth.updateUser({ password: password });
-        if (pwdErr) {
-          console.warn('Update user password warning:', pwdErr);
+      if (!currentUser.id) {
+        const client = window.supabaseClient || dbClient;
+        if (client && client.auth) {
+          const { data: sData } = await client.auth.getSession();
+          if (sData?.session?.user) {
+            currentUser.id = sData.session.user.id;
+            currentUser.email = currentUser.email || sData.session.user.email;
+          }
         }
       }
 
-      const userId = state.currentUser?.id;
-      const userEmail = state.currentUser?.email;
-
-      // 2. Simpan data ke tabel public.users via .upsert()
-      if (supabase && (userId || userEmail)) {
-        const updatePayload = {
-          id: userId,
-          email: userEmail,
+      // 2. Lakukan upsert ke tabel users menggunakan dbClient
+      if (dbClient && dbClient.from) {
+        const { error } = await dbClient.from('users').upsert({
+          id: currentUser.id,
+          email: currentUser.email,
           full_name: name,
           nama: name,
           phone: wa,
@@ -5732,37 +5753,44 @@ Mengerti &amp; Tutup
           target_instansi: target,
           provinsi: target,
           has_password: true
-        };
+        }, { onConflict: 'id' });
 
-        try {
-          const { error: upsertErr } = await supabase.from('users').upsert(updatePayload, { onConflict: 'id' });
-          if (upsertErr) {
-            console.warn('Upsert by id error, trying update by email:', upsertErr);
-            await supabase.from('users').update({
-              nama: name,
-              no_wa: wa,
-              provinsi: target,
-              has_password: true
-            }).eq('email', userEmail);
-          }
-        } catch (dbErr) {
-          console.warn('DB upsert error:', dbErr);
+        if (error) {
+          console.error('Gagal menyimpan profil:', error);
+          alert('Gagal menyimpan profil: ' + error.message);
+          return;
         }
       }
 
-      // 3. Update local state
-      if (state.currentUser) {
-        state.currentUser.nama = name;
-        state.currentUser.full_name = name;
-        state.currentUser.no_wa = wa;
-        state.currentUser.phone = wa;
-        state.currentUser.provinsi = target;
-        state.currentUser.target_instansi = target;
-        state.currentUser.has_password = true;
-        localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
+      // 3. Simpan tanda lokal bahwa profil telah selesai
+      if (currentUser.id) {
+        localStorage.setItem('profile_done_' + currentUser.id, 'true');
       }
 
-      // 4. Tutup modal profil dan buka Dashboard Peserta
+      // 4. Update password autentikasi dalam blok try-catch terpisah
+      if (password && password.length >= 6) {
+        try {
+          const client = window.supabaseClient || dbClient;
+          if (client && client.auth) {
+            await client.auth.updateUser({ password: password });
+          }
+        } catch (pwdErr) {
+          console.warn('Update user password notice:', pwdErr);
+        }
+      }
+
+      // 5. Update state currentUser
+      currentUser.nama = name;
+      currentUser.full_name = name;
+      currentUser.no_wa = wa;
+      currentUser.phone = wa;
+      currentUser.provinsi = target;
+      currentUser.target_instansi = target;
+      currentUser.has_password = true;
+      state.currentUser = currentUser;
+      localStorage.setItem('cat_user_session', JSON.stringify(currentUser));
+
+      // 6. Tutup modal profil dan langsung tampilkan Dashboard Peserta
       closeModal('modal-complete-profile');
       window.showView('dashboard');
       renderDashboardView();
@@ -5771,10 +5799,7 @@ Mengerti &amp; Tutup
       }
     } catch (err) {
       console.error('Save profile completion error:', err);
-      if (alertEl) {
-        alertEl.textContent = 'Terjadi kesalahan saat menyimpan data profil.';
-        alertEl.classList.remove('hidden');
-      }
+      alert('Gagal menyimpan profil: ' + (err.message || err));
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
@@ -7563,7 +7588,7 @@ Mengerti &amp; Tutup
     let totalQuestionsCount = state.questions ? state.questions.length : 0;
     let fetchedViaApi = false;
 
-    const adminToken = sessionStorage.getItem('adminToken');
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken');
 
     // 1. Coba ambil data via serverless endpoint /api/admin-data (Bypass RLS)
     if (adminToken) {
@@ -7590,19 +7615,26 @@ Mengerti &amp; Tutup
       }
     }
 
-    // Fallback: Query langsung Supabase Client jika API belum aktif
-    if (!fetchedViaApi && supabase) {
+    // 2. Query langsung Supabase Client menggunakan dbClient (Membaca tabel users, tokens, attempts, questions secara real-time)
+    const activeDb = window.dbClient || window.supabaseClient;
+    if (activeDb && activeDb.from) {
       try {
-        const { data: uData } = await supabase.from('users').select('*').order('created_at', { ascending: false });
-        if (uData) dbUsers = uData;
+        const { data: uData, error: uErr } = await activeDb.from('users').select('*').order('created_at', { ascending: false });
+        if (!uErr && uData && uData.length > 0) {
+          dbUsers = uData;
+        }
 
-        const { data: tData } = await supabase.from('tokens').select('*').order('created_at', { ascending: false });
-        if (tData) dbTokens = tData;
+        const { data: tData, error: tErr } = await activeDb.from('tokens').select('*').order('created_at', { ascending: false });
+        if (!tErr && tData && tData.length > 0) {
+          dbTokens = tData;
+        }
 
-        const { data: aData } = await supabase.from('attempts').select('*').order('created_at', { ascending: false });
-        if (aData) dbAttempts = aData;
+        const { data: aData, error: aErr } = await activeDb.from('attempts').select('*').order('created_at', { ascending: false });
+        if (!aErr && aData && aData.length > 0) {
+          dbAttempts = aData;
+        }
 
-        const { count: qCount, data: qData } = await supabase.from('questions').select('*', { count: 'exact' });
+        const { count: qCount, data: qData } = await activeDb.from('questions').select('*', { count: 'exact' });
         if (qCount !== null && qCount !== undefined) {
           totalQuestionsCount = qCount;
         } else if (qData) {
@@ -7784,7 +7816,13 @@ Mengerti &amp; Tutup
     window.confirmExitToUser = function() {
       window.showView('dashboard');
     };
+
+    window.loadAdminData = initAdminView;
+    window.initAdminView = initAdminView;
   }
+
+  window.loadAdminData = initAdminView;
+  window.initAdminView = initAdminView;
 
   // 11. INITIALIZATION & EVENT DELEGATION
   document.addEventListener('DOMContentLoaded', async function() {
@@ -7920,7 +7958,7 @@ Mengerti &amp; Tutup
       }
 
       // 5. CEK SESI PESERTA VIA SUPABASE AUTH (Instance konsisten)
-      const authClient = window.supabaseClient || supabaseClient || supabase;
+      const authClient = window.dbClient || window.supabaseClient;
 
       let participantSessionFound = false;
       let participantProfileComplete = false;
@@ -7929,11 +7967,14 @@ Mengerti &amp; Tutup
       async function syncAndCheckUserProfile(u, isGoogle) {
         if (!u) return { isComplete: false, profile: null };
 
-        let profile = null;
-        const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0];
-        const activeClient = window.supabaseClient || supabaseClient || supabase;
+        // 1. Cek tanda tersimpan lokal (profile_done_)
+        const isLocalDone = localStorage.getItem('profile_done_' + u.id) === 'true';
 
-        if (activeClient) {
+        let profile = null;
+        const googleFullName = u.user_metadata?.full_name || u.user_metadata?.name || (u.email ? u.email.split('@')[0] : 'Peserta');
+        const activeClient = window.dbClient || window.supabaseClient;
+
+        if (activeClient && activeClient.from) {
           try {
             const { data: profsById } = await activeClient.from('users').select('*').eq('id', u.id).limit(1);
             if (profsById && profsById.length > 0) {
@@ -7985,7 +8026,17 @@ Mengerti &amp; Tutup
         };
         localStorage.setItem('cat_user_session', JSON.stringify(state.currentUser));
 
-        const isComplete = Boolean(pName && pName.trim() && pPhone && pPhone.trim() && pTarget && pTarget.trim());
+        // Cek kelengkapan: jika localStorage profile_done_ bernilai true ATAU di database sudah ada phone dan target_instansi
+        const hasDbPhoneAndTarget = Boolean(
+          (profile?.phone || profile?.no_wa) && 
+          (profile?.target_instansi || profile?.provinsi)
+        );
+        const isComplete = isLocalDone || hasDbPhoneAndTarget || Boolean(pName && pPhone && pTarget);
+
+        if (isComplete) {
+          localStorage.setItem('profile_done_' + u.id, 'true');
+        }
+
         return { isComplete, profile };
       }
 
@@ -8018,7 +8069,12 @@ Mengerti &amp; Tutup
           }
 
           authClient.auth.onAuthStateChange(async (event, session) => {
-            if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+            // Abaikan event TOKEN_REFRESHED dan USER_UPDATED agar modal tidak muncul kembali saat token auto-refresh atau saat peserta berganti tab browser!
+            if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+              return;
+            }
+
+            if (event === 'SIGNED_IN' && session?.user) {
               const u = session.user;
               const isGoogle = u.app_metadata?.provider === 'google' || (u.identities && u.identities.some(id => id.provider === 'google'));
               if (u.email_confirmed_at || isGoogle) {
@@ -8039,6 +8095,10 @@ Mengerti &amp; Tutup
                   }, 200);
                 }
               }
+            } else if (event === 'SIGNED_OUT') {
+              state.currentUser = null;
+              localStorage.removeItem('cat_user_session');
+              window.showLoginScreen();
             }
           });
         } catch (sessErr) {
@@ -8048,7 +8108,8 @@ Mengerti &amp; Tutup
 
       // 6. TENTUKAN TAMPILAN BERDASARKAN HASIL PENGECEKAN
       if (participantSessionFound && state.currentUser) {
-        if (participantProfileComplete) {
+        const isDone = (localStorage.getItem('profile_done_' + state.currentUser.id) === 'true') || participantProfileComplete;
+        if (isDone) {
           window.showView('dashboard');
           renderDashboardView();
         } else {
